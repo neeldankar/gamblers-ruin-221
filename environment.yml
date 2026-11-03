@@ -1,0 +1,14 @@
+name: gr221
+channels:
+  - conda-forge
+dependencies:
+  - python=3.13
+  - numpy=2.5
+  - scipy=1.18
+  - pyamg=5.3
+  - numba=0.68
+  - scikit-sparse=0.5
+  - python-flint=0.9
+  - matplotlib
+  - pandas
+  - pytest
