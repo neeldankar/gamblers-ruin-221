@@ -36,3 +36,12 @@
   pip subsection. Every other pin is unchanged and comes from conda-forge.
 - Set up on Apple Silicon with Miniforge (Homebrew cask, conda 26.9.4). Versions: Python 3.13.18, numpy 2.5.4,
   scipy 1.18.1, pyamg 5.3.0, numba 0.68.1, scikit-sparse 0.5.0, python-flint 0.9.0. `pytest -q`: 46 passed, 17 skipped.
+
+
+## Chunk 1 spec fix: N list (Nov 9)
+- The chunk 1 check "kappa_inf_over_N2 = 2/9 when 3 divides N" had no data: none of N = 10, 20, 40, 80, 160,
+  320, 640 is divisible by 3, so the check could never run.
+- Sanity-checked in the Project chat. Decided: N list becomes {10, 20, 30, 40, 80, 90, 160, 300, 320, 640}
+  (`--quick`: 10, 20, 30, 40), eigsh still capped at 320, and a new FAIL row: when 3 does not divide N,
+  kappa_inf_over_N2 is below 2/9 and within 1% of it for N >= 40 (max x1 x2 x3 is then just under (N/3)^3;
+  at N = 40 the ratio is 2366/2370.4 = 0.998).

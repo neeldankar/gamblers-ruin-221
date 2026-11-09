@@ -31,7 +31,7 @@ against a prediction. Also build the results logger every experiment uses.
 ## Experiment
 
 `experiments/e01_conditioning.py` writes `results/e01_conditioning.csv`, one row per
-N in {10, 20, 40, 80, 160, 320, 640} (`--quick`: 10, 20, 40), columns:
+N in {10, 20, 30, 40, 80, 90, 160, 300, 320, 640} (`--quick`: 10, 20, 30, 40), columns:
 `N, n, lambda_min_formula, lambda_min_eigsh, lambda_max_formula, kappa2, kappa2_over_N2, kappa_inf,
 kappa_inf_over_N2, jacobi_rate, seconds_eigsh`.
 `lambda_min_eigsh` comes from `scipy.sparse.linalg.eigsh(A, k=1, sigma=0, which="LM")`, an independent
@@ -57,6 +57,7 @@ dense eigenvalues of Q, shift-invert Lanczos at N = 80, and the logger.
 | kappa2_over_N2 | increasing in N, below 9/(8 pi^2) = 0.1139863 | strict | FAIL |
 | kappa2_over_N2 at N = 640 | 0.1139863 | 1e-5 relative | FAIL |
 | kappa_inf_over_N2 when 3 divides N | 2/9 = 0.2222 | 1e-9 relative | FAIL |
+| kappa_inf_over_N2 when 3 does not divide N | below 2/9, within 1% of it for N >= 40 | | FAIL |
 | kappa_inf / kappa2 | between 1.9 and 2.0 for N >= 40 | | WARN |
 | jacobi_rate | 1 - lambda_min_formula | 1e-15 | FAIL |
 | seconds_eigsh at N = 320 | under 10 s | | WARN |
