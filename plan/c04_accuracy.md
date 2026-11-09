@@ -98,7 +98,8 @@ against the Fraction solver, componentwise accuracy of the direct solve, and CG 
 | certified_bound | 9e-12 (160), 4.5e-11 (320), 3e-10 (640), about 2e-9 (1280, extrapolated) | below 1e-8 | FAIL |
 | exact-reference rows, direct methods: max_rel_err | 2e-15 to 8e-14 | below 1e-13 | FAIL |
 | exact-reference rows, direct methods: max_rel_err <= 2 cond_i omega | holds in every entry | | FAIL |
-| CG none, N >= 320: ratio_tiny_to_prediction | 0.9-1.6 (at N = 160 it ranges 0.07-1.3) | in [0.5, 2] | WARN |
+| CG none, N >= 320, rtol <= 1e-8: ratio_tiny_to_prediction | 0.9-1.6 (at N = 160 it ranges 0.07-1.3) | in [0.5, 2] | WARN |
+| CG none, rtol 1e-6, N = 640: rel_err_tiny | 0.63 (63% wrong; ratio about 4, the law underestimates at loose rtol) | in [0.3, 1.0] | WARN |
 | CG mic0 and amg, N >= 160: ratio_tiny_to_prediction | mic0 0.001-0.03, amg 0.02-0.2 | below 1 | WARN |
 | CG none, rtol 1e-10, N = 640: rel_err_tiny | 1.4e-5 | in [3e-6, 6e-5] | WARN |
 | CG at rtol 1e-10: componentwise / normwise backward error | above 1e3 for N >= 80 | above 100 | FAIL |
