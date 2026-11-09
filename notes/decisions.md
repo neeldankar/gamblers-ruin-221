@@ -45,3 +45,22 @@
   (`--quick`: 10, 20, 30, 40), eigsh still capped at 320, and a new FAIL row: when 3 does not divide N,
   kappa_inf_over_N2 is below 2/9 and within 1% of it for N >= 40 (max x1 x2 x3 is then just under (N/3)^3;
   at N = 40 the ratio is 2366/2370.4 = 0.998).
+
+
+## Chunk 1: exact spectrum (Nov 9)
+- gr/spectrum.py implements the spec's formulas directly. lambda_max is attained at (k, l) = (1, N - 2)
+  (checked by brute force for N = 10, 11, 12, 30, 31); the docstring derives the closed form from that mode.
+- kappa_inf computes ||A||_inf from the matrix (max absolute row sum) instead of hard-coding 2: it is 5/3 at
+  N = 5, where every live state has a coordinate equal to 1, and 2 for N >= 6. ||A^{-1}||_inf = max t because
+  A^{-1} >= 0 and A^{-1} 1 = t = 3 x1 x2 x3 / N.
+- jacobi_rate is literally 1 - lambda_min(N), so the 1e-15 check holds exactly.
+- gr/runlog.py: git_hash is the short HEAD hash plus "-dirty" when gr/ or experiments/ have uncommitted or
+  untracked changes. The chunk 1 CSV therefore says d67e602-dirty: it was produced by the code in the
+  "chunk 1: exact spectrum" commit, run before that commit existed. Chunk 11's run_all refuses a dirty tree, so
+  the final results will carry a clean hash. CSV floats are written with full repr precision.
+- e01: eigsh time is the median of 3 calls with A built (and converted to CSC) outside the timer. Full run:
+  eigsh at N = 320 takes 0.53 s; max relative difference from the formula 3.1e-13.
+- check_c01.py: all 9 rows PASS. kappa2/N^2 at N = 640 is 2.7e-6 below 9/(8 pi^2), consistent with the
+  -pi^2/(9 N^2) relative correction from expanding lambda_max/lambda_min. No red flags.
+- The figure uses fixed x ticks at 10, 20, 40, ..., 640 (labels at 80/90 and 300/320 collided otherwise).
+- The env has no `tabulate`, so check_c01 formats its markdown data table by hand instead of DataFrame.to_markdown.
