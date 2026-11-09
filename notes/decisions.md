@@ -27,3 +27,12 @@
   is about cond_tiny * rtol; refinement with an accurate residual is correctly rounded; GTH is accurate to ~0.3 N u;
   the structured condition number (off-diagonals, row sums, b) is O(1); the tiny-entry constant is
   Gamma(1/3)^9 / (8 pi^4) = 9.1195890.
+
+
+## Environment: python-flint from PyPI (Nov 9)
+- environment.yml pinned `python-flint=0.9`, but conda-forge only has up to 0.8.0, so `conda env create` could
+  not solve. PyPI has 0.9.0 with a cp313 macOS arm64 wheel.
+- Decided: drop python-flint from the conda dependencies, add `pip`, and install `python-flint==0.9.0` through a
+  pip subsection. Every other pin is unchanged and comes from conda-forge.
+- Set up on Apple Silicon with Miniforge (Homebrew cask, conda 26.9.4). Versions: Python 3.13.18, numpy 2.5.4,
+  scipy 1.18.1, pyamg 5.3.0, numba 0.68.1, scikit-sparse 0.5.0, python-flint 0.9.0. `pytest -q`: 46 passed, 17 skipped.
