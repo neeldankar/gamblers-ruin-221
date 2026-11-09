@@ -16,9 +16,20 @@ A = I - Q, Q = transient-to-transient transitions. A is sparse SPD, <= 7 nonzero
 - Relabeling: P_x(ijk) = u_123(x_i, x_j, x_k), so one solve gives all six orders.
 - States ordered lexicographically by (x1, x2). State indexing lives ONLY in gr/states.py.
 
+## How work is organized
+The project is split into chunks. plan/README.md has the chunk index, the loop and the conventions; each chunk
+has a spec plan/cNN_*.md (what to build, experiments, expected results, red flags) and acceptance tests in
+tests/cNN_*/ that were validated against an independent reference implementation before you started. They
+skip until the chunk's module exists. A session normally starts with "Do chunk NN. Read CLAUDE.md and
+plan/cNN_*.md, then follow the spec exactly." For each chunk: build the module(s) the spec names (exact
+names and signatures), make `pytest tests/c00_core ... tests/cNN_*` pass, run the experiments, write
+checks/check_cNN.py from the spec's "Expected results" table (ranges copied exactly; print PASS/WARN/FAIL
+honestly), save the output to results/cNN_report.md, log decisions in notes/decisions.md, commit.
+
 ## Rules
 - Tests come first. No solver is benchmarked until it passes every test in tests/.
-- NEVER edit a test to make it pass. If a test looks wrong, stop and ask.
+- NEVER edit anything in tests/ or plan/ to make something pass. If a test or an expected range looks wrong,
+  stop and say why; it changes only after a sanity check in the Project chat.
 - Every number in the report comes from a script in experiments/ that writes a CSV to results/
   (with git hash, machine info, library versions). No hand-typed numbers.
 - Figures are generated only from results/*.csv by scripts in figures/.
@@ -33,8 +44,19 @@ A = I - Q, Q = transient-to-transient transitions. A is sparse SPD, <= 7 nonzero
 Python 3.13 via conda (environment.yml): numpy, scipy (cg/gmres take rtol, not tol), pyamg
 (its solve still takes tol), numba, scikit-sparse (CHOLMOD), python-flint or fractions for exact
 solves. SciPy has no sparse or incomplete Cholesky; spilu is not a valid CG preconditioner.
+- scikit-sparse 0.5 API: `sksparse.cholmod.cho_factor(A, order="amd")` returns a factor with `.solve(b)`
+  and `.nnz`; `cholesky(A)` now returns a tuple, so the old `cholesky(A)(b)` pattern fails.
+- `scipy.sparse.linalg.spsolve_triangular` is about 10x slower than a numba loop here; use numba for
+  triangular solves inside iterations, and warm numba up on a tiny problem before timing.
+- `np.longdouble` is float64 on Apple Silicon: never rely on it for extra precision. Extra precision comes from
+  error-free transformations (chunk 7) or exact rationals (python-flint, N <= 80).
+- Experiments take `--quick` and `--outdir`, pin threads before importing numpy, and seed with
+  `np.random.default_rng(221)`.
 
 ## Commands
 - conda env create -f environment.yml && conda activate gr221
-- pytest -q                        run all tests
-- python experiments/<name>.py     run one experiment
+- pytest -q                        run all tests (chunks not built yet are skipped)
+- pytest tests/c00_core tests/c03_krylov   run the tests for one chunk plus the core
+- python experiments/<name>.py [--quick]   run one experiment
+- python checks/check_cNN.py       compare a chunk's CSVs with its expected results
+- caffeinate -i python ...         keep the Mac awake for long runs
