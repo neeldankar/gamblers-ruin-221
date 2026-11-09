@@ -39,6 +39,8 @@ honestly), save the output to results/cNN_report.md, log decisions in notes/deci
   and the real probability right-hand sides.
 - Keep code simple and readable; Neel needs to understand and present every line of gr/.
 - Log decisions (what was tried, what was decided, why) in notes/decisions.md.
+- Commit order for every chunk: first commit the code and check script once the tests pass, then run the
+  experiments (so CSVs carry a clean git hash), then commit the results and report in a second commit.
 
 ## Stack
 Python 3.13 via conda (environment.yml): numpy, scipy (cg/gmres take rtol, not tol), pyamg
@@ -52,6 +54,8 @@ solves. SciPy has no sparse or incomplete Cholesky; spilu is not a valid CG prec
   error-free transformations (chunk 7) or exact rationals (python-flint, N <= 80).
 - Experiments take `--quick` and `--outdir`, pin threads before importing numpy, and seed with
   `np.random.default_rng(221)`.
+- Always run Python through the gr221 env (conda run -n gr221 or its python directly); plain python may
+  point at Homebrew.
 
 ## Commands
 - conda env create -f environment.yml && conda activate gr221
