@@ -119,9 +119,9 @@ def run_checks(df):
                 "none 0.98, ic0 0.97, mic0 0.55, amg 0.2-0.4; none, ic0 in [0.9, 1.05]; mic0 in [0.45, 0.65]; "
                 "amg below 0.5", "; ".join(parts), "PASS" if ok else "WARN"))
 
-    # 10. ranking amg < mic0 < ic0 < none at every N >= 80, every rhs
+    # 10. ranking amg < mic0 < ic0 < none at every N >= 80, every rhs except ones
     bad, total = [], 0
-    for (N, rhs), g in cg[cg["N"] >= 80].groupby(["N", "rhs"]):
+    for (N, rhs), g in cg[(cg["N"] >= 80) & (cg["rhs"] != "ones")].groupby(["N", "rhs"]):
         k = g.set_index("kind")["iterations"]
         if not all(x in k for x in ("amg", "mic0", "ic0", "none")):
             continue
@@ -129,19 +129,31 @@ def run_checks(df):
         if not (k["amg"] < k["mic0"] < k["ic0"] < k["none"]):
             bad.append(f"N={N} {rhs} (amg {int(k['amg'])}, mic0 {int(k['mic0'])}, ic0 {int(k['ic0'])}, "
                        f"none {int(k['none'])})")
-    out.append(("ranking at every N >= 80, every rhs", "amg < mic0 < ic0 < none, strict",
+    out.append(("ranking at every N >= 80, every rhs except ones", "amg < mic0 < ic0 < none, strict",
                 f"{total - len(bad)}/{total} (N, rhs) ranked" + (f"; broken at {'; '.join(bad)}" if bad else ""),
                 "PASS" if total and not bad else "FAIL"))
 
-    # 11. forward error
+    # 11. b = ones: ic0 vs none (IC(0) breaks the symmetry behind plain CG's floor((N-1)/2) termination)
+    ic1, none1 = its(df, "ic0", "ones"), its(df, "none", "ones")
+    common = ic1.index.intersection(none1.index)
+    small = [N for N in common if N <= 80]
+    ok = len(small) > 0 and all(ic1[N] > none1[N] for N in small) and 160 in common \
+        and abs(ic1[160] / none1[160] - 1) <= 0.05
+    out.append(("b = ones: ic0 vs none",
+                "ic0 needs more iterations at N <= 80 (47 vs 40 at N = 80), about equal at N = 160 (84 vs 85) "
+                "(read here as: ic0 > none at every N <= 80, within 5% at N = 160)",
+                ", ".join(f"N={N}: {int(ic1[N])} vs {int(none1[N])}" for N in common) or "no rows",
+                "PASS" if ok else "WARN"))
+
+    # 12. forward error
     fe, cap = cg["forward_error"], cg["kappa2"] * RTOL
     worst = cg.loc[fe.idxmax()] if len(cg) else None
     status = "FAIL" if (not len(cg) or (fe > cap).any()) else ("WARN" if (fe > 1e-8).any() else "PASS")
-    out.append(("forward_error at rtol 1e-10", "1e-11 to 3e-9; below kappa2(N) * 1e-10 FAIL; above 1e-8 WARN",
+    out.append(("forward_error at rtol 1e-10", "1e-11 to 3e-9 up to N = 640, about 5e-9 at N = 1280; below kappa2(N) * 1e-10 FAIL; above 1e-8 WARN",
                 f"{fe.min():.2e} to {fe.max():.2e} over {len(cg)} rows (max at N = {int(worst['N'])} {worst['kind']} "
                 f"{worst['rhs']}); {int((fe > cap).sum())} above kappa2 * 1e-10" if len(cg) else "no rows", status))
 
-    # 12. time per iteration ic0 / none, N >= 640
+    # 13. time per iteration ic0 / none, N >= 640
     parts, vals = [], []
     for N in sorted(cg[cg["N"] >= 640]["N"].unique()):
         for rhs in ("ones", "random", "out_first", "order321"):
@@ -154,7 +166,7 @@ def run_checks(df):
                 "; ".join(parts) or "no rows",
                 "PASS" if len(vals) and ((vals >= 1.5) & (vals <= 5)).all() else "WARN"))
 
-    # 13. amg time per iteration / none at N = 1280
+    # 14. amg time per iteration / none at N = 1280
     vals = [value(cg, "amg", rhs, 1280, "time_per_iteration") / value(cg, "none", rhs, 1280, "time_per_iteration")
             for rhs in ("ones", "random", "out_first", "order321")]
     vals = np.array([v for v in vals if not np.isnan(v)])
@@ -162,7 +174,7 @@ def run_checks(df):
                 f"{vals.min():.1f}-{vals.max():.1f} over {len(vals)} rhs" if len(vals) else "no rows",
                 "PASS" if len(vals) and ((vals >= 4) & (vals <= 25)).all() else "WARN"))
 
-    # 14. one rhs at N = 1280: total time, amg and mic0 vs none
+    # 15. one rhs at N = 1280: total time, amg and mic0 vs none
     def total(kind, count=1):
         return value(df, kind, "random", 1280, "setup_time") + count * value(df, kind, "random", 1280, "solve_time")
 
@@ -173,7 +185,7 @@ def run_checks(df):
                 f"none {t_none:.2f} s; amg {total('amg'):.2f} s ({sp['amg']:.1f}x); mic0 {total('mic0'):.2f} s "
                 f"({sp['mic0']:.1f}x)", "PASS" if ok else "WARN"))
 
-    # 15. six rhs at N = 1280: direct vs amg
+    # 16. six rhs at N = 1280: direct vs amg
     t_d, t_a = total("direct", 6), total("amg", 6)
     out.append(("six rhs at N = 1280: direct (one factor, six solves) vs amg (one setup, six solves)", "direct faster",
                 f"direct {t_d:.2f} s, amg {t_a:.2f} s", "PASS" if t_d < t_a else "WARN"))
@@ -195,7 +207,7 @@ def red_flags(df, conv):
     out.append(("b = ones terminates near floor((N-1)/2)", f"ratio {r.min():.3f}-{r.max():.3f}",
                 bool(len(r) and (r <= 1.15).all())))
     fe = cg["forward_error"].max()
-    out.append(("forward errors not much larger than about 1e-9", f"max {fe:.2e}", bool(fe <= 3e-9)))
+    out.append(("forward errors not above about 1e-8", f"max {fe:.2e}", bool(fe <= 1e-8)))
     a = cg[cg["kind"] == "amg"]["iterations"]
     out.append(("AMG never above about 30 iterations", f"max {int(a.max())} over {len(a)} rows" if len(a) else "no rows",
                 bool(len(a) and a.max() <= 30)))
@@ -206,15 +218,6 @@ def red_flags(df, conv):
     ratio = (c["err_A"] / c["chebyshev"]).max() if len(c) else np.nan
     out.append(("extra: plain CG err_A never above the Chebyshev bound (e03_convergence)",
                 f"max err_A / bound {ratio:.3g} over {len(c)} rows", bool(len(c) and ratio <= 1)))
-    bad, total = [], 0
-    for (N, rhs), g in cg[(cg["N"] >= 80) & (cg["rhs"] != "ones")].groupby(["N", "rhs"]):
-        k = g.set_index("kind")["iterations"]
-        if all(x in k for x in ("amg", "mic0", "ic0", "none")):
-            total += 1
-            if not (k["amg"] < k["mic0"] < k["ic0"] < k["none"]):
-                bad.append(f"N={N} {rhs}")
-    out.append(("extra (information only): ranking amg < mic0 < ic0 < none on random, out_first, order321",
-                f"{total - len(bad)}/{total} ranked" + (f"; broken at {', '.join(bad)}" if bad else ""), not bad))
     return out
 
 

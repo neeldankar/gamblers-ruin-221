@@ -106,8 +106,9 @@ because dot products round differently, AMG may move more across pyamg versions)
 | none: iterations / bound | 0.39-0.45 | below 1 | FAIL |
 | b = ones: iterations / floor((N-1)/2) | 1.00 (N <= 41), 1.03-1.08 above | in [1.0, 1.15] | WARN |
 | fitted exponent of iterations vs N, N = 160-1280, random b | none 0.98, ic0 0.97, mic0 0.55, amg 0.2-0.4 | none, ic0 in [0.9, 1.05]; mic0 in [0.45, 0.65]; amg below 0.5 | WARN |
-| ranking at every N >= 80, every rhs | amg < mic0 < ic0 < none | strict | FAIL |
-| forward_error at rtol 1e-10 | 1e-11 to 3e-9 | below kappa2(N) * 1e-10 FAIL; above 1e-8 WARN | WARN/FAIL |
+| ranking at every N >= 80, every rhs except ones | amg < mic0 < ic0 < none | strict | FAIL |
+| b = ones: ic0 vs none | ic0 needs more iterations at N <= 80 (47 vs 40 at N = 80), about equal at N = 160 (84 vs 85): IC(0) in lexicographic order breaks the symmetry that gives plain CG its floor((N-1)/2) termination | | WARN |
+| forward_error at rtol 1e-10 | 1e-11 to 3e-9 up to N = 640, about 5e-9 at N = 1280 | below kappa2(N) * 1e-10 FAIL; above 1e-8 WARN | WARN/FAIL |
 | time_per_iteration ratio ic0 / none, N >= 640 | 2-4 here | in [1.5, 5] (higher means slow triangular solves) | WARN |
 | amg time_per_iteration / none, N = 1280 | about 10 | in [4, 25] | WARN |
 | one rhs at N = 1280, total time (setup + solve): amg and mic0 vs none | 5-7 times faster | at least 3 times | WARN |
@@ -121,7 +122,7 @@ CHOLMOD nesdis about 10 s setup and 0.1 s per solve.
 - IC(0) not reducing iterations, or MIC(0) growing like N instead of N^{1/2}: the factorization is wrong.
 - Any breakdown (negative pivot) in IC(0) or MIC(0) on our matrix: it is an M-matrix, so this should not happen.
 - b = ones not terminating near floor((N-1)/2): the right-hand side or the matrix is off.
-- Forward errors much larger than about 1e-9 at rtol 1e-10.
+- Forward errors above about 1e-8 at rtol 1e-10.
 - AMG above about 30 iterations.
 
 ## Done when

@@ -13,14 +13,15 @@ Sources: `results/e03_krylov.csv` (git 08efc8a, 2026-11-09T23:00:21) and `result
 | none: iterations / bound | 0.39-0.45 (random b), below 1 (every rhs) | random b 0.368-0.448; every rhs max 0.448 over 28 rows | PASS |
 | b = ones: iterations / floor((N-1)/2) | 1.00 (N <= 41), 1.03-1.08 above; in [1.0, 1.15] | N=20: 1.000, N=40: 1.000, N=80: 1.026, N=160: 1.076, N=320: 1.082, N=640: 1.078, N=1280: 1.074 | PASS |
 | fitted exponent of iterations vs N, N = 160-1280, random b | none 0.98, ic0 0.97, mic0 0.55, amg 0.2-0.4; none, ic0 in [0.9, 1.05]; mic0 in [0.45, 0.65]; amg below 0.5 | none 0.985 (N=160-1280); ic0 0.972 (N=160-1280); mic0 0.553 (N=160-1280); amg 0.299 (N=160-1280) | PASS |
-| ranking at every N >= 80, every rhs | amg < mic0 < ic0 < none, strict | 19/20 (N, rhs) ranked; broken at N=80 ones (amg 11, mic0 37, ic0 47, none 40) | FAIL |
-| forward_error at rtol 1e-10 | 1e-11 to 3e-9; below kappa2(N) * 1e-10 FAIL; above 1e-8 WARN | 6.44e-16 to 4.85e-09 over 132 rows (max at N = 1280 ic0 out_first); 0 above kappa2 * 1e-10 | PASS |
+| ranking at every N >= 80, every rhs except ones | amg < mic0 < ic0 < none, strict | 15/15 (N, rhs) ranked | PASS |
+| b = ones: ic0 vs none | ic0 needs more iterations at N <= 80 (47 vs 40 at N = 80), about equal at N = 160 (84 vs 85) (read here as: ic0 > none at every N <= 80, within 5% at N = 160) | N=20: 15 vs 9, N=40: 26 vs 19, N=80: 47 vs 40, N=160: 84 vs 85, N=320: 157 vs 172, N=640: 305 vs 344, N=1280: 590 vs 686 | PASS |
+| forward_error at rtol 1e-10 | 1e-11 to 3e-9 up to N = 640, about 5e-9 at N = 1280; below kappa2(N) * 1e-10 FAIL; above 1e-8 WARN | 6.44e-16 to 4.85e-09 over 132 rows (max at N = 1280 ic0 out_first); 0 above kappa2 * 1e-10 | PASS |
 | time_per_iteration ratio ic0 / none, N >= 640 (every rhs) | 2-4 here, in [1.5, 5] | N=640: 3.60-3.66; N=1280: 3.08-3.27 | PASS |
 | amg time_per_iteration / none, N = 1280 (every rhs) | about 10, in [4, 25] | 14.2-15.1 over 4 rhs | PASS |
 | one rhs at N = 1280, total time (setup + solve): amg and mic0 vs none | 5-7 times faster; at least 3 | none 18.53 s; amg 3.61 s (5.1x); mic0 4.03 s (4.6x) | PASS |
 | six rhs at N = 1280: direct (one factor, six solves) vs amg (one setup, six solves) | direct faster | direct 6.85 s, amg 15.39 s | PASS |
 
-Summary: 14 PASS, 0 WARN, 1 FAIL.
+Summary: 16 PASS, 0 WARN, 0 FAIL.
 
 ## Red flags (automatic checks of the spec's list)
 
@@ -29,11 +30,10 @@ Summary: 14 PASS, 0 WARN, 1 FAIL.
 | IC(0) reduces iterations at every N (random b) | N=20: 2.60x, N=40: 2.85x, N=80: 3.14x, N=160: 3.22x, N=320: 3.30x, N=640: 3.30x, N=1280: 3.32x | yes |
 | MIC(0) grows like N^{1/2}, not N | exponent 0.553 over N = 160-1280 | yes |
 | b = ones terminates near floor((N-1)/2) | ratio 1.000-1.082 | yes |
-| forward errors not much larger than about 1e-9 | max 4.85e-09 | NO |
+| forward errors not above about 1e-8 | max 4.85e-09 | yes |
 | AMG never above about 30 iterations | max 24 over 28 rows | yes |
 | every CG row converged (final_relres <= 1e-10) | 132/132 rows | yes |
 | extra: plain CG err_A never above the Chebyshev bound (e03_convergence) | max err_A / bound 0.5 over 1192 rows | yes |
-| extra (information only): ranking amg < mic0 < ic0 < none on random, out_first, order321 | 15/15 ranked | yes |
 
 ## Iterations, rtol 1e-10: observed (reference)
 

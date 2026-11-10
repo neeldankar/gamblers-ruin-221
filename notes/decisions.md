@@ -159,3 +159,17 @@
 - Figures: f03_iterations (two panels), f03_convergence (one panel per rhs, end labels with iteration counts),
   f03_time (legend only; end labels collided). Colors are the validated categorical slots in fixed order,
   plus a marker per kind, because three slots are below 3:1 contrast.
+- Spec fix after the Project chat sanity check (Nov 10). Both chunk 3 findings were judged spec mistakes, and
+  plan/c03_krylov.md was edited as agreed:
+  1. The ranking row now reads "every rhs except ones". A new WARN row "b = ones: ic0 vs none" was added
+     (IC(0) in lexicographic order breaks the symmetry behind plain CG's floor((N-1)/2) termination).
+  2. The forward_error expected value is now "1e-11 to 3e-9 up to N = 640, about 5e-9 at N = 1280". Its
+     tolerances are unchanged. The red flag is now "Forward errors above about 1e-8 at rtol 1e-10".
+- check_c03 follows suit:
+  - The ranking skips b = ones.
+  - The new row passes if ic0 > none at every N <= 80 and the two are within 5% at N = 160. The spec says
+    "about equal", and 5% is my reading of that. Observed: N = 160 84 vs 85.
+  - The red-flag threshold is now 1e-8.
+  - The information-only "ranking without ones" extra is dropped, since it is now the main check.
+- Re-ran check_c03 on the same CSVs (git 08efc8a; experiments not re-run): 16 PASS, 0 WARN, 0 FAIL, no red
+  flags.
