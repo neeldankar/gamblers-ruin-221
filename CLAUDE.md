@@ -25,6 +25,7 @@ plan/cNN_*.md, then follow the spec exactly." For each chunk: build the module(s
 names and signatures), make `pytest tests/c00_core ... tests/cNN_*` pass, run the experiments, write
 checks/check_cNN.py from the spec's "Expected results" table (ranges copied exactly; print PASS/WARN/FAIL
 honestly), save the output to results/cNN_report.md, log decisions in notes/decisions.md, commit.
+After each chunk's final commit, git push.
 
 ## Rules
 - Tests come first. No solver is benchmarked until it passes every test in tests/.
