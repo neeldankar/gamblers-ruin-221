@@ -99,3 +99,63 @@
   nnz 165,657,920, setup 29.3 s; at N = 3200 nnz 310,559,935, setup 65.3 s, solve 0.96 s. err_over_kappa_u 0.127
   at both, backward error 2.7e-15 to 3.2e-15 (12-14 u). Fill exponent from N = 1600 to 3200 is 1.10, still in the
   nested-dissection range. Not used by check_c02 (the spec has no expected rows for it).
+
+
+## Chunk 3: conjugate gradients and preconditioners (Nov 10)
+- gr/krylov.py follows the spec's names. cg is a textbook PCG. It sets r0 = b.copy() when x0 is None, so
+  residuals[0] is exactly 1, and it stops on the recurrence residual, unpreconditioned for every M.
+  ic0 is IKJ ILU(0) on the sorted CSR pattern of A in a numba loop. With MIC, dropped fill goes to the row's
+  diagonal. The kernel returns the first non-positive pivot and Python raises ValueError. Then
+  L = L_unit diag(sqrt(d)). AMG is `smoothed_aggregation_solver(A).aspreconditioner(cycle="V").matvec` with defaults.
+  tests c00-c03: 205 passed (44 new).
+- Numba: `@njit(cache=True)`; the cache lands in gr/__pycache__, which is git-ignored, so git_hash stays clean.
+  `krylov.warmup()` (N = 10, ic0 + mic0 + cg) runs before any timer in both experiments.
+- Triangular solves, a fix made after the first full run (commit 08efc8a). The first run (git 373ba4c) had
+  ic0/none time per iteration at 4.3-5.1, which was a WARN at N = 640 (5.11 > 5). The spec reads that as slow
+  triangular solves. Profiling at N = 1280: matvec 4.4 ms, but M(r) took 24.9 ms; the backward sweep
+  (14.6 ms) reloaded z[i] on every inner step (numba cannot rule out aliasing), and the per-row divide sits on
+  the row-to-row critical path. I kept z[i] in a local and multiplied by a precomputed 1/diag(L): M(r) is now
+  16.8 ms and the ratio 3.1-3.7. Results agree with the old solve to 6e-15. Experiments were re-run on the
+  new commit; the CSVs come from 08efc8a.
+- e03_krylov conventions:
+  - Direct rows use CHOLMOD nesdis, timed like everything else (median of 3 setups, median of 3 solves per rhs;
+    a single run at N = 1280).
+  - forward_error is NaN on direct rows (they are the reference), and their final_relres is the true residual.
+  - bound is filled only for kind none.
+  - time_per_iteration = solve_time / iterations.
+- e03_convergence: x* is the CHOLMOD solution. The errors are computed inside the callback, so no iterates are
+  stored. `--quick` uses N = 80 (the spec gives no quick size).
+- check_c03 conventions:
+  - Reading of the iteration-count tolerance: within 3% PASS, 3-10% WARN, beyond 10% FAIL.
+  - "Six rhs" = setup + 6 x solve_time on random b.
+  - The time_per_iteration ratio checks use every rhs.
+  - Missing rows get the check's own kind.
+  - Red flags are automatic. "Forward error much larger than about 1e-9" is flagged above 3e-9, the top of the
+    spec's expected band.
+  - Extras: err_A <= the Chebyshev bound for plain CG, and the ranking without b = ones.
+- Results (git 08efc8a): 14 PASS, 0 WARN, 1 FAIL.
+  - Iteration counts match the reference table exactly for none, ic0 and amg at every N. mic0 matches except
+    N = 1280 (158 vs 157); the old solve gave 157, so this is rounding.
+  - Exponents: none 0.985, ic0 0.972, mic0 0.553, amg 0.299. iterations/N for none is 1.85-1.93, and
+    iterations/bound is 0.37-0.45.
+  - b = ones: ratio 1.00 at N = 20, 40 and 1.03-1.08 above.
+  - At N = 1280 (random b): none 18.5 s; ic0 0.30 + 17.8 s; mic0 0.27 + 3.8 s; amg 1.26 + 2.36 s; CHOLMOD nesdis
+    6.5 s setup + 0.06 s per solve. Plain CG is about 2x faster per iteration than on the reference machine
+    (7.8 ms vs about 16 ms), which is why IC(0) is no faster than plain CG in wall time here.
+- The FAIL is the ranking check "amg < mic0 < ic0 < none at every N >= 80, every rhs": at N = 80, b = ones,
+  ic0 takes 47 iterations while plain CG takes 40. Plain CG on b = 1 terminates after floor((N-1)/2) steps,
+  because b touches only that many eigenvalues. IC(0) in lexicographic order is not invariant under the
+  triangle's symmetries, so the preconditioned system loses that and needs about 0.46 N steps.
+  - b = ones iterations: N = 80 ic0 47 vs none 40; N = 160 84 vs 85; N = 320 157 vs 172; N = 1280 590 vs 686.
+  - The margin is one iteration at N = 160.
+  - On random, out_first and order321 the ranking holds at all 15 (N, rhs).
+  - My reading: the expected row is wrong for b = ones (story point 2 is the reason). The check prints FAIL
+    as written; it goes to the Project chat. I did not edit plan/ or loosen the check.
+- Red flag: forward error max 4.85e-9 (ic0, out_first, N = 1280), above the spec's 1e-11 to 3e-9 band but below
+  its 1e-8 WARN line. Every row above 1e-9 is a probability rhs (out_first or order321) at N >= 640; random b
+  stays at or below 4.1e-10. The likely cause is that the smooth probability solutions sit mostly in low modes,
+  where error/residual amplification is near 1/lambda_min. This is a chunk 4 topic; flagged for the Project
+  chat.
+- Figures: f03_iterations (two panels), f03_convergence (one panel per rhs, end labels with iteration counts),
+  f03_time (legend only; end labels collided). Colors are the validated categorical slots in fixed order,
+  plus a marker per kind, because three slots are below 3:1 contrast.

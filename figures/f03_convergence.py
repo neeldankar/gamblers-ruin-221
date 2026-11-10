@@ -17,6 +17,7 @@ import pandas as pd
 
 INK, MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 COLOR = {"none": "#2a78d6", "ic0": "#1baf7a", "mic0": "#eda100", "amg": "#e87ba4"}
+LABEL_OFFSET = {"none": (4, -10), "ic0": (4, -10), "mic0": (4, -10), "amg": (4, 10)}  # amg ends next to mic0
 
 
 def main():
@@ -37,7 +38,7 @@ def main():
             ax.plot(e["k"], e["relres"], color=color, linewidth=2, zorder=3)
             ax.plot(e["k"], e["err_A"], color=color, linewidth=1.5, linestyle=(0, (5, 2)), zorder=3)
             ax.annotate(f"{kind} ({int(e['k'].max())})", xy=(e["k"].iloc[-1], e["relres"].iloc[-1]),
-                        xytext=(4, -8), textcoords="offset points", color=INK, fontsize=8)
+                        xytext=LABEL_OFFSET[kind], textcoords="offset points", color=INK, fontsize=8)
         c = d[d["kind"] == "none"].dropna(subset=["chebyshev"]).sort_values("k")
         ax.plot(c["k"], c["chebyshev"], color=MUTED, linewidth=1.5, linestyle=(0, (1, 2)), zorder=2)
         ax.set_yscale("log")
@@ -57,7 +58,7 @@ def main():
     handles += [Line2D([], [], color=INK, linewidth=2, label="||r_k|| / ||b||"),
                 Line2D([], [], color=INK, linewidth=1.5, linestyle=(0, (5, 2)), label="||x_k - x*||_A / ||x*||_A"),
                 Line2D([], [], color=MUTED, linewidth=1.5, linestyle=(0, (1, 2)),
-                       label="Chebyshev 2((sqrt(k)-1)/(sqrt(k)+1))^k, plain CG"),
+                       label=r"Chebyshev bound $2\rho^k$, $\rho = (\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)$ (plain CG)"),
                 Line2D([], [], color=MUTED, linewidth=0.8, label="rtol = 1e-10")]
     fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False, fontsize=8, labelcolor=INK)
     fig.tight_layout(rect=(0, 0.1, 1, 1))

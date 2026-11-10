@@ -44,9 +44,6 @@ def main():
             total = d["setup_time"] + count * d["solve_time"]
             ax.plot(d["N"], total, color=color, marker=marker, linestyle=ls, linewidth=2, markersize=7,
                     markeredgecolor="white" if marker != "x" else color, markeredgewidth=1, label=kind, zorder=3)
-            if kind != "jacobi":
-                ax.annotate(kind, xy=(d["N"].iloc[-1], total.iloc[-1]), xytext=(6, 0), textcoords="offset points",
-                            color=INK, fontsize=8, va="center")
         ax.set_xscale("log")
         ax.set_yscale("log")
         ax.xaxis.set_major_locator(FixedLocator(Ns))
