@@ -175,7 +175,10 @@ def run_checks(cond, err, pert):
     out.append(("CG at rtol 1e-10, N >= 80: componentwise / normwise backward error",
                 "above 1e3 for N >= 80; above 100",
                 f"{q.min():.3g} to {q.max():.3g} over {len(d)} rows (min at N = {int(d.loc[q.idxmin(), 'N'])} "
-                f"{d.loc[q.idxmin(), 'kind']})" if len(d) else "no rows",
+                f"{d.loc[q.idxmin(), 'kind']}); per kind: " + ", ".join(
+                    f"{k} min {q[d['kind'] == k].min():.3g}" + (f" ({int((q[d['kind'] == k] <= 100).sum())} rows <= 100)"
+                                                               if (q[d['kind'] == k] <= 100).any() else "")
+                    for k in d["kind"].unique()) if len(d) else "no rows",
                 status(len(d) > 0 and (q > 100).all(), "FAIL", len(d) > 0)))
 
     # 16. CG none reaches rtol 1e-14

@@ -173,3 +173,77 @@
   - The information-only "ranking without ones" extra is dropped, since it is now the main check.
 - Re-ran check_c03 on the same CSVs (git 08efc8a; experiments not re-run): 16 PASS, 0 WARN, 0 FAIL, no red
   flags.
+
+## Chunk 4: accuracy diagnosis of the tiny probabilities (Nov 10)
+- Derivation of cond_i = 2 E_x[T | event] (in my words):
+  - A = I - Q, where Q >= 0 has a zero diagonal. So |A| has the same entries as A except the off-diagonals
+    flip sign: |A| = I + Q = 2I - A.
+  - For the exact solution, A x = b with x, b >= 0. So |A||x| + |b| = (2I - A) x + b = 2x - b + b = 2x.
+  - A is an M-matrix, so A^{-1} >= 0 and |A^{-1}| = A^{-1}. The componentwise condition number
+    (|A^{-1}|(|A||x| + |b|))_i / x_i is therefore 2 (A^{-1} x)_i / x_i.
+  - Meaning: A^{-1} = sum_k Q^k (the chain is absorbed, so the series converges). (Q^k x)_i = E_i[1{T > k} x(X_k)]
+    = P_i(T > k and the event happens), by the Markov property at time k. Here T is the number of rounds until
+    the first bust.
+  - Summing over k >= 0 gives E_i[T 1{event}], since T > k holds for exactly T values of k. Dividing by
+    x_i = P_i(event) gives E_i[T | event]. conditional_mean_time computes that ratio, and the test checks it
+    against E[T] = 3 x1 x2 x3 / N for the sure event (x = 1).
+  - Consequence: the tiny entry at (1, 1, N-2) has cond about 0.388 N^2. The event "the big stack goes out
+    first" forces a long game, but the tiny number is still well conditioned: about N^2 u relative accuracy is
+    possible.
+- gr/accuracy.py follows the spec's names exactly.
+  - componentwise_backward_error counts 0/0 rows as 0 (np.divide with where=den > 0).
+  - flint_solve builds a dense fmpz_mat from 6N A and 6N b. It turns each fmpq result into a Fraction and then
+    a float (correctly rounded), and raises ValueError when scale * A or scale * b is more than 1e-9 from an
+    integer. Timing: N = 80 takes 25 s.
+- Experiments:
+  - Full runs took about 4 min on 1 thread. Experiments run as `PYTHONPATH=. python experiments/...`, as in
+    earlier chunks.
+  - e04_condition has extra columns n, method, ordering and omega_over_u. States are written as "(x1, x2, x3)".
+  - e04_errors: on direct rows, kind holds the ordering and rtol/iterations are NaN.
+  - e04_errors has one added column, max_err_over_bound = max_i rel_err_i / (2 cond_i max(omega, u)). The spec
+    row "max_rel_err <= 2 cond_i omega in every entry" cannot be checked from the scalar max_rel_err. The
+    max(omega, u) is the same convention the acceptance test uses.
+  - At N >= 160, the cholmod row is its own reference, so its errors are exactly 0. splu and banded are
+    measured against it.
+  - e04_perturbation: rng = default_rng(221), fresh for each (N, eps), so a --quick row equals the full-run row.
+    Its columns are worst_ratio_min/max and random_max_ratio (plus eps_cond_max and draws).
+- f04_tiny_error: the "direct solver's error" mark needed a choice. At N = 640 the reference is the CHOLMOD
+  solve, so CHOLMOD's own error is 0. I drew two horizontal marks instead: SuperLU's tiny-entry error against
+  CHOLMOD (2.0e-13, two independent direct solves), and the certified bound max_i cond_i omega_direct (2.4e-10).
+- check_c04 readings:
+  - The 2e-6 relative tolerance on N3_x_tiny is also applied at N <= 80.
+  - "Direct methods" means every method other than cg.
+  - The mic0/amg ratio row covers every rtol.
+  - The backward-error row ("CG at rtol 1e-10") covers every CG kind.
+  - The red flag "CG at 1e-14 with componentwise omega near u" reads "near u" as below 100 u and looks only at
+    N >= 80. At N <= 40, rtol 1e-14 is itself about 90 u.
+  - I set all of these readings before the full run.
+- Results (git 2567b4c): 16 PASS, 1 WARN, 1 FAIL, no red flags.
+  - N^3 x_tiny = 9.1195890 at N >= 320 (N = 1280 is -1.9e-11 from the Gamma(1/3)^9 / (8 pi^4) limit).
+    order_321 is exactly half.
+  - argmin and argmax cond are at (1, 1, N-2) for every N and both events. cond_tiny / N^2 rises from 0.3733 to
+    0.3884, and its fitted exponent over N >= 160 is 2.0001.
+  - omega_direct is 1.4-20.4 u. The certified bound is 6.2e-12 (N = 160), 4.6e-11 (320), 2.4e-10 (640) and
+    1.2e-9 (1280; out_first_3, measured).
+  - Direct solvers against the exact rationals (N <= 80): max relative error 1.9e-15 to 9.4e-14, at 4-13% of
+    the per-entry bound 2 cond_i omega.
+  - CG none matches the reference numbers: rel_err_tiny at rtol 1e-10 is 2.1e-8, 3.7e-8, 2.5e-8, 6.8e-7,
+    5.8e-6 and 1.4e-5 (N = 20 to 640). rtol 1e-14 converged at every N, in 1331 iterations at N = 640 and 2623
+    at N = 1280. At N = 1280, rtol 1e-6, the tiny entry is off by 196%.
+  - mic0's ratio to the prediction is 0.00075-0.016 and amg's is 0.019-0.2. Perturbation ratios are within
+    1.5e-5 of 1 for eps <= 1e-8 and 1.0015 at eps = 1e-6, N = 80. Random perturbations give 0.24-0.39.
+- WARN: CG none, ratio_tiny_to_prediction for N >= 320 and rtol <= 1e-8. The range is 0.54-6.01; N = 320 and
+  N = 640 sit inside [0.5, 2] (1.01-1.63 and 0.90-1.00).
+  - The misses are at N = 1280: 6.01 at rtol 1e-8 and 2.11 at rtol 1e-12.
+  - The spec's 0.9-1.6 band was measured up to N = 640. It already notes that the law underestimates at loose
+    rtol (ratio about 4 at rtol 1e-6, N = 640). At N = 1280, rtol 1e-8 is loose in the same sense:
+    cond_tiny * rtol is 6.4e-3, and CG's error has not yet settled into the lowest modes.
+  - For the Project chat.
+- FAIL: componentwise / normwise backward error at rtol 1e-10, N >= 80, must be above 100.
+  - Plain CG passes easily: minimum 9.8e3, up to 1.2e7 at N = 1280. amg passes too (minimum 276).
+  - mic0 fails at two rows: 14.7 (N = 80) and 30.9 (N = 160). It is above 100 from N = 320 on.
+  - This fits the diagnosis rather than contradicting it. MIC(0) already gets the tiny entry 60-1300x better
+    than cond_tiny * rtol, so its residual is spread less unevenly against |A||x| + |b|.
+  - I think the spec row means plain CG ("CG with the usual normwise stopping rule", story point 4). I applied
+    it to every kind because that was the literal reading, chosen before the data. I did not edit plan/ or
+    loosen the check. For the Project chat.
