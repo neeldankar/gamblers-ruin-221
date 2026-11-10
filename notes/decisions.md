@@ -247,3 +247,16 @@
   - I think the spec row means plain CG ("CG with the usual normwise stopping rule", story point 4). I applied
     it to every kind because that was the literal reading, chosen before the data. I did not edit plan/ or
     loosen the check. For the Project chat.
+- Spec fix after the Project chat sanity check (Nov 10). Both chunk 4 findings were judged spec wording issues,
+  and plan/c04_accuracy.md was edited as agreed:
+  1. The backward-error ratio row is now two rows. "CG kind none at rtol 1e-10" keeps above 100 (FAIL) and
+     records the measured 9.8e3 to 1.2e7. A new row "CG kinds mic0 and amg at rtol 1e-10" requires above 10
+     (WARN): mic0 is 15-31 at N = 80-160 because its errors are already componentwise-small, and amg is 276 and up.
+  2. The ratio_tiny_to_prediction row (CG none) now records "at N = 1280 up to 6 at rtol 1e-8 and 2.1 at 1e-12".
+     Its tolerance is [0.5, 2] for N <= 640 and [0.3, 8] at N = 1280.
+- check_c04 follows suit:
+  - Both backward-error rows use N >= 80. The mic0/amg row says no N; N >= 80 is the plain-CG range and covers
+    the sizes its mic0 numbers come from.
+  - The per-kind breakdown is now part of each row.
+- Re-ran only check_c04, on the same CSVs (git 2567b4c; experiments not re-run): 19 PASS, 0 WARN, 0 FAIL, no
+  red flags.

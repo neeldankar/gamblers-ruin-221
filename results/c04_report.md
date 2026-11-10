@@ -14,16 +14,17 @@ Sources: `results/e04_condition.csv` (git 2567b4c, 2026-11-09T23:22:02), `result
 | certified_bound = max_i cond_i omega_direct | 9e-12 (160), 4.5e-11 (320), 3e-10 (640), about 2e-9 (1280); below 1e-8 | N=10: 6.1e-15, N=20: 4.3e-14, N=40: 2.6e-13, N=80: 1.9e-12, N=160: 6.2e-12, N=320: 4.6e-11, N=640: 2.4e-10, N=1280: 1.2e-09; max over both events 1.4e-09 | PASS |
 | exact-reference rows, direct methods: max_rel_err | 2e-15 to 8e-14; below 1e-13 | 1.9e-15 to 9.4e-14 over 9 rows (N = 20, 40, 80) | PASS |
 | exact-reference rows, direct methods: rel_err_i <= 2 cond_i omega in every entry | holds in every entry (max_err_over_bound <= 1) | max_err_over_bound 0.039 to 0.13 over 9 rows | PASS |
-| CG none, N >= 320, rtol <= 1e-8: ratio_tiny_to_prediction | 0.9-1.6 (at N = 160 it ranges 0.07-1.3); in [0.5, 2] | 0.54 to 6.01 over 12 rows; N=320: 1.01-1.63; N=640: 0.90-1.00; N=1280: 0.54-6.01 | WARN |
+| CG none, N >= 320, rtol <= 1e-8: ratio_tiny_to_prediction | 0.9-1.6 (at N = 160 it ranges 0.07-1.3); at N = 1280 up to 6 at rtol 1e-8 and 2.1 at 1e-12; in [0.5, 2] for N <= 640; in [0.3, 8] at N = 1280 | 0.54 to 6.01 over 12 rows; N=320: 1.01-1.63; N=640: 0.90-1.00; N=1280: 0.54-6.01 | PASS |
 | CG none, rtol 1e-6, N = 640: rel_err_tiny | 0.63 (ratio about 4); in [0.3, 1.0] | 0.627 (ratio 3.94) | PASS |
 | CG mic0 and amg, N >= 160: ratio_tiny_to_prediction | mic0 0.001-0.03, amg 0.02-0.2; below 1 | mic0 0.00075 to 0.016 (20 rows); amg 0.019 to 0.2 (20 rows) | PASS |
 | CG none, rtol 1e-10, N = 640: rel_err_tiny | 1.4e-5; in [3e-6, 6e-5] | 1.42e-05 | PASS |
-| CG at rtol 1e-10, N >= 80: componentwise / normwise backward error | above 1e3 for N >= 80; above 100 | 14.7 to 1.18e+07 over 15 rows (min at N = 80 mic0); per kind: none min 9.81e+03, mic0 min 14.7 (2 rows <= 100), amg min 276 | FAIL |
+| CG kind none at rtol 1e-10, N >= 80: componentwise / normwise backward error | above 1e3 for N >= 80 (9.8e3 to 1.2e7 measured); above 100 | none 9.81e+03 to 1.18e+07 (min at N = 80) over 5 rows | PASS |
+| CG kinds mic0 and amg at rtol 1e-10, N >= 80: componentwise / normwise backward error | mic0 15-31 at N = 80-160 (its errors are already componentwise-small), amg 276 and up; above 10 | mic0 14.7 to 669 (min at N = 80); amg 276 to 3.45e+04 (min at N = 80) over 10 rows | PASS |
 | CG none, rtol 1e-14 reached (converged) for N <= 1280 | yes up to N = 640 (1331 iterations); N = 1280 not measured | N=20: yes (41), N=40: yes (85), N=80: yes (170), N=160: yes (339), N=320: yes (670), N=640: yes (1331), N=1280: yes (2623) | PASS |
 | worst-case perturbation ratio | 1.00000 for eps <= 1e-8; up to 1.0015 at eps = 1e-6, N = 80; within 1e-3 for eps <= 1e-8 | eps <= 1e-8: max |ratio - 1| 1.5e-05 over 8 rows; eps = 1e-6: 1.00001 to 1.00149 | PASS |
 | random perturbation max ratio | 0.24-0.39; below 1 + 1e-3 | 0.240 to 0.394 over 12 rows | PASS |
 
-Summary: 16 PASS, 1 WARN, 1 FAIL.
+Summary: 19 PASS, 0 WARN, 0 FAIL.
 
 ## Red flags (automatic checks of the spec's list)
 

@@ -98,11 +98,12 @@ against the Fraction solver, componentwise accuracy of the direct solve, and CG 
 | certified_bound | 9e-12 (160), 4.5e-11 (320), 3e-10 (640), about 2e-9 (1280, extrapolated) | below 1e-8 | FAIL |
 | exact-reference rows, direct methods: max_rel_err | 2e-15 to 8e-14 | below 1e-13 | FAIL |
 | exact-reference rows, direct methods: max_rel_err <= 2 cond_i omega | holds in every entry | | FAIL |
-| CG none, N >= 320, rtol <= 1e-8: ratio_tiny_to_prediction | 0.9-1.6 (at N = 160 it ranges 0.07-1.3) | in [0.5, 2] | WARN |
+| CG none, N >= 320, rtol <= 1e-8: ratio_tiny_to_prediction | 0.9-1.6 (at N = 160 it ranges 0.07-1.3); at N = 1280 up to 6 at rtol 1e-8 and 2.1 at 1e-12 | in [0.5, 2] for N <= 640; in [0.3, 8] at N = 1280 | WARN |
 | CG none, rtol 1e-6, N = 640: rel_err_tiny | 0.63 (63% wrong; ratio about 4, the law underestimates at loose rtol) | in [0.3, 1.0] | WARN |
 | CG mic0 and amg, N >= 160: ratio_tiny_to_prediction | mic0 0.001-0.03, amg 0.02-0.2 | below 1 | WARN |
 | CG none, rtol 1e-10, N = 640: rel_err_tiny | 1.4e-5 | in [3e-6, 6e-5] | WARN |
-| CG at rtol 1e-10: componentwise / normwise backward error | above 1e3 for N >= 80 | above 100 | FAIL |
+| CG kind none at rtol 1e-10: componentwise / normwise backward error | above 1e3 for N >= 80 (9.8e3 to 1.2e7 measured) | above 100 | FAIL |
+| CG kinds mic0 and amg at rtol 1e-10: same ratio | mic0 15-31 at N = 80-160 (its errors are already componentwise-small), amg 276 and up | above 10 | WARN |
 | CG none, rtol 1e-14 reached (converged) for N <= 1280 | yes up to N = 640 (1331 iterations); N = 1280 not measured | | WARN |
 | worst-case perturbation ratio | 1.00000 for eps <= 1e-8; up to 1.0015 at eps = 1e-6, N = 80 | within 1e-3 for eps <= 1e-8 | FAIL |
 | random perturbation max ratio | 0.24-0.39 | below 1 + 1e-3 | FAIL |
