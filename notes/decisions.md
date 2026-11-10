@@ -64,3 +64,38 @@
   -pi^2/(9 N^2) relative correction from expanding lambda_max/lambda_min. No red flags.
 - The figure uses fixed x ticks at 10, 20, 40, ..., 640 (labels at 80/90 and 300/320 collided otherwise).
 - The env has no `tabulate`, so check_c01 formats its markdown data table by hand instead of DataFrame.to_markdown.
+
+
+## Chunk 2: direct solvers, fill-in and orderings (Nov 9)
+- gr/direct.py follows the spec's names and calls. Column counts: dense n - j and banded min(p+1, n-j) by
+  formula; splu from a copy of SuperLU's L (`np.diff(L.tocsc().indptr)`); CHOLMOD from the factor's own
+  `colcount` (equal to `L.nnz` per column and to `F.nnz` in total, checked at N = 20, 100, 400). CHOLMOD chose
+  simplicial factors (`is_super` False) up to N = 400, so its `nnz` has no supernodal padding.
+- scikit-sparse 0.5 (CHOLMOD) is installed and used; no CHOLMOD test skipped. tests c00-c02: 161 passed.
+- SuperLU never pivoted: `perm_r == perm_c` and `L.nnz == U.nnz` for all four orders at N = 100, and splu
+  NATURAL is exactly 2 x cholmod natural at every N. The module docstring gives the argument (column diagonal
+  dominance survives elimination).
+- Fill counts match the spec's reference table exactly for every order at N = 100-1200 (deterministic orderings,
+  same counts on macOS arm64 as on the Linux reference).
+- e02: A is built and converted to CSC outside the timer; the previous factor is freed before each of the three
+  factorizations so only one big factor lives at a time. Backward error uses ||b||_inf = 1 in the denominator.
+  `np.random.default_rng(221)` is created for convention only (this chunk uses b = 1 throughout).
+- The gr package is not installed in the env, so experiments run as `PYTHONPATH=. python experiments/e02_direct.py`
+  (same as chunk 1). check_c02 and f02 read only the CSV.
+- check_c02 conventions: an exponent is the least-squares slope of log y vs log n over every row in the stated N
+  range; "natural orders" = splu NATURAL and cholmod natural (the two the envelope formula names); missing rows give
+  the check's own kind, never PASS. Added an automatic "red flags" section (splu = 2 x Cholesky, no ordering worse
+  than natural, forward-error growth vs N^2, backward-error growth vs sqrt(n), err_over_kappa_u <= 1).
+- Results (full run, git 7cd1f96): 16 PASS, 1 WARN, 0 FAIL; no red flags. Exponents: natural fill 1.500, flops
+  2.000; metis/nesdis/MMD_AT_PLUS_A fill 1.118/1.116/1.123; amd/COLAMD/MMD_ATA 1.174/1.233/1.184; flops metis/nesdis
+  1.529/1.532, amd 1.681. err_over_kappa_u 0.074-0.326 (max: splu NATURAL at N = 400); backward error 1.5-23.7 u.
+- The WARN: cholmod amd setup at N = 1200 is 1.95 s against the spec's 2-30 s (reference: about 11 s). This Mac is
+  faster than the reference container; amd is the cheapest ordering here (metis/nesdis take 5.4-5.6 s at N = 1200
+  because the ordering itself costs more). Timing only; fill and flops are exact. Left as WARN for the Project chat.
+- nesdis setup-time exponent is 1.15 over N = 400-1600 (reference about 1.24), inside [1.0, 1.7].
+- Figure: one PNG with three panels; color = method family (4 validated hues), marker/line style = ordering. In
+  panels (a) and (b) splu NATURAL lies exactly under cholmod natural (identical Cholesky-equivalent counts).
+- Optional --big run (16 GB Mac, git 7cd1f96, results/e02_direct_big.csv): cholmod nesdis at N = 2400 has
+  nnz 165,657,920, setup 29.3 s; at N = 3200 nnz 310,559,935, setup 65.3 s, solve 0.96 s. err_over_kappa_u 0.127
+  at both, backward error 2.7e-15 to 3.2e-15 (12-14 u). Fill exponent from N = 1600 to 3200 is 1.10, still in the
+  nested-dissection range. Not used by check_c02 (the spec has no expected rows for it).
