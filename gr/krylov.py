@@ -145,29 +145,29 @@ def ic0(A, modified=False):
 
 
 @njit(cache=True)
-def _forward(indptr, indices, data, r):
-    """Solve L y = r, L lower triangular CSR with sorted indices (diagonal last in each row)."""
+def _forward(indptr, indices, data, inv_diag, r):
+    """Solve L y = r, L lower triangular CSR with sorted indices (diagonal last in each row).
+    inv_diag = 1 / diag(L): a multiply instead of a divide on the row-to-row critical path."""
     n = r.shape[0]
     y = np.empty(n)
     for i in range(n):
         s = r[i]
-        last = indptr[i + 1] - 1
-        for idx in range(indptr[i], last):
+        for idx in range(indptr[i], indptr[i + 1] - 1):
             s -= data[idx] * y[indices[idx]]
-        y[i] = s / data[last]
+        y[i] = s * inv_diag[i]
     return y
 
 
 @njit(cache=True)
-def _backward(indptr, indices, data, y):
+def _backward(indptr, indices, data, inv_diag, y):
     """Solve L^T z = y using the CSR rows of L as the columns of L^T, from the last row up."""
     n = y.shape[0]
     z = y.copy()
     for i in range(n - 1, -1, -1):
-        last = indptr[i + 1] - 1
-        z[i] /= data[last]
-        for idx in range(indptr[i], last):
-            z[indices[idx]] -= data[idx] * z[i]
+        zi = z[i] * inv_diag[i]
+        z[i] = zi
+        for idx in range(indptr[i], indptr[i + 1] - 1):  # zi in a local: numba cannot tell z[indices[idx]] is not z[i]
+            z[indices[idx]] -= data[idx] * zi
     return z
 
 
@@ -176,10 +176,11 @@ def ic_preconditioner(L):
     L = sp.csr_matrix(L)
     L.sort_indices()
     indptr, indices, data = L.indptr.astype(np.int64), L.indices.astype(np.int64), L.data.astype(float)
+    inv_diag = 1.0 / L.diagonal()
 
     def apply(r):
-        y = _forward(indptr, indices, data, np.ascontiguousarray(r, dtype=float))
-        return _backward(indptr, indices, data, y)
+        y = _forward(indptr, indices, data, inv_diag, np.ascontiguousarray(r, dtype=float))
+        return _backward(indptr, indices, data, inv_diag, y)
 
     return apply
 
