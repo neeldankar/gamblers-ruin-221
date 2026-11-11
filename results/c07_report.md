@@ -1,6 +1,6 @@
 # Chunk 7 report: three fixes for the tiny probabilities
 
-Sources: `results/e07_fixes.csv` (git 522a5a2, 2026-11-10T23:57:45), `results/e07_structured.csv` (git 522a5a2, 2026-11-10T23:33:25), `results/e07_floor.csv` (git c7eebd8, 2026-11-11T09:45:58); macOS-15.6.1-arm64-arm-64bit-Mach-O, Python 3.13.18, numpy 2.5.4, scipy 1.18.1, OMP_NUM_THREADS=1. `e07_fft_check.csv` is absent: chunk 6 (gr.fft_solver) is not built yet.
+Sources: `results/e07_fixes.csv` (git 522a5a2, 2026-11-10T23:57:45), `results/e07_structured.csv` (git 522a5a2, 2026-11-10T23:33:25), `results/e07_floor.csv` (git c7eebd8, 2026-11-11T09:45:58), `results/e07_fft_check.csv` (git 86834dc, 2026-11-11T15:03:18); macOS-15.6.1-arm64-arm-64bit-Mach-O, Python 3.13.18, numpy 2.5.4, scipy 1.18.1, OMP_NUM_THREADS=1.
 
 | Check | Expected | Observed | Status |
 |---|---|---|---|
@@ -19,8 +19,8 @@ Sources: `results/e07_fixes.csv` (git 522a5a2, 2026-11-10T23:57:45), `results/e0
 | cg_componentwise iterations / cg rtol 1e-10 iterations, converged runs only (tol 1e-14) | none 1.25-1.49, mic0 1.36-1.90, amg 1.38-1.86; in [1.1, 2.5] | none (spec 1.25-1.49): N=20: 1.43, N=40: 1.25, N=60: 1.31, N=80: 1.33, N=160: 1.35, N=320: 1.37, N=640: 1.49; mic0 (spec 1.36-1.90): N=20: 1.43, N=40: 1.36, N=60: 1.48, N=80: 1.45, N=160: 1.67, N=320: 1.67, N=640: 1.79, N=1280: 1.90; amg (spec 1.38-1.86): N=20: 1.43, N=40: 1.38, N=60: 1.44, N=80: 1.67, N=160: 1.70, N=320: 1.69, N=640: 1.86, N=1280: 1.79 (excluded, not converged: N=1280 none) | PASS |
 | cg_componentwise tol 1e-14 converged | mic0 and amg at every N up to 1280; none up to N = 640 (not at 1280: see e07_floor) | 23/24 rows converged (N up to 1280); required runs: 23/23; not converged: N=1280 none (final omega 360 u) | PASS |
 | ir_direct seconds minus direct seconds at N = 640 | about 0.06 s (factor 1.3 s, Mac); under 50% of the factor time | ir_direct - direct = 0.056 s, factor 1.34 s (4%) | PASS |
-| e07_fft_check: which solver is off at (N-2, 1, 1) | the FFT (normwise accurate only); splu within about 0.1 N^2 u of ir_direct, and near data_term_smallest | no e07_fft_check.csv (chunk 6's gr.fft_solver is not built yet) | WARN |
-| e07_fft_check: FFT rel_err_smallest at N = 800 | about 1e-6 (chunk 6's disagreement) | no e07_fft_check.csv (chunk 6's gr.fft_solver is not built yet) | WARN |
+| e07_fft_check: which solver is off at (N-2, 1, 1) | the FFT (normwise accurate only); splu within about 0.1 N^2 u of ir_direct, and near data_term_smallest | N=50: fft 1.9e-12, splu 2.1e-14 (0.077 N^2 u; signed -2.1e-14 vs data term -2.7e-14); N=100: fft 3e-10, splu 8.3e-14 (0.075 N^2 u; signed -8.3e-14 vs data term -1.1e-13); N=200: fft 2.5e-10, splu 3.2e-13 (0.073 N^2 u; signed -3.2e-13 vs data term -4.3e-13); N=400: fft 1.2e-07, splu 1.3e-12 (0.071 N^2 u; signed -1.3e-12 vs data term -1.7e-12); N=800: fft 4.8e-07, splu 5e-12 (0.070 N^2 u; signed -5e-12 vs data term -6.9e-12) | PASS |
+| e07_fft_check: FFT rel_err_smallest at N = 800 | about 1e-6 (chunk 6's disagreement, 6e-7 to 2e-6) | 4.8e-07 | WARN |
 | structured_random_max | 1.48, 1.96, 2.21, 2.94, 2.41 (N = 10 ... 160; a max over 20 random draws, so not monotone); below 10 | N=10: 1.48, N=20: 1.96, N=40: 2.21, N=80: 2.94, N=160: 2.41 | PASS |
 | structured_push | 3.85, 4.30, 4.53, 4.64, 4.69 (N = 10 ... 160); below 10 | N=10: 3.85 (3.85), N=20: 4.30 (4.3), N=40: 4.53 (4.53), N=80: 4.64 (4.64), N=160: 4.69 (4.69) | PASS |
 | cond_max / structured_push | grows like N^2: 37/3.85 (10), 2484/4.64 (80), 9941/4.69 (160); increasing | N=10: 37/3.85 = 9.7, N=20: 154/4.30 = 35.8, N=40: 620/4.53 = 137.0, N=80: 2484/4.64 = 535.7, N=160: 9941/4.69 = 2117.9 | PASS |
@@ -29,7 +29,7 @@ Sources: `results/e07_fixes.csv` (git 522a5a2, 2026-11-10T23:57:45), `results/e0
 | e07_floor, mic0 and amg: min_omega_in_u | at most 90 at every N (they reach tol 1e-14 in e07_fixes) | amg: N=80: 3.9 u, N=160: 4.6 u, N=320: 7.1 u, N=640: 15.1 u, N=1280: 23.9 u; mic0: N=80: 6.0 u, N=160: 9.9 u, N=320: 19.3 u, N=640: 26.0 u, N=1280: 62.2 u | PASS |
 | e07_floor, none: k_at_min_over_k10 | 1.40, 1.45, 1.49, 1.61, 1.54 (Linux); in [1, 3.5]; above 3.5 means maxiter cut the run before the floor | N=80: 1.40, N=160: 1.42, N=320: 1.51, N=640: 1.54, N=1280: 1.60 | PASS |
 
-Summary: 22 PASS, 2 WARN, 0 FAIL.
+Summary: 23 PASS, 1 WARN, 0 FAIL.
 
 ## Red flags (automatic checks of the spec's list)
 
@@ -187,3 +187,27 @@ Summary: 22 PASS, 2 WARN, 0 FAIL.
 | 1280 | none | 10 | 2147 | 8588 | 3.462e-14 | 311.8 | 3440 | 1.602 | 360.3 |
 | 1280 | mic0 | 5 | 137 | 548 | 6.91e-15 | 62.24 | 265 | 1.934 | 63.26 |
 | 1280 | amg | 1 | 19 | 76 | 2.655e-15 | 23.91 | 35 | 1.842 | 24.86 |
+
+## Data (e07_fft_check)
+
+| N | n | method | reference | rel_err_smallest | max_rel_err | normwise_rel_err | data_term_smallest | signed_err_smallest |
+|---|---|---|---|---|---|---|---|---|
+| 50 | 1176 | fft | refined | 1.921e-12 | 1.921e-12 | 1.053e-14 | -2.691e-14 | 1.921e-12 |
+| 50 | 1176 | cholmod | refined | 3.269e-14 | 3.283e-14 | 4.936e-15 | -2.691e-14 | -3.269e-14 |
+| 50 | 1176 | splu | refined | 2.136e-14 | 2.142e-14 | 3.684e-15 | -2.691e-14 | -2.136e-14 |
+| 50 | 1176 | fft | exact | 1.921e-12 | 1.921e-12 | 1.053e-14 | -2.691e-14 | 1.921e-12 |
+| 50 | 1176 | cholmod | exact | 3.269e-14 | 3.283e-14 | 4.936e-15 | -2.691e-14 | -3.269e-14 |
+| 50 | 1176 | splu | exact | 2.136e-14 | 2.142e-14 | 3.684e-15 | -2.691e-14 | -2.136e-14 |
+| 50 | 1176 | ir_direct | exact | 0 | 0 | 0 | -2.691e-14 | 0 |
+| 100 | 4851 | fft | refined | 3.034e-10 | 3.034e-10 | 1.072e-14 | -1.078e-13 | -3.034e-10 |
+| 100 | 4851 | cholmod | refined | 6.464e-14 | 6.477e-14 | 1.005e-14 | -1.078e-13 | -6.464e-14 |
+| 100 | 4851 | splu | refined | 8.304e-14 | 8.31e-14 | 1.086e-14 | -1.078e-13 | -8.304e-14 |
+| 200 | 19701 | fft | refined | 2.506e-10 | 5.016e-10 | 3.513e-14 | -4.311e-13 | 2.506e-10 |
+| 200 | 19701 | cholmod | refined | 2.933e-13 | 2.934e-13 | 3.976e-14 | -4.311e-13 | -2.933e-13 |
+| 200 | 19701 | splu | refined | 3.225e-13 | 3.226e-13 | 4.173e-14 | -4.311e-13 | -3.225e-13 |
+| 400 | 79401 | fft | refined | 1.206e-07 | 1.206e-07 | 2.111e-13 | -1.725e-12 | -1.206e-07 |
+| 400 | 79401 | cholmod | refined | 1.179e-12 | 1.179e-12 | 1.449e-13 | -1.725e-12 | -1.179e-12 |
+| 400 | 79401 | splu | refined | 1.267e-12 | 1.267e-12 | 1.515e-13 | -1.725e-12 | -1.267e-12 |
+| 800 | 318801 | fft | refined | 4.759e-07 | 4.759e-07 | 1.592e-13 | -6.899e-12 | -4.759e-07 |
+| 800 | 318801 | cholmod | refined | 4.755e-12 | 4.755e-12 | 5.694e-13 | -6.899e-12 | -4.755e-12 |
+| 800 | 318801 | splu | refined | 4.962e-12 | 4.962e-12 | 5.803e-13 | -6.899e-12 | -4.962e-12 |

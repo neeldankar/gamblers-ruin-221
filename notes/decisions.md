@@ -411,6 +411,12 @@
 - e07_fft_check: chunk 6 is not built, so the script prints a message and writes no CSV. Its code path follows
   the spec and chunk 6's API fft_solve(N, b), but it is untested until chunk 6 lands. Its two check rows WARN with
   "no CSV".
+  - Nov 11, after chunk 6. Ran e07_fft_check only (git 86834dc), then reran check_c07: 23 PASS, 1 WARN, 0 FAIL.
+    - The FFT is the solver that is off. splu is within 0.070-0.077 N^2 u of ir_direct and has the sign of the
+      data term.
+    - The FFT's rel_err_smallest at N = 800 is 4.8e-7, which equals chunk 6's p123_reldiff. That WARNs: it is
+      just under the 6e-7-2e-6 two reference implementations measured, and inside chunk 6's 1e-8-1e-4.
+    - Most likely, a different FFT rounding pattern (rfft2) in this implementation.
 - e07_structured: "each off-diagonal entry" is read literally. Every entry gets its own factor, so A' is
   not symmetric and the solves use SuperLU (gr.matrix.solve), not GTH.
   - The base system is rebuilt the same way (diagonal = row sum + sum|a_ij|), so only eps differs between x
