@@ -538,3 +538,16 @@
   - identity_max_dev grows about 4x per doubling of N: 2.3e-13 (30) to 3.8e-11 (480). It is a rounding residue
     of differences of O(1) sums, still under the 1e-10 limit at 480, but would pass it near N = 960. Fine for
     the spec's N list; worth knowing if chunk 10 reuses it at larger N.
+
+## Chunk 8 follow-up: prior work (Nov 11)
+- The Project chat found prior work: Diaconis and Ethier, arXiv:2011.07610v2.
+  - Conjecture 4.2(b) is the N^-4 rate at fixed proportions. Their Table 9 uses the same 2:3:5 stacks.
+  - Section 2.7, Remark 2 says the exact P(leader busts first) at (1, 1, N-2) is of order 1/N^3, against the
+    ICM's 1/N^2.
+- Not found in their paper, so ours:
+  - the largest second-place error, 0.036, and where it sits;
+  - the sign pattern at every state (short stacks overrated, big stacks underrated);
+  - the equity identity (equity error = (w2 - w3) times the 2nd-place error).
+- plan/c08_icm.md now cites them in fact 3, fact 4 and the "Why fourth order" paragraph (approved wording,
+  wording only). The isotropy argument is labelled our heuristic, not a proof. No code, check, experiment or
+  figure changed.

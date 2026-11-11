@@ -21,9 +21,10 @@ confirm with numbers:
    the 2nd- and 3rd-place errors cancel. Every ICM equity error is a second-place error.
 2. The ICM **overrates short stacks and underrates big stacks** (sign checked at every state).
 3. The error **does not vanish as N grows**: at fixed proportions the exact probabilities converge (at
-   rate N^-4) to a limit that differs from the ICM.
+   rate N^-4, as Diaconis and Ethier conjecture: arXiv:2011.07610v2, Conjecture 4.2(b); their Table 9 uses the same
+   2:3:5 stacks) to a limit that differs from the ICM.
 4. **Relative** error explodes where probabilities are tiny: from (N-2, 1, 1) the exact P(leader busts
-   first) is about 9.12/N^3, the ICM says 2/(N(N-1)), so the ICM is off by a factor of about N/4.56.
+   first) is about 9.12/N^3, the ICM says 2/(N(N-1)), so the ICM is off by a factor of about N/4.56. (Diaconis and Ethier, section 2.7, Remark 2, already note the two are of different orders, 1/N^3 against 1/N^2.)
 
 ## What to build (the tests import exactly these names)
 
@@ -100,7 +101,7 @@ fixed proportions, and the nonzero limiting error.
 
 Why fourth order: the six-neighbor stencil is isotropic to fourth order (z^m is discrete harmonic on
 the triangular lattice for m <= 5), so for these harmonic probabilities the local error is O(h^6) and
-the global error O(N^-4). This is an observation we verified numerically, not a theorem we cite.
+the global error O(N^-4). The rate is Diaconis and Ethier's Conjecture 4.2(b) (they call the convergence surprising and test it with one comparison at N = 300); we measure orders 3.96 to 4.03 for all six orders at N = 80 to 640. The isotropy argument is our heuristic explanation, not a proof.
 
 ## Red flags (bring these to the Project chat)
 
