@@ -470,3 +470,41 @@
 - Side check in a scratch script, NOT in the CSVs: perturbing the off-diagonal pairs symmetrically gives
   structured_random_max of 1.1-1.6 over three seeds. The literal nonsymmetric reading (in the CSV) gives
   1.5-2.9, closer to the spec's 1.5-2.4. Either way the ratio stays O(1) while cond_max grows like N^2.
+
+## Chunk 7 follow-up: spec fixes and e07_floor (Nov 11)
+- The Project chat approved a list of edits; I made exactly those.
+  - The deleted root c07_fixes.md was identical to plan/c07_fixes.md.
+  - The chunk 7 entry now says 16 PASS: the report was right, I miscounted.
+  - The pushed commit 145e515 still says "17 PASS" in its message. History was not rewritten.
+  - plan/c07_fixes.md: goal text for fixes 1-3, "why 3 works", the e07_floor paragraph, 12 rows replaced,
+    4 e07_floor rows added, red flag and "done when". Rewrapped to the file's line width; no wording changed.
+  - The g_norm sentence ("1.1702 for N >= 40 ...") is fixed in notes/proofs.md section 4 and in
+    plan/c04b_review_fixes.md "Math to record".
+    - The docstring of tests/c04_accuracy/test_c04b_review.py (line 196) still says "for every N". tests/ is off
+      limits, so it is left for the Project chat. The test itself uses N >= 160 and passes.
+- check_c07 mirrors the new rows.
+  - Rows using converged runs only name what they exclude.
+  - The converged row and the red flag share the rule "every mic0 and amg run, and none up to N = 640" (must_converge).
+  - The "extra" CG check skips plain CG, tol 1e-14, N = 1280, and says so.
+  - N = 400 is gone (GTH_REF, DIRECT_REF, strings). DIRECT_REF and STORED_REF are deleted: they were unused.
+- f07_accuracy panel (b) adds "CG + AMG, stop at omega <= 1e-14" in categorical slot 7 (violet), validated
+  together with the panel's other line colors.
+- e07_floor (git c7eebd8, 3.0 min, 1 thread). min_omega_in_u:
+  | N | none | mic0 | amg |
+  |---|---|---|---|
+  | 80 | 10.1 | 6.0 | 3.9 |
+  | 160 | 15.5 | 9.9 | 4.6 |
+  | 320 | 25.0 | 19.3 | 7.1 |
+  | 640 | 50.8 | 26.0 | 15.1 |
+  | 1280 | 311.8 | 62.2 | 23.9 |
+  - Plain CG's minimum falls at k = 1.40-1.60 k10, matching the Linux 1.40-1.61.
+  - Plain CG at N = 1280 bottoms out at 3.46e-14, the value e07_fixes' run log showed over 30000 iterations.
+    The floor is reached within 1.6 k10, so maxiter did not cut it.
+  - The floor is not always the final value. Plain CG at N = 640 reaches 50.8 u at k = 1680 and then drifts
+    back up to 90.2 u. e07_fixes stopped at 89.2 u, just under 90 u, because it checks every 10 iterations and
+    stops at the first omega below tol.
+  - amg at N = 80 gave 3.9 u here and 4.3 u in the --quick smoke test (same code), and 5.0 vs 4.6 u at 160.
+    pyamg's setup is not bitwise reproducible from run to run, probably through its random spectral-radius
+    estimate. The effect is within the tolerances. Not fixed: it would need a pyamg seed in gr/krylov.py.
+- check_c07 (only the check was rerun; e07_fixes and e07_structured are unchanged): 22 PASS, 2 WARN, 0 FAIL,
+  no red flags. The two WARNs are the e07_fft_check rows (chunk 6 not built).
