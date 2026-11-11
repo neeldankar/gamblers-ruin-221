@@ -5,8 +5,12 @@ order_321 (rhs_order(S, 2, 1, 0)). One CHOLMOD nesdis factor per N (SuperLU MMD_
 gives x and is reused for the extra solves behind cond and E[T | event].
     python experiments/e04_condition.py [--quick] [--outdir DIR]
 
-tiny = the state (1, 1, N-2). certified_bound = max_i cond_i * omega_direct, a first-order bound on the
-largest relative error of any entry of the direct solution.
+tiny = the state (1, 1, N-2).
+  * aposteriori_bound = max_i (omega_direct + 8u) cond_i (acc.aposteriori_bound): a bound, computed in floating
+    point, on the largest relative distance of any entry of the direct solution from the solution of the stored
+    system.
+  * data_term_tiny = DELTA_SIXTH * E[T | event] at the tiny state (acc.data_error_term), signed: how far storing 1/6
+    in float64 moves the tiny entry, relative to its value. data_term_over_N2u = data_term_tiny / (N^2 u).
 """
 import os
 
@@ -54,15 +58,17 @@ def run_size(N):
         cond = acc.entry_condition(A, b, x, F.solve)
         ET = acc.conditional_mean_time(A, x, F.solve)
         omega = acc.componentwise_backward_error(A, x, b)
+        data_term = acc.data_error_term(x, F.solve)[tiny]
         rows.append({"N": N, "n": S.n, "event": event, "method": F.method, "ordering": F.ordering,
                      "argmin_state": state_str(S, np.argmin(x)), "x_tiny": x[tiny], "N3_x_tiny": N ** 3 * x[tiny],
                      "cond_tiny": cond[tiny], "cond_tiny_over_N2": cond[tiny] / N ** 2,
                      "cond_max_over_N2": cond.max() / N ** 2, "argmax_cond_state": state_str(S, np.argmax(cond)),
                      "ET_tiny_over_N2": ET[tiny] / N ** 2, "omega_direct": omega,
-                     "omega_over_u": omega / acc.U, "certified_bound": cond.max() * omega})
+                     "omega_over_u": omega / acc.U, "aposteriori_bound": acc.aposteriori_bound(A, b, x, F.solve).max(),
+                     "data_term_tiny": data_term, "data_term_over_N2u": data_term / (N ** 2 * acc.U)})
         r = rows[-1]
         print(f"N = {N:4d}  {event:11s}  N^3 x_tiny {r['N3_x_tiny']:.7f}  cond/N^2 {r['cond_tiny_over_N2']:.5f}  "
-              f"omega {r['omega_over_u']:5.1f} u  bound {r['certified_bound']:.2e}  argmin {r['argmin_state']}  "
+              f"omega {r['omega_over_u']:5.1f} u  bound {r['aposteriori_bound']:.2e}  data {data_term:.3e}  argmin {r['argmin_state']}  "
               f"argmax cond {r['argmax_cond_state']}", flush=True)
     del F
     gc.collect()

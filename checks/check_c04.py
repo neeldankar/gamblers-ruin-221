@@ -1,5 +1,6 @@
-"""Chunk 4 check: compare results/e04_condition.csv, e04_errors.csv and e04_perturbation.csv with the
-"Expected results" table of plan/c04_accuracy.md. Prints one PASS/WARN/FAIL line per table row (plus automatic
+"""Chunk 4 check: compare results/e04_condition.csv, e04_errors.csv, e04_perturbation.csv and (chunk 4b)
+e04_mechanism_rhs.csv with the "Expected results" table of plan/c04_accuracy.md (which includes the chunk 4b rows
+of plan/c04b_review_fixes.md). Prints one PASS/WARN/FAIL line per table row (plus automatic
 red-flag checks) and writes results/c04_report.md.
     python checks/check_c04.py [--results DIR]
 
@@ -17,8 +18,18 @@ Conventions:
   * ratio_tiny_to_prediction for CG none: [0.5, 2] applies at N <= 640, [0.3, 8] at N = 1280 (and above).
   * Red flag "CG converged to 1e-14 with componentwise omega near u" reads "near u" as below 100 u and looks at
     N >= 80 only: at N <= 40, rtol 1e-14 is itself only about 90 u, so a small omega there is expected.
+Chunk 4b rows:
+  * data_term_tiny: each listed value with 1e-3 relative tolerance, as written. An information-only line also
+    compares it with -(u/4) cond_tiny, the exact prediction, which does not depend on printed digits.
+  * data_term_over_N2u: within 1% of -0.0971 at every N >= 80.
+  * "Exact-reference direct rows" = reference == "exact" and method != "cg" (as above).
+  * (N3_x_tiny - C) N^4 comes from e04_condition, out_first_3.
+  * Mechanism rows "vs e04_errors" match every out_first_3 row of e04_mechanism_rhs with the e04_errors row of
+    CG kind none at the same N and rtol; 1% relative on rel_err at the tiny entry.
+  * g_norm: 1e-3 absolute. abs_err_smallest <= residual_bound_abs * (1 + 1e-6).
 """
 import argparse
+import math
 import pathlib
 import sys
 
@@ -26,11 +37,14 @@ import numpy as np
 import pandas as pd
 
 U = 2.0 ** -53
-LIMIT = 9.1195890  # Gamma(1/3)^9 / (8 pi^4)
+C = math.gamma(1 / 3) ** 9 / (8 * math.pi ** 4)  # 2c of Diaconis and Ethier (2022), Remark 4
 N3_REF = {10: 9.122614, 20: 9.119797, 40: 9.119602, 80: 9.119590}  # N >= 160: 9.119589
 COND_REF = {20: 0.3846, 40: 0.3874, 80: 0.3881, 160: 0.3883, 320: 0.3884, 640: 0.3884}
 CG_REF = {1e-10: {20: 2.1e-8, 40: 3.7e-8, 80: 2.5e-8, 160: 6.8e-7, 320: 5.8e-6, 640: 1.4e-5},
           1e-14: {160: 7e-12, 320: 4e-10, 640: 1.6e-9}}
+DATA_TERM_REF = {10: -1.036e-15, 20: -4.270e-15, 40: -1.7206e-14, 80: -6.895e-14, 160: -2.76e-13, 320: -1.10e-12,
+                 640: -4.42e-12, 1280: -1.77e-11}
+MECH_RTOLS = [1e-6, 1e-8, 1e-10, 1e-12, 1e-14]
 
 
 def status(ok, kind, have=True):
@@ -52,7 +66,7 @@ def cg_rows(err, kind=None, rtol=None, N=None):
     return d
 
 
-def run_checks(cond, err, pert):
+def run_checks(cond, err, pert, mech):
     out = []
     of3 = cond[cond["event"] == "out_first_3"].set_index("N").sort_index()
     o321 = cond[cond["event"] == "order_321"].set_index("N").sort_index()
@@ -60,13 +74,11 @@ def run_checks(cond, err, pert):
     # 1. N^3 x_tiny, out_first_3
     devs = {N: of3.loc[N, "N3_x_tiny"] / N3_REF.get(N, 9.119589) - 1 for N in of3.index}
     worst = max(devs, key=lambda N: abs(devs[N])) if devs else None
-    big = of3.index.max() if len(of3) else None
     out.append(("N3_x_tiny, out_first_3",
                 "9.122614 (N=10), 9.119797 (20), 9.119602 (40), 9.119590 (80), 9.119589 (N >= 160); limit "
                 "Gamma(1/3)^9 / (8 pi^4) = 9.1195890; 2e-6 relative",
                 (", ".join(f"N={N}: {of3.loc[N, 'N3_x_tiny']:.7f}" for N in of3.index)
-                 + f"; worst {devs[worst]:+.1e} at N = {worst}; N = {big} vs limit "
-                 f"{of3.loc[big, 'N3_x_tiny'] / LIMIT - 1:+.1e}") if devs else "no rows",
+                 + f"; worst {devs[worst]:+.1e} at N = {worst}") if devs else "no rows",
                 status(bool(devs) and all(abs(v) <= 2e-6 for v in devs.values()), "FAIL", bool(devs))))
 
     # 2. order_321 is half of out_first_3
@@ -112,12 +124,12 @@ def run_checks(cond, err, pert):
                 ", ".join(f"N={r.N} {r.event}: {r.omega_direct / U:.1f} u" for r in cond.itertuples()) or "no rows",
                 status(len(w) > 0 and (w < 100).all(), "FAIL", len(w) > 0)))
 
-    # 8. certified bound
-    out.append(("certified_bound = max_i cond_i omega_direct",
-                "9e-12 (160), 4.5e-11 (320), 3e-10 (640), about 2e-9 (1280); below 1e-8",
-                ", ".join(f"N={N}: {v:.2g}" for N, v in of3["certified_bound"].items())
-                + f"; max over both events {cond['certified_bound'].max():.2g}" if len(cond) else "no rows",
-                status(len(cond) > 0 and (cond["certified_bound"] < 1e-8).all(), "FAIL", len(cond) > 0)))
+    # 8. a posteriori bound
+    out.append(("aposteriori_bound = max_i (omega_direct + 8u) cond_i",
+                "1.5e-11 (160), 8.1e-11 (320), 3.8e-10 (640), 1.8e-9 (1280); below 1e-8",
+                ", ".join(f"N={N}: {v:.2g}" for N, v in of3["aposteriori_bound"].items())
+                + f"; max over both events {cond['aposteriori_bound'].max():.2g}" if len(cond) else "no rows",
+                status(len(cond) > 0 and (cond["aposteriori_bound"] < 1e-8).all(), "FAIL", len(cond) > 0)))
 
     # 9-10. exact-reference rows, direct methods
     ex = err[(err["reference"] == "exact") & (err["method"] != "cg")]
@@ -136,7 +148,7 @@ def run_checks(cond, err, pert):
     d = d[(d["N"] >= 320) & (d["rtol"] <= 1e-8 * (1 + 1e-9))]
     r = d["ratio_tiny_to_prediction"]
     ok = np.where(d["N"] <= 640, r.between(0.5, 2), r.between(0.3, 8))
-    out.append(("CG none, N >= 320, rtol <= 1e-8: ratio_tiny_to_prediction",
+    out.append(("empirical fit, this right-hand side only: CG none, N >= 320, rtol <= 1e-8: ratio_tiny_to_prediction",
                 "0.9-1.6 (at N = 160 it ranges 0.07-1.3); at N = 1280 up to 6 at rtol 1e-8 and 2.1 at 1e-12; "
                 "in [0.5, 2] for N <= 640; in [0.3, 8] at N = 1280",
                 f"{r.min():.2f} to {r.max():.2f} over {len(d)} rows" + "".join(
@@ -164,7 +176,7 @@ def run_checks(cond, err, pert):
         else:
             ok = False
             parts.append(f"{kind} no rows")
-    out.append(("CG mic0 and amg, N >= 160: ratio_tiny_to_prediction", "mic0 0.001-0.03, amg 0.02-0.2; below 1",
+    out.append(("empirical fit, this right-hand side only: CG mic0 and amg, N >= 160: ratio_tiny_to_prediction", "mic0 0.001-0.03, amg 0.02-0.2; below 1",
                 "; ".join(parts), status(ok, "WARN", have)))
 
     # 14. CG none, rtol 1e-10, N = 640
@@ -213,10 +225,134 @@ def run_checks(cond, err, pert):
     out.append(("random perturbation max ratio", "0.24-0.39; below 1 + 1e-3",
                 f"{r.min():.3f} to {r.max():.3f} over {len(pert)} rows" if len(pert) else "no rows",
                 status(len(pert) > 0 and (r <= 1 + 1e-3).all(), "FAIL", len(pert) > 0)))
+    return out + checks_4b(of3, err, mech)
+
+
+def data_term_devs(of3):
+    """Relative deviation of data_term_tiny from the spec's listed values, per N."""
+    return {N: of3.loc[N, "data_term_tiny"] / v - 1 for N, v in DATA_TERM_REF.items() if N in of3.index}
+
+
+def mech_rows(mech, name, N=None):
+    d = mech[mech["rhs"] == name]
+    return (d if N is None else d[d["N"] == N]).sort_values("rtol", ascending=False)
+
+
+def ratio_row(mech, name, check, expected, lo, hi):
+    """Each ratio_to_cond_rtol at N = 640 for one right-hand side must lie in [lo, hi] (WARN)."""
+    d = mech_rows(mech, name, 640)
+    r = d["ratio_to_cond_rtol"]
+    have = len(d) == len(MECH_RTOLS)
+    return (check, expected, ", ".join(f"{v:.3g}" for v in r) + " (rtol 1e-6 ... 1e-14)" if len(d) else "no rows",
+            status(bool(r.between(lo, hi).all()), "WARN", have))
+
+
+def checks_4b(of3, err, mech):
+    out = []
+    # 4b-1. data_term_tiny against the listed values
+    devs = data_term_devs(of3)
+    out.append(("data_term_tiny (e04_condition, out_first_3)",
+                "-1.036e-15 (10), -4.270e-15 (20), -1.7206e-14 (40), -6.895e-14 (80), -2.76e-13 (160), -1.10e-12 (320), "
+                "-4.42e-12 (640), -1.77e-11 (1280); 1e-3 relative",
+                ", ".join(f"N={N}: {of3.loc[N, 'data_term_tiny']:.5g} ({devs[N]:+.1e})" for N in devs) if devs else "no rows",
+                status(len(devs) == len(DATA_TERM_REF) and all(abs(v) <= 1e-3 for v in devs.values()), "FAIL",
+                       bool(devs))))
+
+    # 4b-2. data_term_over_N2u
+    s = of3.loc[of3.index >= 80, "data_term_over_N2u"]
+    out.append(("data_term_over_N2u", "tends to -0.0971 (= -cond_tiny / (4 N^2)); within 1% for N >= 80",
+                ", ".join(f"N={N}: {v:.5f}" for N, v in of3["data_term_over_N2u"].items()) if len(s) else "no rows",
+                status(len(s) > 0 and bool(((s / -0.0971 - 1).abs() <= 0.01).all()), "FAIL", len(s) > 0)))
+
+    # 4b-3, 4. exact-reference direct rows: the solver's own error at the tiny entry
+    ex = err[(err["reference"] == "exact") & (err["method"] != "cg")]
+    se = ex["solver_err_tiny"].abs()
+    out.append(("exact-reference direct rows: abs(solver_err_tiny)",
+                "4e-17 to 2.5e-14 (N = 80: +2.1e-14 SuperLU, -1.1e-14 CHOLMOD on Linux); below 5e-14",
+                f"{se.min():.2g} to {se.max():.2g} over {len(ex)} rows; "
+                + ", ".join(f"N={r.N} {r.method}: {r.solver_err_tiny:+.2g}" for r in ex.itertuples()) if len(ex) else "no rows",
+                status(len(ex) > 0 and bool((se < 5e-14).all()), "WARN", len(ex) > 0)))
+    d = ex[ex["N"].isin([40, 80])]
+    ok = (d["solver_err_tiny"].abs() < d["data_term_tiny"].abs())
+    out.append(("exact-reference direct rows, N = 40 and 80: abs(solver_err_tiny) < abs(data_term_tiny)", "yes",
+                ", ".join(f"N={r.N} {r.method}: {abs(r.solver_err_tiny):.2g} vs {abs(r.data_term_tiny):.2g}"
+                          for r in d.itertuples()) if len(d) else "no rows",
+                status(len(d) > 0 and bool(ok.all()), "WARN", len(d) > 0)))
+
+    # 4b-5. (N3_x_tiny - C) N^4
+    want = [80, 160, 320]
+    v = {N: (of3.loc[N, "N3_x_tiny"] - C) * N ** 4 for N in want if N in of3.index}
+    out.append(("(N3_x_tiny - C) N^4, N = 80, 160, 320",
+                "34.32, 34.37, 34.32 (true values 34.325, 34.375, 34.388; the last is already bent by the solver's "
+                "bias); in [34.2, 34.5]",
+                ", ".join(f"N={N}: {x:.3f}" for N, x in v.items()) + f" (C = {C:.11f})" if v else "no rows",
+                status(len(v) == len(want) and all(34.2 <= x <= 34.5 for x in v.values()), "WARN", bool(v))))
+
+    # 4b-6. a negative probability
+    d = cg_rows(err, "none", 1e-6, 1280)
+    val = float(d["value_tiny"].iloc[0]) if len(d) else np.nan
+    out.append(("CG none, rtol 1e-6, N = 1280: value_tiny", "negative (-4.18e-9 for a probability of +4.35e-9); negative",
+                f"{val:.3g} (relative error {float(d['rel_err_tiny'].iloc[0]):.3g})" if len(d) else "no rows",
+                status(val < 0, "WARN", len(d) > 0)))
+
+    # 4b-7. mechanism out_first_3 agrees with e04_errors
+    m = mech_rows(mech, "out_first_3")
+    pairs = []
+    for r in m.itertuples():
+        e = cg_rows(err, "none", r.rtol, r.N)
+        pairs.append((r.N, r.rtol, r.rel_err_smallest, float(e["rel_err_tiny"].iloc[0]) if len(e) else np.nan))
+    dev = [abs(a / b - 1) for _, _, a, b in pairs]  # NaN where e04_errors has no matching row
+    matched = [x for x in dev if not np.isnan(x)]
+    out.append(("mechanism: out_first_3 rows vs e04_errors (same N, rtol)", "same rel_err at the tiny entry; 1%",
+                (f"max relative difference {max(matched):.1e}" if matched else "no matching rows")
+                + f" over {len(pairs)} (N, rtol) pairs"
+                + (f"; {len(dev) - len(matched)} without a match" if len(matched) < len(dev) else ""),
+                status(len(pairs) > 0 and all(x <= 0.01 for x in dev), "FAIL", len(pairs) > 0)))
+
+    # 4b-8. the rigorous bound abs_err <= g_norm ||r||
+    frac = mech["abs_err_smallest"] / mech["residual_bound_abs"]
+    out.append(("mechanism: abs_err_smallest <= residual_bound_abs, every row",
+                "holds (observed 5e-4 to 1.5e-2 of the bound); 1e-6 relative slack",
+                f"abs_err / bound {frac.min():.2g} to {frac.max():.2g} over {len(mech)} rows" if len(mech) else "no rows",
+                status(len(mech) > 0 and bool((frac <= 1 + 1e-6).all()), "FAIL", len(mech) > 0)))
+
+    # 4b-9. g_norm
+    g = mech["g_norm"]
+    out.append(("mechanism: g_norm, every row", "1.1702; 1e-3",
+                f"{g.min():.5f} to {g.max():.5f} over {len(mech)} rows (smallest states: "
+                f"{', '.join(sorted(mech['smallest_state'].unique()))})" if len(mech) else "no rows",
+                status(len(mech) > 0 and bool(((g - 1.1702).abs() <= 1e-3).all()), "FAIL", len(mech) > 0)))
+
+    # 4b-10 to 12. ratios for the other right-hand sides at N = 640
+    out.append(ratio_row(mech, "land_mid", "mechanism: land_mid ratio_to_cond_rtol, N = 640",
+                         "34, 48, 16, 18, 13 for rtol 1e-6 ... 1e-14; each in [3, 150]", 3, 150))
+    out.append(ratio_row(mech, "land_quarter", "mechanism: land_quarter ratio, N = 640",
+                         "440, 12, 24, 8.0, 18; each above 3", 3, np.inf))
+    out.append(ratio_row(mech, "order_321", "mechanism: order_321 ratio, N = 640",
+                         "10.3, 2.4, 1.8, 0.74, 0.38; each in [0.1, 30]", 0.1, 30))
+
+    # 4b-13. median over all states
+    d = mech_rows(mech, "out_first_3", 640)
+    d = d[np.isclose(d["rtol"].values[:, None], [1e-8, 1e-10, 1e-12], rtol=1e-9, atol=0).any(axis=1)]
+    med = d["median_ratio_all_states"]
+    out.append(("mechanism: out_first_3 median_ratio_all_states, N = 640",
+                "4.0e-4, 1.8e-4, 1.9e-4 at rtol 1e-8, 1e-10, 1e-12; below 0.01",
+                ", ".join(f"rtol {r.rtol:g}: {r.median_ratio_all_states:.2g}" for r in d.itertuples()) if len(d) else "no rows",
+                status(len(d) == 3 and bool((med < 0.01).all()), "WARN", len(d) > 0)))
+
+    # 4b-14. absolute errors at N = 640, rtol 1e-10
+    d = mech_rows(mech, "out_first_3", 640)
+    d = d[np.isclose(d["rtol"], 1e-10, rtol=1e-9, atol=0)]
+    r = d.iloc[0] if len(d) else None
+    out.append(("mechanism: out_first_3, N = 640, rtol 1e-10: absolute errors",
+                "corner 5.0e-13, median 1.9e-10, max 1.6e-9; corner below median",
+                f"corner {r['abs_err_smallest']:.2g}, median {r['abs_err_median']:.2g}, max {r['abs_err_max']:.2g}"
+                if r is not None else "no rows",
+                status(r is not None and r["abs_err_smallest"] < r["abs_err_median"], "WARN", r is not None)))
     return out
 
 
-def red_flags(cond, err, pert):
+def red_flags(cond, err, pert, mech):
     """Automatic checks of the spec's red-flag list. Each returns (description, observed, ok)."""
     out = []
     d = err[(err["method"] != "cg") & (err["N"] <= 80)]
@@ -240,6 +376,25 @@ def red_flags(cond, err, pert):
                 f"componentwise omega {w.min():.0f} u to {w.max():.3g} u over {len(d)} converged rows "
                 f"(min: N = {int(d.loc[w.idxmin(), 'N'])} {d.loc[w.idxmin(), 'kind']})" if len(d) else "no rows",
                 bool(len(d) == 0 or (w >= 100).all())))
+    # chunk 4b red flags
+    of3 = cond[cond["event"] == "out_first_3"].set_index("N").sort_index()
+    devs = data_term_devs(of3)
+    out.append(("data_term_tiny off by more than 1e-3 from the listed values",
+                ", ".join(f"N={N}: {v:+.1e}" for N, v in devs.items()) if devs else "no rows",
+                bool(devs) and all(abs(v) <= 1e-3 for v in devs.values())))
+    pred = (of3["data_term_tiny"] / (-(U / 4) * of3["cond_tiny"]) - 1).abs()
+    out.append(("info: data_term_tiny vs the exact prediction -(u/4) cond_tiny (no printed digits involved; "
+                "within 1e-12 relative)", f"max relative deviation {pred.max():.1e} over {len(pred)} N" if len(pred)
+                else "no rows", bool(len(pred)) and bool((pred <= 1e-12).all())))
+    d = err[(err["reference"] == "exact") & (err["method"] != "cg") & (err["N"] == 80)]
+    big = d[d["solver_err_tiny"].abs() > d["data_term_tiny"].abs()]
+    out.append(("a solver-only error larger than the data term at N = 80 (tiny entry, direct rows)",
+                ", ".join(f"{r.method}: {abs(r.solver_err_tiny):.2g} vs {abs(r.data_term_tiny):.2g}" for r in d.itertuples())
+                or "no rows", bool(len(d)) and big.empty))
+    frac = mech["abs_err_smallest"] / mech["residual_bound_abs"]
+    out.append(("rigorous bound abs_err_smallest <= g_norm ||r||_2 violated (e04_mechanism)",
+                f"largest abs_err / bound {frac.max():.2g} over {len(mech)} rows" if len(mech) else "no rows",
+                bool(len(mech)) and bool((frac <= 1 + 1e-6).all())))
     d = cg_rows(err)
     nc = d[~d["converged"].astype(bool)]
     out.append(("extra: every CG row converged within maxiter", f"{len(d) - len(nc)}/{len(d)} rows"
@@ -276,11 +431,13 @@ def main():
     cond = pd.read_csv(results / "e04_condition.csv")
     err = pd.read_csv(results / "e04_errors.csv")
     pert = pd.read_csv(results / "e04_perturbation.csv")
-    checks = run_checks(cond, err, pert)
-    flags = red_flags(cond, err, pert)
+    mech = pd.read_csv(results / "e04_mechanism_rhs.csv")
+    checks = run_checks(cond, err, pert, mech)
+    flags = red_flags(cond, err, pert, mech)
 
     src = ", ".join(f"`{results / (name + '.csv')}` (git {df.iloc[0]['git_hash']}, {df.iloc[0]['timestamp']})"
-                    for name, df in (("e04_condition", cond), ("e04_errors", err), ("e04_perturbation", pert)))
+                    for name, df in (("e04_condition", cond), ("e04_errors", err), ("e04_perturbation", pert),
+                                     ("e04_mechanism_rhs", mech)))
     m = cond.iloc[0]
     lines = [
         "# Chunk 4 report: accuracy of the tiny probabilities",
@@ -310,9 +467,10 @@ def main():
             cells.append((f"{float(d['rel_err_tiny'].iloc[0]):.2g}" if len(d) else "") + (f" ({ref:g})" if ref else ""))
         lines.append(f"| {rtol:g} | " + " | ".join(cells) + " |")
 
-    lines += ["", "## Data (e04_condition)", ""] + table(cond, "N", "certified_bound")
+    lines += ["", "## Data (e04_condition)", ""] + table(cond, "N", "data_term_over_N2u")
     lines += ["", "## Data (e04_perturbation)", ""] + table(pert, "N", "draws")
-    lines += ["", "## Data (e04_errors)", ""] + table(err, "N", "max_err_over_bound")
+    lines += ["", "## Data (e04_errors)", ""] + table(err, "N", "at_reference_accuracy")
+    lines += ["", "## Data (e04_mechanism_rhs)", ""] + table(mech, "N", "q90_ratio_all_states")
     lines.append("")
 
     for c, _, o, s in checks:

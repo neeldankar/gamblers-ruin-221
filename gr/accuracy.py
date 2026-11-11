@@ -12,6 +12,7 @@ import numpy as np
 import scipy.sparse as sp
 
 U = 2.0 ** -53  # unit roundoff of float64
+DELTA_SIXTH = -2.0 ** -54  # fl(1/6) = (1 + DELTA_SIXTH) / 6 exactly: 1/6 rounds down when stored in float64
 
 
 def relative_errors(x, x_true):
@@ -43,6 +44,26 @@ def entry_condition(A, b, x, solve):
 def conditional_mean_time(A, x, solve):
     """(A^{-1} x)_i / x_i = E_i[T | event], the expected rounds to the first bust given the event x."""
     return solve(x) / x
+
+
+def data_error_term(x, solve):
+    """DELTA_SIXTH * (A^{-1} x)_i / x_i = DELTA_SIXTH * E_i[T | event] = -(u/4) cond_i.
+
+    The relative change of each entry caused by storing 1/6 in float64, to first order:
+    (x_stored - x_ideal)_i / x_i. Every float solver inherits it; an exact rational solve of the ideal system
+    does not. Exact (to 1e-15 relative) for right-hand sides built from 1/6 alone (rhs_out_first); for rhs_order
+    the individually rounded entries of b add about u. Derivation: notes/proofs.md, section 3."""
+    return DELTA_SIXTH * solve(x) / x
+
+
+def aposteriori_bound(A, b, x, solve):
+    """(omega + 8u) cond_i, entry by entry: a bound on |x_stored - x|_i / |x_i| for a computed x.
+
+    x_stored - x = A^{-1} r with A^{-1} >= 0, and |r| <= omega (|A||x| + |b|), so the error is at most omega cond_i.
+    The 8u covers the rounding in evaluating the residual of a row with at most 7 nonzeros. Add
+    abs(data_error_term) for the distance to the true probability. It is computed in floating point, so it is a
+    bound to trust, not a machine-checked certificate (notes/proofs.md, section 5)."""
+    return (componentwise_backward_error(A, x, b) + 8 * U) * entry_condition(A, b, x, solve)
 
 
 def worst_case_perturbation(A, b, eps):

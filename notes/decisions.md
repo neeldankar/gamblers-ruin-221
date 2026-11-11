@@ -25,8 +25,9 @@
   n + (N-3) + (N-1)(N-2)(N-3)/3; CG on b = 1 stops after exactly floor((N-1)/2) steps; MIC(0) has smallest
   preconditioned eigenvalue exactly 1; cond of the tiny entry is 2 E[T | event] ~ 0.388 N^2; CG's tiny-entry error
   is about cond_tiny * rtol; refinement with an accurate residual is correctly rounded; GTH is accurate to ~0.3 N u;
-  the structured condition number (off-diagonals, row sums, b) is O(1); the tiny-entry constant is
-  Gamma(1/3)^9 / (8 pi^4) = 9.1195890.
+  the structured condition number (off-diagonals, row sums, b) is O(1).
+- The tiny-entry constant Gamma(1/3)^9 / (8 pi^4) = 9.1195890 is published (Diaconis and Ethier 2022, Remark 4):
+  it is twice their c. It is not one of our findings (corrected in chunk 4b).
 
 
 ## Environment: python-flint from PyPI (Nov 9)
@@ -219,7 +220,8 @@
     N >= 80. At N <= 40, rtol 1e-14 is itself about 90 u.
   - I set all of these readings before the full run.
 - Results (git 2567b4c): 16 PASS, 1 WARN, 1 FAIL, no red flags.
-  - N^3 x_tiny = 9.1195890 at N >= 320 (N = 1280 is -1.9e-11 from the Gamma(1/3)^9 / (8 pi^4) limit).
+  - N^3 x_tiny = 9.1195890 at N >= 320 (N = 1280 is -1.9e-11 from the Gamma(1/3)^9 / (8 pi^4) limit; the
+    constant is published (Diaconis and Ethier 2022, Remark 4)).
     order_321 is exactly half.
   - argmin and argmax cond are at (1, 1, N-2) for every N and both events. cond_tiny / N^2 rises from 0.3733 to
     0.3884, and its fitted exponent over N >= 160 is 2.0001.
@@ -260,3 +262,50 @@
   - The per-kind breakdown is now part of each row.
 - Re-ran only check_c04, on the same CSVs (git 2567b4c; experiments not re-run): 19 PASS, 0 WARN, 0 FAIL, no
   red flags.
+
+
+## Chunk 4b: fixes from the external review of chunks 1-4 (Nov 10)
+- Why: two referee passes found five things to change (plan/c04b_review_fixes.md). The biggest: fl(1/6) =
+  (1 - 2^-54)/6, so every float solver solves the stored system (I - (1+d)Q) x = (1+d) b, d = -2^-54. Its
+  solution differs from the true probability by d E_i[T | event] = -(u/4) cond_i in entry i. flint_solve
+  solves the ideal system, so most of the "direct solver error" in chunks 2 and 4 is this data term.
+- Kept build_A and boundary_rhs unchanged, as the spec decided. The data term is reported in its own columns.
+- gr/accuracy.py: DELTA_SIXTH, data_error_term(x, solve) = DELTA_SIXTH solve(x) / x, and
+  aposteriori_bound(A, b, x, solve) = (omega + 8u) cond_i. gr/matrix.py: rhs_landing(S, y). All three follow
+  the spec's one-line definitions exactly. All 15 new tests pass, and nothing in chunks 0-4 regressed
+  (239 passed).
+- e04_condition: certified_bound is renamed to aposteriori_bound, and its value now includes the + 8u.
+  New columns: data_term_tiny and data_term_over_N2u.
+- e04_errors:
+  - The data-term vector is computed from x_ref with the reference factor, before the factor is freed.
+  - Every row now has signed_err_tiny, solver_err_tiny, max_solver_err and at_reference_accuracy. The columns
+    that do not apply to a row's reference are NaN or empty, which keeps the CSV column order fixed.
+- e04_mechanism (new), my readings:
+  - "Plain CG" is krylov.cg with M = None, the same as kind none in e04_errors.
+  - The sampled states come from one default_rng(221) per N: rng.choice(n, 4000, replace=False), joined with
+    the 200 smallest-x states (duplicates removed). The same states are used for all three rtols.
+  - At --quick (N = 80, n = 3081) that is every state.
+- f04_tiny_error:
+  - Removed the prediction line and the "SuperLU vs CHOLMOD" line.
+  - Added the dashed |data_term_tiny| line. The bound line is now the a posteriori bound.
+  - A hollow marker means at_reference_accuracy; a legend entry says so.
+- f04_mechanism: panel (a) uses abs_err_max from the rhs CSV (the true maximum over all states) for the
+  1/x guide line, and marks the corner with a star. Panel (b) inverts the x axis to match f04_tiny_error.
+- check_c04 readings (fixed before the full run):
+  - The data_term_tiny row applies the 1e-3 relative tolerance to the listed values literally.
+  - Before writing the check I found a problem: at N = 320, 640 and 1280 the spec lists only 3 significant
+    figures (-1.10e-12, -4.42e-12, -1.77e-11). The values implied by the existing cond_tiny are -1.1038e-12,
+    -4.4153e-12 and -1.7661e-11, which are 3.5e-3, 1.1e-3 and 2.2e-3 away. That is rounding in the spec, not
+    an error in the formula.
+  - The row therefore FAILs as written. I added an information-only line comparing the column with the exact
+    prediction -(u/4) cond_tiny. I did not loosen the tolerance or edit plan/. This goes to the Project chat.
+  - The g_norm tolerance is 1e-3 absolute, as in the acceptance test.
+  - "Mechanism vs e04_errors" matches each out_first_3 row with the CG-none e04_errors row at the same N and rtol.
+- plan/ edits: exactly the approved list.
+  - The c02 point-2 replacement text has no comma before "and flops", so the sentence now reads "...is a
+    local slope and flops to n^{3/2}". I left it word for word.
+  - c04 line 75 (spec text for e04_errors) still says "trusted to its certified bound". That phrase is not
+    on the approved list, so I left it (it is the only remaining "certified" in plan/c04_accuracy.md).
+  - check_c02's expected text for err_over_kappa_u still says 0.10-0.25. The spec did not list check_c02, so
+    it is unchanged; its tolerance [0.02, 1] is the same either way.
+

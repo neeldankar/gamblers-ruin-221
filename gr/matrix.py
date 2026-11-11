@@ -72,6 +72,11 @@ def rhs_win(S, i):
     return boundary_rhs(S, lambda Y: Y[:, i] / S.N)
 
 
+def rhs_landing(S, y):
+    """P(the first bust lands exactly on the boundary state y), y = (y1, y2, y3) with one zero coordinate."""
+    return boundary_rhs(S, lambda Y: np.all(Y == np.asarray(y), axis=1).astype(float))
+
+
 def rhs_rounds(S):
     """Expected rounds until the first elimination: A t = 1."""
     return np.ones(S.n)

@@ -14,11 +14,12 @@ preconditioner buys. The story after this chunk:
 1. Unpreconditioned CG needs about 1.9 N iterations for a random right-hand side at rtol 1e-10, because
    sqrt(kappa) = 0.34 N. The Chebyshev bound is correct but about 2.3 times too pessimistic.
 2. For b = 1 (expected rounds), CG stops after exactly floor((N-1)/2) iterations, because that b has weight
-   on only floor((N-1)/2) distinct eigenvalues. In floating point this stretches by about 7% for large N.
+   on only floor((N-1)/2) distinct eigenvalues (proved: notes/proofs.md). In floating point this stretches by about 7% for large N.
    That is why no benchmark may use b = 1 alone.
 3. Jacobi preconditioning does nothing here (the diagonal of A is exactly 1).
 4. IC(0) cuts kappa by about 12 but keeps kappa ~ N^2, so iterations still grow like N.
-   MIC(0) makes kappa ~ N (Gustafsson), so iterations grow like N^{1/2}; its smallest preconditioned
+   MIC(0) makes kappa grow about linearly (Gustafsson 1978): kappa / N = 0.136, 0.140, 0.150, 0.160, 0.171 at
+   N = 20, 40, 80, 160, 320, still creeping up, so iterations grow like N^{0.55}; its smallest preconditioned
    eigenvalue is exactly 1. Smoothed aggregation AMG keeps iterations nearly flat (7 to 21 for N = 20 to 1280).
 5. Iterations are not time: an IC(0) step costs 2 to 4 plain steps, an AMG V-cycle about 10.
 

@@ -15,10 +15,13 @@ story you should be able to tell after this chunk:
 1. With the natural (lexicographic) order the factor fills its whole envelope:
    nnz(L) = n + (N-3) + (N-1)(N-2)(N-3)/3, which is about (2/3) of the band and grows like n^{3/2}.
    Flops grow like n^2.
-2. Fill-reducing orders (minimum degree, nested dissection) cut fill to about n^{1.1} (n log n in theory)
+2. Fill-reducing orders (minimum degree, nested dissection) cut fill to n log n (George 1973);
+   the fitted exponent 1.1 is a local slope
    and flops to n^{3/2} (George's nested dissection theorem for 2D meshes).
 3. Every method is backward stable (backward error a few u), and the forward error grows like
-   kappa_inf * u, about 0.1 to 0.25 kappa_inf u here. Normwise accuracy is therefore fine; chunk 4 asks
+   kappa_inf * u, 0.07 to 0.33 kappa_inf u here. Of this, (3/16 - 27/(16 N^2)) kappa_inf u is not solver error:
+   it is the rounding of 1/6 in the stored matrix, identical for every solver, because A^{-1} t = t (1 + e2)/4
+   (chunk 4b). Normwise accuracy is therefore fine; chunk 4 asks
    whether the tiny entries are accurate.
 
 ## What to build (the tests import exactly these names)
@@ -109,7 +112,7 @@ should match on your Mac to within a few percent, and times will differ.
 | nnz at N = 1200: amd / metis | 1.40 | in [1.15, 1.65] | WARN |
 | nnz at N = 1200: (MMD_AT_PLUS_A / 2) / metis | 0.98 | in [0.85, 1.15] | WARN |
 | nnz at N = 1200: (COLAMD / 2) / metis | 2.41 | in [1.8, 3.0] | WARN |
-| err_over_kappa_u, every row with N >= 100 | 0.10-0.25 | in [0.02, 1] WARN; above 10 FAIL | WARN/FAIL |
+| err_over_kappa_u, every row with N >= 100 | 0.07-0.33 (data term 0.1875 plus a solver part of either sign) | in [0.02, 1] WARN; above 10 FAIL | WARN/FAIL |
 | backward_error, every row | 2-15 u (2e-16 to 2e-15) | above 50 u WARN; above 1e-13 FAIL | WARN/FAIL |
 | solve_time / setup_time, splu and cholmod, N >= 400 | 0.01-0.04 | below 0.1 | WARN |
 | setup_time, cholmod amd, N = 1200 | about 11 s here | 2-30 s | WARN |

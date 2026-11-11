@@ -10,6 +10,9 @@
 Pin down the matrix's spectrum exactly, so every later chunk can compare measured convergence
 against a prediction. Also build the results logger every experiment uses.
 
+The eigenvalue formula is a theorem (method of images; Práger 2001), not an empirical fit. kappa_inf = 2N^2/9
+needs 3 | N and N >= 6.
+
 ## What to build (the tests import exactly these names)
 
 `gr/spectrum.py`

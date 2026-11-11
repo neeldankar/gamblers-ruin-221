@@ -2,7 +2,8 @@
 
 Writes results/e04_errors.csv: one row per (N, method, kind, rtol). The reference is the exact rational solve
 (flint_solve) for N in {20, 40, 80} (reference = "exact") and the CHOLMOD nesdis solve for N >= 160
-(reference = "direct", trusted to its certified bound from e04_condition). Methods: cholmod (nesdis), splu
+(reference = "direct", a direct solve of the stored system; its own error is about the size of the data term,
+see at_reference_accuracy). Methods: cholmod (nesdis), splu
 (COLAMD), banded (N <= 400) and CG with kinds none, mic0, amg at five rtols (maxiter 30000).
     python experiments/e04_errors.py [--quick] [--outdir DIR]
 
@@ -13,6 +14,12 @@ Column notes:
   * max_err_over_bound = max_i rel_err_i / (2 cond_i max(omega, u)) (added: the first-order bound, entry by
     entry; at most 1 means it holds in every entry).
   * At N >= 160 the cholmod row is its own reference, so its errors are 0 by construction.
+  * value_tiny = the computed tiny entry itself (a negative probability shows up here).
+  * data_term_tiny = DELTA_SIXTH * E[T | event] at the tiny state (acc.data_error_term at the reference), every row:
+    the relative shift of the tiny entry caused by storing 1/6 in float64.
+  * reference "exact" rows: signed_err_tiny = (x - x_ref) / x_ref at the tiny state, solver_err_tiny =
+    signed_err_tiny - data_term_tiny, max_solver_err = max_i |signed_err_i - data_term_i|.
+  * reference "direct" rows: at_reference_accuracy = rel_err_tiny < 10 |data_term_tiny|.
 """
 import os
 
@@ -64,6 +71,7 @@ def run_size(N, kinds):
     else:
         x_ref, reference = x_direct, "direct"
     cond = acc.entry_condition(A, b, x_ref, F.solve)
+    data_term = acc.data_error_term(x_ref, F.solve)  # needs F, so compute it before F is freed
 
     def row(method, kind, x, rtol=np.nan, iterations=np.nan, converged=True):
         rel = acc.relative_errors(x, x_ref)
@@ -75,7 +83,15 @@ def run_size(N, kinds):
              "normwise_rel_err": np.max(np.abs(x - x_ref)) / np.max(np.abs(x_ref)),
              "normwise_backward_error": acc.normwise_backward_error(A, x, b),
              "componentwise_backward_error": omega, "cond_tiny": cond[tiny], "cond_times_rtol": pred,
-             "ratio_tiny_to_prediction": rel[tiny] / pred, "max_err_over_bound": np.max(rel / (2 * cond * max(omega, acc.U)))}
+             "ratio_tiny_to_prediction": rel[tiny] / pred, "max_err_over_bound": np.max(rel / (2 * cond * max(omega, acc.U))),
+             "value_tiny": x[tiny], "data_term_tiny": data_term[tiny]}
+        if reference == "exact":
+            signed = (x - x_ref) / x_ref
+            r.update(signed_err_tiny=signed[tiny], solver_err_tiny=signed[tiny] - data_term[tiny],
+                     max_solver_err=np.max(np.abs(signed - data_term)), at_reference_accuracy=None)
+        else:
+            r.update(signed_err_tiny=np.nan, solver_err_tiny=np.nan, max_solver_err=np.nan,
+                     at_reference_accuracy=bool(rel[tiny] < 10 * abs(data_term[tiny])))
         flag = "" if converged else "  NOT CONVERGED"
         print(f"N = {N:4d}  {method:7s} {kind:7s} rtol {rtol:7.0e}  its {iterations:>6}  tiny {r['rel_err_tiny']:.2e}  "
               f"max {r['max_rel_err']:.2e}  nw {r['normwise_rel_err']:.2e}  omega_nw {r['normwise_backward_error']:.1e}  "

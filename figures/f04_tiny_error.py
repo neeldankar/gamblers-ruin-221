@@ -1,9 +1,11 @@
 """Figure for chunk 4: relative error of the tiny entry against the CG stopping tolerance, N = 640.
 
-One line per CG kind (none, mic0, amg), the prediction cond_tiny * rtol (grey dashed), and two horizontal
-marks for the direct solver: SuperLU's tiny-entry error against the CHOLMOD reference (the cholmod row is its
-own reference at N >= 160, so it has error 0), and the certified first-order bound max_i cond_i omega_direct
-from e04_condition. Uses the largest N in the CSV if N = 640 is missing (--quick).
+One line per CG kind (none, mic0, amg) and two horizontal marks:
+  * the stored-data term |data_term_tiny| = (u/4) cond_tiny (e04_errors): storing 1/6 in float64 moves the tiny
+    entry by this much, so it is the accuracy of the reference (a direct solve of the stored system);
+  * the a posteriori bound max_i (omega + 8u) cond_i for the direct solve (e04_condition, column aposteriori_bound).
+Points flagged at_reference_accuracy (error below 10 |data_term_tiny|) are drawn hollow: their error cannot be told
+apart from the reference's own. Uses the largest N in the CSV if N = 640 is missing (--quick).
 Reads results/e04_errors.csv and results/e04_condition.csv only.
     python figures/f04_tiny_error.py [--results DIR] [--outdir DIR]
 """
@@ -36,20 +38,23 @@ def main():
     for kind, (color, marker) in STYLE.items():
         e = cg[cg["kind"] == kind].sort_values("rtol")
         if len(e):
-            ax.plot(e["rtol"], e["rel_err_tiny"], color=color, marker=marker, linewidth=2, markersize=5,
-                    label=f"CG, {kind}", zorder=3)
-    e = cg.drop_duplicates("rtol").sort_values("rtol")
-    ax.plot(e["rtol"], e["cond_times_rtol"], color=MUTED, linewidth=1.5, linestyle=(0, (5, 2)),
-            label=r"prediction cond$_{tiny}$ $\times$ rtol", zorder=2)
+            ax.plot(e["rtol"], e["rel_err_tiny"], color=color, linewidth=2, label=f"CG, {kind}", zorder=3)
+            hollow = e["at_reference_accuracy"].astype(str) == "True"
+            ax.plot(e["rtol"][~hollow], e["rel_err_tiny"][~hollow], color=color, marker=marker, markersize=5,
+                    linestyle="none", zorder=4)
+            ax.plot(e["rtol"][hollow], e["rel_err_tiny"][hollow], color=color, marker=marker, markersize=6,
+                    markerfacecolor="white", linestyle="none", zorder=4)
 
-    splu = d[d["method"] == "splu"]["rel_err_tiny"]
-    if len(splu) and float(splu.iloc[0]) > 0:
-        ax.axhline(float(splu.iloc[0]), color=INK, linewidth=1.2,
-                   label=f"direct: SuperLU vs CHOLMOD ({float(splu.iloc[0]):.1e})", zorder=2)
-    cb = cond[(cond["N"] == N) & (cond["event"] == "out_first_3")]["certified_bound"]
-    if len(cb):
-        ax.axhline(float(cb.iloc[0]), color=INK, linewidth=1.2, linestyle=(0, (1, 2)),
-                   label=rf"direct: certified bound max$_i$ cond$_i$ $\omega$ ({float(cb.iloc[0]):.1e})", zorder=2)
+    dt = d["data_term_tiny"].abs()
+    if len(dt):
+        ax.axhline(float(dt.iloc[0]), color=MUTED, linewidth=1.5, linestyle=(0, (5, 2)), zorder=2,
+                   label=rf"stored-data term (u/4) cond$_{{tiny}}$: accuracy of the reference ({float(dt.iloc[0]):.1e})")
+    ab = cond[(cond["N"] == N) & (cond["event"] == "out_first_3")]["aposteriori_bound"]
+    if len(ab):
+        ax.axhline(float(ab.iloc[0]), color=INK, linewidth=1.2, linestyle=(0, (1, 2)), zorder=2,
+                   label=f"a posteriori bound for the direct solve ({float(ab.iloc[0]):.1e})")
+    ax.plot([], [], color=MUTED, marker="o", markerfacecolor="white", linestyle="none",
+            label="hollow: error below 10x the reference's accuracy")
 
     ax.set_xscale("log")
     ax.set_yscale("log")
