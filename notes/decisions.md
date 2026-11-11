@@ -361,3 +361,71 @@
     or better at every N.
   - check_c02: unchanged except for the expected text. err_over_kappa_u is 0.074 to 0.326, PASS.
 
+
+
+## Chunk 7: accuracy fixes (Nov 10)
+- Tests first: tests/c07_fixes (18 tests) still fit the revised spec. The names and signatures match, and 18 is
+  the count the spec gives. All 257 tests in c00-c04 + c07 pass. GTH max errors at N = 20, 40, 60 are 8.0 u,
+  11.7 u and 24.7 u: the spec's 8, 12, 25 u.
+- gr/refine.py
+  - accurate_residual: Dot2 (Ogita, Rump and Oishi) over the integer system (6N A, 6N b).
+    - Why TwoProduct is exact here: Dekker's split cuts each factor into a high and a low half of at most 26
+      significant bits. Each of the four partial products then has at most 52 bits and is exact in float64, so
+      p + e = a x exactly. That holds for any doubles without overflow. Here it is even simpler: |Ai_ij| <= 6N
+      < 2^26, so the split of Ai_ij is exact with a zero low half.
+    - TwoSum is exact for any doubles. So B_i - sum_j Ai_ij x_j = s + (sum of the error terms) exactly, and the
+      only roundings are the compensation sum (of size u times the errors, about u^2 times the terms), s + c,
+      and the division by the scale. The result is about 2u per entry.
+    - The integer system is the IDEAL one: rint(6N fl(1/6)) = N. So this residual belongs to the true problem,
+      and refinement removes the data term as well as the solver's own error.
+  - Refinement builds (Ai, B) once and computes x = solve(b) unless x0 is given. Its steps count residual
+    corrections only (the initial solve is not a step), matching the tests: "2 steps" after a direct solve.
+  - gth_solve: why it is subtraction-free.
+    - Off-diagonals are <= 0, row sums >= 0 and b >= 0. Every multiplier l = a_ik / pivot is <= 0. The code
+      writes every update as x += (nonnegative) * (same sign as x):
+      - pivot = s_k + sum(-a_kj) (all terms >= 0);
+      - s_i += (-l) s_k (both >= 0);
+      - a_ij += (-l) a_kj (a_ij and a_kj both <= 0);
+      - y_i += (-l) y_k;
+      - x_k = (y_k + sum(-a_kj) x_j) / pivot.
+    - The diagonal is never updated: it is rebuilt from the row sum when its row pivots. The row sums of the
+      Schur complement are s_i - l s_k, because a_k. 1 = s_k - pivot_k.
+    - No cancellation means every operation has relative error u, so the error grows like the number of
+      operations along a path (about N), not like N^2.
+    - Storage is the upper band, row-contiguous (ub[k, d] = a_{k,k+d}), so the inner update loop is contiguous
+      in both rows. Forward substitution recomputes l = a_ki / pivot_k from the final row k (the same rounding as
+      in the factorization), so no L is stored.
+  - cg_componentwise: the krylov.cg recurrence, with omega checked at k = 0 and at every multiple of
+    check_every. It stops early (rz = 0) if the recurrence residual is exactly 0. The experiments pass maxiter
+    30000, as in chunk 4: the default 10 n would run for ages if omega stalled.
+- e07_fixes
+  - Rows are direct and ir_direct (they share one CHOLMOD factor, so ir_direct seconds = factor time + refinement
+    time), gth (N <= 640), and for each kind cg 1e-10, cg_componentwise 1e-12 and 1e-14, ir_cg_mic0 / ir_cg_amg.
+  - Timings are the median of 3 runs. The accuracy columns come from the last run (every method is
+    deterministic).
+  - At N >= 160 the reference is refinement from x_direct with the same factor, so the ir_direct row equals the
+    reference: its errors are 0 by construction. GTH is the independent check there (see the red flags).
+  - Extra columns: n, converged, setup_seconds (needed for the "under 50% of the factor time" row) and
+    signed_err_tiny. err_vs_stored_tiny is signed (the spec's values carry signs); rel_err_tiny is absolute, as in
+    chunk 4.
+- e07_fft_check: chunk 6 is not built, so the script prints a message and writes no CSV. Its code path follows
+  the spec and chunk 6's API fft_solve(N, b), but it is untested until chunk 6 lands. Its two check rows WARN with
+  "no CSV".
+- e07_structured: "each off-diagonal entry" is read literally. Every entry gets its own factor, so A' is
+  not symmetric and the solves use SuperLU (gr.matrix.solve), not GTH.
+  - The base system is rebuilt the same way (diagonal = row sum + sum|a_ij|), so only eps differs between x
+    and x'.
+  - Solver noise in the ratio is about 2 * 0.07 N^2 u / eps, about 4e-5 at N = 160.
+  - Quick run: random max 1.48, 1.96, 2.21, 2.94, 2.41 (N = 10 ... 160). N = 80 is above the spec's
+    "1.5-2.4", but far below the limit of 10. It may depend on the draw order or on the symmetric vs
+    nonsymmetric reading. Push 3.85, 4.30, 4.53, 4.64 match the spec's 3.9, 4.3, 4.5, 4.6.
+- check_c07 readings (fixed before the full run)
+  - N = 400 values: the spec's gth (120 u), direct (8018 u) and factor (67) values are quoted at N = 400, which
+    is not in e07_fixes' N list. The rules are applied at the N that exist, and N = 400 is printed "not
+    measured". Not changed in plan/; it goes to the Project chat.
+  - "cg rtol 1e-10 as in chunk 4": chunk 4's band at N = 640 ([3e-6, 6e-5] around 1.4e-5, a factor 0.21 to
+    4.3) is applied around each listed value (60, 160, 640).
+  - The cg_componentwise rows cover every kind. The iteration-ratio and converged rows use tol 1e-14 at every N.
+  - Figures: f07_accuracy uses kind none for both CG lines. ir_direct (error exactly 0) is drawn hollow at
+    1e-17. Colors are categorical slots 1-5 of the dataviz palette (validated; the low-contrast slots get
+    markers + legend).
