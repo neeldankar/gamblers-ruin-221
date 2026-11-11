@@ -429,7 +429,7 @@
   - Figures: f07_accuracy uses kind none for both CG lines. ir_direct (error exactly 0) is drawn hollow at
     1e-17. Colors are categorical slots 1-5 of the dataviz palette (validated; the low-contrast slots get
     markers + legend).
-- Results (git 522a5a2; e07_fixes 24 min, e07_structured 2 s, 1 thread): 17 PASS, 4 WARN, 0 FAIL, plus one
+- Results (git 522a5a2; e07_fixes 24 min, e07_structured 2 s, 1 thread): 16 PASS, 4 WARN, 0 FAIL, plus one
   real red flag.
   - Refinement:
     - Every ir_* row at N <= 80 equals the exact rationals rounded to double (0 u).

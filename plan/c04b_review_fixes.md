@@ -259,7 +259,8 @@ neighbours = 4 e3 and vanishes on the boundary), (x' - t)_i / t_i = d (e2 - 3)/4
 
 With r = b - A x_hat, x - x_hat = A^-1 r, so e_i = g_i . r with g_i = A^-1 e_i (row i of A^-1: expected visits
 to each state from i). By Cauchy-Schwarz |e_i| <= ||g_i||_2 ||r||_2 <= ||g_i||_2 rtol ||b||_2. At the corner
-||g_i||_2 = 1.1702 for every N, ||b||_2 = sqrt(N-2)/3 for out_first, and x_tiny = 9.12 / N^3, so the best a
+||g_i||_2 = 1.1702 for N >= 40 (it converges in N: 1.1687 at N = 10, 1.1701 at N = 20), ||b||_2 = sqrt(N-2)/3
+for out_first, and x_tiny = 9.12 / N^3, so the best a
 residual test can promise there is a relative error of 0.043 N^3.5 rtol. The observed error is 5e-4 to 1.5e-2
 of that bound. The componentwise condition number does not enter: cond_i measures the response to
 perturbations |dA| <= eps|A|, |db| <= eps|b|, and a normwise-small residual is not of that form.

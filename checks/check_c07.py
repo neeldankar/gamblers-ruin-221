@@ -1,18 +1,18 @@
-"""Chunk 7 check: compare results/e07_fixes.csv, e07_structured.csv and (if chunk 6 exists) e07_fft_check.csv with
-the "Expected results" table of plan/c07_fixes.md. Prints one PASS/WARN/FAIL line per table row (plus automatic
-red-flag checks) and writes results/c07_report.md.
+"""Chunk 7 check: compare results/e07_fixes.csv, e07_structured.csv, e07_floor.csv and (if chunk 6 exists)
+e07_fft_check.csv with the "Expected results" table of plan/c07_fixes.md. Prints one PASS/WARN/FAIL line per table
+row (plus automatic red-flag checks) and writes results/c07_report.md.
     python checks/check_c07.py [--results DIR]
 
-Conventions (logged in notes/decisions.md, chunk 7):
+Conventions (logged in notes/decisions.md, chunk 7 and its follow-up):
   * Each row gets the kind the spec lists (FAIL or WARN) when it misses, and also when the rows it needs are
     missing: never PASS without data. A row with kind "WARN/FAIL" is WARN above the first limit, FAIL above the second.
-  * Several rows quote values at N = 400, which is not in e07_fixes' N list (20, 40, 60, 80, 160, 320, 640, 1280).
-    Their rules (gth below N u; direct / N^2 in [0.02, 0.2]; gth below direct at every N >= 80) are applied at the
-    N that exist, and the N = 400 values are reported as not measured.
   * "cg rtol 1e-10 ... as in chunk 4": chunk 4's tolerance for N = 640 was [3e-6, 6e-5] around 1.4e-5, i.e. a factor
     1/4.67 to 4.29. The same factor band is applied around the listed values at N = 60 and 160.
-  * The cg_componentwise rows use every kind (none, mic0, amg); the iteration ratio and "converged" rows use tol 1e-14
-    (the tolerance the spec's story quotes) at every N.
+  * The cg_componentwise rows use every kind (none, mic0, amg) at tol 1e-14. The err_vs_stored and iteration-ratio
+    rows use converged runs only and name the excluded ones. "Converged" passes if every mic0 and amg run converged
+    and every none run with N <= 640 did (plain CG stalls above 1e-14 at N = 1280: see e07_floor).
+  * e07_floor rows: none min_omega_in_u within a factor 2.5 of the Linux values; none at N = 1280 above 1e-14;
+    mic0 and amg at most 90 u at every N; none k_at_min_over_k10 in [1, 3.5].
   * direct err_vs_stored_tiny: |value| < 0.2 N^2 u at every N.
   * ir_direct seconds minus direct seconds is compared with the direct row's setup_seconds (the factor time).
   * e07_fft_check "which solver is off": PASS if at every N the FFT's rel_err_smallest is larger than splu's and
@@ -27,14 +27,14 @@ import pandas as pd
 
 U = 2.0 ** -53
 DATA_TERM_REF = {80: -6.895e-14, 160: -2.7592e-13, 320: -1.1038e-12, 640: -4.4153e-12, 1280: -1.7661e-11}
-GTH_REF = {20: 8, 40: 12, 60: 25, 80: 34, 160: 46, 400: 120}
-DIRECT_REF = {20: 39, 60: 267, 80: 431, 400: 8018}
-STORED_REF = {80: -1.1e-14, 160: 1.5e-13, 320: 5.9e-13, 640: 2.3e-12, 1280: 8.5e-12}
+GTH_REF = {20: 8, 40: 12, 60: 25, 80: 34, 160: 46, 320: 60, 640: 200}
 CG_REF = {60: 5e-8, 160: 6.8e-7, 640: 1.4e-5}
 CG_BAND = (3e-6 / 1.4e-5, 6e-5 / 1.4e-5)  # chunk 4's tolerance at N = 640, as a factor
-IT_RATIO_REF = {"none": "1.3-1.5", "mic0": "1.5-1.8", "amg": "1.4-2.2"}
-PUSH_REF = {10: 3.9, 20: 4.3, 40: 4.5, 80: 4.6}
+IT_RATIO_REF = {"none": "1.25-1.49", "mic0": "1.36-1.90", "amg": "1.38-1.86"}
+PUSH_REF = {10: 3.85, 20: 4.30, 40: 4.53, 80: 4.64, 160: 4.69}
+FLOOR_REF = {80: 9.9, 160: 17.7, 320: 26.5, 640: 57.4, 1280: 193}  # none, min_omega_in_u (Linux)
 KINDS = ["none", "mic0", "amg"]
+NONE_CONVERGES_UP_TO = 640  # plain CG reaches omega <= 1e-14 up to this N
 
 
 def status(ok, kind, have=True):
@@ -60,7 +60,18 @@ def ir_methods(df):
     return [m for m in ("ir_direct", "ir_cg_mic0", "ir_cg_amg") if m in set(df["method"])]
 
 
-def run_checks(fx, st, fft):
+def must_converge(d):
+    """Runs the spec expects to reach tol 1e-14: every mic0 and amg run, and plain CG up to N = 640."""
+    return (d["kind"] != "none") | (d["N"] <= NONE_CONVERGES_UP_TO)
+
+
+def excluded_text(d):
+    nc = d[~truthy(d["converged"])]
+    return (" (excluded, not converged: " + ", ".join(f"N={r.N} {r.kind}" for r in nc.itertuples()) + ")"
+            if len(nc) else "")
+
+
+def run_checks(fx, st, fft, fl):
     out = []
 
     # 1. ir_* vs exact
@@ -86,7 +97,7 @@ def run_checks(fx, st, fft):
                 ", ".join(f"N={r.N}: {r.iterations_or_steps:g}" for r in d.itertuples()) if len(d) else "no rows",
                 status(len(d) > 0 and (d["iterations_or_steps"] <= 3).all(), "WARN", len(d) > 0)))
     d = fx[fx["method"].isin(["ir_cg_mic0", "ir_cg_amg"])].sort_values(["method", "N"])
-    out.append(("ir_cg_mic0 and ir_cg_amg steps", "4; at most 8",
+    out.append(("ir_cg_mic0 and ir_cg_amg steps", "3 (N <= 320), 4 (N >= 640); at most 8",
                 "; ".join(f"{m}: " + ", ".join(f"N={r.N}: {r.iterations_or_steps:g}" for r in g.itertuples())
                           for m, g in d.groupby("method")) if len(d) else "no rows",
                 status(len(d) > 0 and (d["iterations_or_steps"] <= 8).all(), "WARN", len(d) > 0)))
@@ -96,28 +107,30 @@ def run_checks(fx, st, fft):
     over_n = d[d["max_rel_err_in_u"] >= d["N"]]
     over_10n = d[d["max_rel_err_in_u"] > 10 * d["N"]]
     kind = "FAIL" if len(over_10n) else "WARN"
-    missing = [N for N in GTH_REF if N not in set(d["N"])]
     out.append(("gth max_rel_err_in_u",
-                "8 (20), 12 (40), 25 (60), 34 (80), 46 (160), 120 (400); below N; above 10 N is FAIL",
-                (", ".join(f"N={r.N}: {r.max_rel_err_in_u:.1f} u ({r.max_rel_err_in_u / r.N:.2f} N)" for r in d.itertuples())
-                 + (f"; not measured: N = {', '.join(map(str, missing))}" if missing else "")) if len(d) else "no rows",
+                "8 (20), 12 (40), 25 (60), 34 (80), 46 (160), 60 (320), 200 (640): 0.19-0.42 N; below N; above 10 N "
+                "is FAIL",
+                ", ".join(f"N={r.N}: {r.max_rel_err_in_u:.1f} u ({r.max_rel_err_in_u / r.N:.2f} N)" for r in d.itertuples())
+                if len(d) else "no rows",
                 status(len(d) > 0 and over_n.empty, kind, len(d) > 0)))
 
     # 6. direct max_rel_err_in_u / N^2
     d = rows(fx, "direct")
     ratio = d["max_rel_err_in_u"] / d["N"] ** 2
-    missing = [N for N in DIRECT_REF if N not in set(d["N"])]
-    out.append(("direct max_rel_err_in_u / N^2 (against the true probability)",
-                "about 0.07 (39 u at 20, 267 u at 60, 431 u at 80, 8018 u at 400); in [0.02, 0.2]",
-                (", ".join(f"N={r.N}: {r.max_rel_err_in_u:.0f} u ({q:.3f})" for r, q in zip(d.itertuples(), ratio))
-                 + (f"; not measured: N = {', '.join(map(str, missing))}" if missing else "")) if len(d) else "no rows",
+    out.append(("direct max_rel_err_in_u / N^2 (against the true probability; mostly the data term, 0.097)",
+                "Mac: 0.065 for N >= 160, 0.09-0.13 for N <= 80 (37, 190, 428, 848 u at N = 20, 40, 60, 80); the Linux "
+                "reference had 39, 267, 431 u at N = 20, 60, 80 (CHOLMOD's own part differs by machine); in [0.02, 0.2]",
+                ", ".join(f"N={r.N}: {r.max_rel_err_in_u:.0f} u ({q:.3f})" for r, q in zip(d.itertuples(), ratio))
+                if len(d) else "no rows",
                 status(len(d) > 0 and ((ratio >= 0.02) & (ratio <= 0.2)).all(), "WARN", len(d) > 0)))
 
     # 7. direct err_vs_stored_tiny
     lim = 0.2 * d["N"] ** 2 * U
     out.append(("direct err_vs_stored_tiny (the solver's own error)",
-                "-1.1e-14 (80), +1.5e-13 (160), +5.9e-13 (320), +2.3e-12 (640), +8.5e-12 (1280): about +0.05 N^2 u, "
-                "opposite in sign to the data term; absolute value below 0.2 N^2 u",
+                "Mac: +3.8e-16 (20), -4.0e-15 (40), -8.8e-15 (60), -2.5e-14 (80), +9.1e-14 (160), +3.7e-13 (320), "
+                "+1.5e-12 (640), +5.7e-12 (1280): +0.032 N^2 u for N >= 160, opposite in sign to the data term; either "
+                "sign for N <= 80. Linux reference: -1.1e-14 (80), about +0.05 N^2 u for N >= 160; absolute value below "
+                "0.2 N^2 u",
                 ", ".join(f"N={r.N}: {r.err_vs_stored_tiny:+.2g} ({r.err_vs_stored_tiny / (r.N ** 2 * U):+.3f} N^2 u, "
                           f"{'opposite' if r.err_vs_stored_tiny * r.data_term_tiny < 0 else 'same'} sign)"
                           for r in d.itertuples()) if len(d) else "no rows",
@@ -138,9 +151,9 @@ def run_checks(fx, st, fft):
     dr = d.set_index("N")["max_rel_err"]
     common = [N for N in g.index if N >= 80 and N in dr.index]
     out.append(("gth beats direct (true probability, max_rel_err), N >= 80",
-                "by a factor growing with N: 13 at N = 80, 67 at N = 400; gth smaller at every N >= 80",
-                ", ".join(f"N={N}: factor {dr[N] / g[N]:.1f}" for N in common) + " (N = 400 not measured)"
-                if common else "no rows",
+                "by a factor growing with N: 25 (80), 37 (160), 112 (320), 133 (640) on the Mac (13 at N = 80 on "
+                "Linux); gth smaller at every N >= 80",
+                ", ".join(f"N={N}: factor {dr[N] / g[N]:.1f}" for N in common) if common else "no rows",
                 status(bool(common) and all(g[N] < dr[N] for N in common), "WARN", bool(common))))
 
     # 10. cg rtol 1e-10 none
@@ -166,17 +179,22 @@ def run_checks(fx, st, fft):
 
     # 12. cg_componentwise 1e-14 err_vs_stored vs direct, N >= 160
     d160 = d[d["N"] >= 160]
+    d160c = d160[truthy(d160["converged"])]
     dirs = rows(fx, "direct").set_index("N")["err_vs_stored_tiny"].abs()
-    cmp = [(r.kind, r.N, abs(r.err_vs_stored_tiny), dirs.get(r.N, np.nan)) for r in d160.itertuples()]
-    out.append(("cg_componentwise tol 1e-14: err_vs_stored_tiny, N >= 160",
-                "3e-14 (160), 1e-13 (320), about 5e-13 (640); below the direct solver's err_vs_stored_tiny at the same N",
-                "; ".join(f"N={N} {k}: {e:.2g} vs direct {de:.2g}" for k, N, e, de in cmp) if cmp else "no rows",
+    cmp = [(r.kind, r.N, abs(r.err_vs_stored_tiny), dirs.get(r.N, np.nan)) for r in d160c.itertuples()]
+    out.append(("cg_componentwise tol 1e-14: err_vs_stored_tiny, N >= 160, converged runs only",
+                "0.05-0.46 of the direct solver's (Mac): none 2.9e-14, 8.0e-14, 3.0e-13; mic0 3.5e-14, 1.0e-13, "
+                "6.8e-13, 2.6e-12; amg 4.6e-15, 1.5e-13, 6.2e-13, 1.9e-12 (N = 160, 320, 640, 1280); below the direct "
+                "solver's err_vs_stored_tiny at the same N",
+                ("; ".join(f"N={N} {k}: {e:.2g} vs direct {de:.2g} ({e / de:.2f})" for k, N, e, de in cmp)
+                 + excluded_text(d160)) if cmp else "no rows",
                 status(bool(cmp) and all(e < de for _, _, e, de in cmp), "WARN", bool(cmp))))
 
     # 13. iteration ratio
     parts, ok, have = [], True, False
     for k in KINDS:
-        a = rows(fx, "cg_componentwise", k, 1e-14).set_index("N")["iterations_or_steps"]
+        cw = rows(fx, "cg_componentwise", k, 1e-14)
+        a = cw[truthy(cw["converged"])].set_index("N")["iterations_or_steps"]
         b = rows(fx, "cg", k, 1e-10).set_index("N")["iterations_or_steps"]
         Ns = [N for N in a.index if N in b.index]
         if not Ns:
@@ -185,17 +203,21 @@ def run_checks(fx, st, fft):
         q = {N: a[N] / b[N] for N in Ns}
         ok &= all(1.1 <= v <= 2.5 for v in q.values())
         parts.append(f"{k} (spec {IT_RATIO_REF[k]}): " + ", ".join(f"N={N}: {v:.2f}" for N, v in q.items()))
-    out.append(("cg_componentwise iterations / cg rtol 1e-10 iterations (tol 1e-14)",
-                "none 1.3-1.5, mic0 1.5-1.8, amg 1.4-2.2; in [1.1, 2.5]",
-                "; ".join(parts) if parts else "no rows", status(have and ok, "WARN", have)))
+    out.append(("cg_componentwise iterations / cg rtol 1e-10 iterations, converged runs only (tol 1e-14)",
+                "none 1.25-1.49, mic0 1.36-1.90, amg 1.38-1.86; in [1.1, 2.5]",
+                ("; ".join(parts) + excluded_text(d)) if parts else "no rows", status(have and ok, "WARN", have)))
 
     # 14. converged
     nc = d[~truthy(d["converged"])]
-    out.append(("cg_componentwise tol 1e-14 converged, every N up to 1280", "yes",
-                f"{len(d) - len(nc)}/{len(d)} rows converged (N up to {d['N'].max() if len(d) else '-'})"
-                + (f"; not: {', '.join(f'N={r.N} {r.kind} (omega {r.omega / U:.0f} u)' for r in nc.itertuples())}"
+    req = d[must_converge(d)]
+    req_nc = req[~truthy(req["converged"])]
+    out.append(("cg_componentwise tol 1e-14 converged",
+                "mic0 and amg at every N up to 1280; none up to N = 640 (not at 1280: see e07_floor)",
+                f"{len(d) - len(nc)}/{len(d)} rows converged (N up to {d['N'].max() if len(d) else '-'}); required "
+                f"runs: {len(req) - len(req_nc)}/{len(req)}"
+                + (f"; not converged: {', '.join(f'N={r.N} {r.kind} (final omega {r.omega / U:.0f} u)' for r in nc.itertuples())}"
                    if len(nc) else ""),
-                status(len(d) > 0 and nc.empty and d["N"].max() >= 1280, "WARN", len(d) > 0)))
+                status(len(req) > 0 and req_nc.empty and d["N"].max() >= 1280, "WARN", len(d) > 0)))
 
     # 15. ir_direct overhead at N = 640
     a, b = rows(fx, "ir_direct", N=640), rows(fx, "direct", N=640)
@@ -203,8 +225,8 @@ def run_checks(fx, st, fft):
     if have:
         extra, factor = float(a["seconds"].iloc[0] - b["seconds"].iloc[0]), float(b["setup_seconds"].iloc[0])
         obs = f"ir_direct - direct = {extra:.3f} s, factor {factor:.2f} s ({extra / factor:.0%})"
-    out.append(("ir_direct seconds minus direct seconds at N = 640", "about 0.1 s (factor 2.2 s); under 50% of the "
-                "factor time", obs if have else "no rows", status(have and extra < 0.5 * factor, "WARN", have)))
+    out.append(("ir_direct seconds minus direct seconds at N = 640", "about 0.06 s (factor 1.3 s, Mac); under 50% "
+                "of the factor time", obs if have else "no rows", status(have and extra < 0.5 * factor, "WARN", have)))
 
     # 16-17. fft check
     if fft is None:
@@ -237,18 +259,47 @@ def run_checks(fx, st, fft):
                     status(len(ff) > 0 and 6e-7 <= v <= 2e-6, "WARN", len(ff) > 0)))
 
     # 18-20. structured
-    out.append(("structured_random_max", "1.5-2.4 at every N; below 10",
+    out.append(("structured_random_max", "1.48, 1.96, 2.21, 2.94, 2.41 (N = 10 ... 160; a max over 20 random draws, "
+                "so not monotone); below 10",
                 ", ".join(f"N={r.N}: {r.structured_random_max:.2f}" for r in st.itertuples()) if len(st) else "no rows",
                 status(len(st) > 0 and (st["structured_random_max"] < 10).all(), "FAIL", len(st) > 0)))
-    out.append(("structured_push", "3.9, 4.3, 4.5, 4.6 (N = 10 ... 80); below 10",
+    out.append(("structured_push", "3.85, 4.30, 4.53, 4.64, 4.69 (N = 10 ... 160); below 10",
                 ", ".join(f"N={r.N}: {r.structured_push:.2f}" + (f" ({PUSH_REF[r.N]})" if r.N in PUSH_REF else "")
                           for r in st.itertuples()) if len(st) else "no rows",
                 status(len(st) > 0 and (st["structured_push"] < 10).all(), "WARN", len(st) > 0)))
     q = (st["cond_max"] / st["structured_push"]).to_numpy()
-    out.append(("cond_max / structured_push", "grows like N^2 (37/3.9 at N = 10, 2484/4.6 at N = 80); increasing",
+    out.append(("cond_max / structured_push", "grows like N^2: 37/3.85 (10), 2484/4.64 (80), 9941/4.69 (160); "
+                "increasing",
                 ", ".join(f"N={r.N}: {r.cond_max:.0f}/{r.structured_push:.2f} = {v:.1f}" for r, v in zip(st.itertuples(), q))
                 if len(st) else "no rows",
                 status(len(q) > 1 and bool((np.diff(q) > 0).all()), "FAIL", len(q) > 1)))
+
+    # 21-24. e07_floor
+    fl = fl if fl is not None else pd.DataFrame(columns=["N", "kind"])
+    nf = fl[fl["kind"] == "none"].sort_values("N")
+    devs = {r.N: r.min_omega_in_u / FLOOR_REF[r.N] for r in nf.itertuples() if r.N in FLOOR_REF}
+    inc = len(nf) > 1 and bool((np.diff(nf["min_omega_in_u"].to_numpy()) > 0).all())
+    out.append(("e07_floor, none: min_omega_in_u",
+                "increasing in N: 9.9 (80), 17.7 (160), 26.5 (320), 57.4 (640), 193 (1280) on Linux with independent "
+                "code; the Mac run log had 312 at 1280; each within a factor 2.5 of these",
+                (", ".join(f"N={N}: {v * FLOOR_REF[N]:.1f} u ({v:.2f}x)" for N, v in devs.items())
+                 + f"; increasing: {'yes' if inc else 'NO'}") if devs else "no e07_floor rows",
+                status(bool(devs) and all(1 / 2.5 <= v <= 2.5 for v in devs.values()), "WARN", bool(devs))))
+    r1280 = nf[nf["N"] == 1280]
+    v = float(r1280["min_omega"].iloc[0]) if len(r1280) else np.nan
+    out.append(("e07_floor, none, N = 1280: min_omega", "above 1e-14 (plain CG cannot reach tol 1e-14 there)",
+                f"{v:.3g} ({v / U:.0f} u)" if len(r1280) else "no row at N = 1280",
+                status(len(r1280) > 0 and v > 1e-14, "WARN", len(r1280) > 0)))
+    pf = fl[fl["kind"].isin(["mic0", "amg"])].sort_values(["kind", "N"])
+    out.append(("e07_floor, mic0 and amg: min_omega_in_u",
+                "at most 90 at every N (they reach tol 1e-14 in e07_fixes)",
+                "; ".join(f"{k}: " + ", ".join(f"N={r.N}: {r.min_omega_in_u:.1f} u" for r in g.itertuples())
+                          for k, g in pf.groupby("kind", sort=False)) if len(pf) else "no e07_floor rows",
+                status(len(pf) > 0 and bool((pf["min_omega_in_u"] <= 90).all()), "FAIL", len(pf) > 0)))
+    out.append(("e07_floor, none: k_at_min_over_k10",
+                "1.40, 1.45, 1.49, 1.61, 1.54 (Linux); in [1, 3.5]; above 3.5 means maxiter cut the run before the floor",
+                ", ".join(f"N={r.N}: {r.k_at_min_over_k10:.2f}" for r in nf.itertuples()) if len(nf) else "no e07_floor rows",
+                status(len(nf) > 0 and bool(nf["k_at_min_over_k10"].between(1, 3.5).all()), "WARN", len(nf) > 0)))
     return out
 
 
@@ -268,10 +319,16 @@ def red_flags(fx, st):
     out.append(("GTH error growing like N^2 (log-log slope of max_rel_err_in_u, N >= 40)",
                 f"slope {s:.2f} (ordinary elimination grows like N^2: slope 2)", bool(s < 1.5)))
     c = rows(fx, "cg_componentwise", param=1e-14)
-    nc = c[~truthy(c["converged"])]
-    out.append(("cg_componentwise never reaching tol 1e-14",
-                "all converged" if nc.empty else
-                "; ".join(f"N={r.N} {r.kind}: final omega {r.omega:.2e}" for r in nc.itertuples()), nc.empty))
+    req = c[must_converge(c)]
+    req_nc = req[~truthy(req["converged"])]
+    other = c[~must_converge(c) & ~truthy(c["converged"])]
+    out.append(("cg_componentwise with mic0 or amg not reaching tol 1e-14 at some N, or plain CG not reaching it at "
+                "N <= 640 (smallest omega: e07_floor)",
+                ("all required runs converged" if req_nc.empty else
+                 "; ".join(f"N={r.N} {r.kind}: final omega {r.omega:.2e}" for r in req_nc.itertuples()))
+                + ("; expected, not required: " + ", ".join(f"N={r.N} {r.kind} (final omega {r.omega / U:.0f} u)"
+                                                            for r in other.itertuples()) if len(other) else ""),
+                len(req) > 0 and req_nc.empty))
     gr = g[g["N"] >= 160]
     out.append(("refinement landing on the stored solution (N >= 160): GTH, which does not use refinement, must sit "
                 "far closer to the refined reference than the data term",
@@ -283,8 +340,12 @@ def red_flags(fx, st):
                 f"random max slope {sr:.2f}, push slope {sp_:.2f}, cond_max slope {slope(st['N'], st['cond_max']):.2f}",
                 bool(sr < 0.3 and sp_ < 0.3)))
     cg = fx[fx["method"].isin(["cg", "cg_componentwise"])]
+    skip = ((cg["method"] == "cg_componentwise") & np.isclose(cg["param"], 1e-14) & (cg["kind"] == "none")
+            & (cg["N"] == 1280))
+    cg = cg[~skip]
     nc = cg[~truthy(cg["converged"])]
-    out.append(("extra: every CG row converged within maxiter", f"{len(cg) - len(nc)}/{len(cg)} rows", nc.empty))
+    out.append(("extra: every CG row converged within maxiter (excluding plain CG, tol 1e-14, N = 1280, which "
+                "stalls above the tolerance: see e07_floor)", f"{len(cg) - len(nc)}/{len(cg)} rows", nc.empty))
     return out
 
 
@@ -317,10 +378,13 @@ def main():
     st = pd.read_csv(results / "e07_structured.csv")
     fft_path = results / "e07_fft_check.csv"
     fft = pd.read_csv(fft_path) if fft_path.exists() else None
-    checks = run_checks(fx, st, fft)
+    floor_path = results / "e07_floor.csv"
+    fl = pd.read_csv(floor_path) if floor_path.exists() else None
+    checks = run_checks(fx, st, fft, fl)
     flags = red_flags(fx, st)
 
-    sources = [("e07_fixes", fx), ("e07_structured", st)] + ([("e07_fft_check", fft)] if fft is not None else [])
+    sources = [("e07_fixes", fx), ("e07_structured", st)] + ([("e07_floor", fl)] if fl is not None else []) \
+        + ([("e07_fft_check", fft)] if fft is not None else [])
     src = ", ".join(f"`{results / (name + '.csv')}` (git {df.iloc[0]['git_hash']}, {df.iloc[0]['timestamp']})"
                     for name, df in sources)
     m = fx.iloc[0]
@@ -342,6 +406,8 @@ def main():
     lines += [f"| {c} | {o} | {'yes' if ok else 'NO'} |" for c, o, ok in flags]
     lines += ["", "## Data (e07_fixes)", ""] + table(fx, "N", "signed_err_tiny")
     lines += ["", "## Data (e07_structured)", ""] + table(st, "N", "draws")
+    if fl is not None:
+        lines += ["", "## Data (e07_floor)", ""] + table(fl, "N", "final_omega_in_u")
     if fft is not None:
         lines += ["", "## Data (e07_fft_check)", ""] + table(fft, "N", "signed_err_smallest")
     lines.append("")

@@ -4,7 +4,8 @@
     and cg at rtol 1e-10 (both kind none), with the data-term line (u/4) cond_tiny and guide lines u N and u N^2.
     ir_direct's error is exactly 0 at every N (correctly rounded at N <= 80; at N >= 160 it is the reference), so
     it is drawn hollow at a floor. cg_componentwise rows that hit maxiter (omega never <= 1e-14) are drawn hollow.
-(b) against the stored solution (|err_vs_stored_tiny|): direct, cg_componentwise tol 1e-14 and cg rtol 1e-10.
+(b) against the stored solution (|err_vs_stored_tiny|): direct, cg_componentwise tol 1e-14 and cg rtol 1e-10 (kind
+    none), plus cg_componentwise tol 1e-14 with AMG (it converges at every N).
     ir_* and gth are left out: they target the true probability.
 Reads results/e07_fixes.csv only.
     python figures/f07_accuracy.py [--results DIR] [--outdir DIR]
@@ -31,12 +32,13 @@ SERIES = [
     ("cg_componentwise", 1e-14, "CG, stop at omega <= 1e-14", "#eda100", "^"),
     ("cg", 1e-10, "CG, stop at rtol 1e-10", "#e87ba4", "v"),
 ]
+AMG_COLOR = "#6250d6"  # categorical slot 7, panel (b) only (validated with that panel's other lines)
 
 
-def pick(df, method, param):
+def pick(df, method, param, kind="none"):
     d = df[df["method"] == method]
     if method.startswith("cg"):
-        d = d[d["kind"] == "none"]
+        d = d[d["kind"] == kind]
     if param is not None:
         d = d[np.isclose(d["param"], param, rtol=1e-9, atol=0)]
     return d.sort_values("N")
@@ -114,6 +116,11 @@ def main():
                       zorder=3, label=label)
             if method == "cg_componentwise":
                 mark_not_converged(ax_b, d, d["err_vs_stored_tiny"].abs(), color, marker)
+    d = pick(df, "cg_componentwise", 1e-14, kind="amg")  # converges at every N
+    if len(d):
+        ax_b.plot(d["N"], d["err_vs_stored_tiny"].abs(), color=AMG_COLOR, marker="P", markersize=7, linewidth=2,
+                  zorder=3, label="CG + AMG, stop at omega <= 1e-14")
+        mark_not_converged(ax_b, d, d["err_vs_stored_tiny"].abs(), AMG_COLOR, "P")
     ax_b.plot(Ns, U * Ns ** 2, color=INK, linewidth=1, linestyle=(0, (3, 1, 1, 1)), zorder=1, label="guide u N$^2$")
     style(ax_b, "(b) against the stored solution (what a float solver can reach)", Ns)
     ax_b.legend(frameon=False, fontsize=7.5, labelcolor=INK, loc="upper left", bbox_to_anchor=(0.35, -0.12),
