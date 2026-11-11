@@ -551,3 +551,27 @@
 - plan/c08_icm.md now cites them in fact 3, fact 4 and the "Why fourth order" paragraph (approved wording,
   wording only). The isotropy argument is labelled our heuristic, not a proof. No code, check, experiment or
   figure changed.
+
+## Chunk 6: FFT fast solver (Nov 11)
+- gr/fft_solver.py: `fft_solve(N, b)`, plus the cached helpers `_group(N)` and `_symbol(N)`.
+  - The group is a breadth-first closure of {identity} under R1, R2, R3. Keys are (L, t mod 3N).
+    The 18-element size and the 9/9 sign split are asserted.
+  - Odd extension by fancy-index `+=`. Each group element is one-to-one, so no index repeats within one g.
+  - Then `scipy.fft.rfft2` / `irfft2` with workers=1. sigma[0, 0] is set to 1 and the (0, 0) coefficient is
+    zeroed, so there is no division by zero.
+  - `_symbol` cache has maxsize 2. The experiment clears it between N to keep the N = 1600 peak down.
+  - Link to chunk 1 checked by hand: sigma at (2k + l, k + 2l) matches `gr.spectrum.eigenvalues(9)` to 2.2e-16.
+  - `pytest tests/c00_core tests/c06_fft`: 66 passed (20 new). Full `pytest -q`: 311 passed, 34 skipped.
+- experiments/e06_fft.py, spec readings:
+  - The splu timing is `splu(A.tocsc()).solve(ones)` (setup + solve). A is built once, outside the timing.
+  - min_p123 is the argmin of the splu solution. The added column `min_state` (player 1 first) records where
+    it sits, so the check can confirm it is (N-2, 1, 1).
+  - Each random b comes from a fresh `default_rng(221)` (the spec's definition), so err_vs_splu and
+    resid_random use the same b.
+  - Run as `PYTHONPATH=. python experiments/e06_fft.py` (gr is not installed), as in earlier chunks.
+- check_c06:
+  - A row whose N is missing gets its kind, never PASS. "For every N" rows need 50 ... 1600; splu rows need
+    50 ... 800.
+  - min_p123 x N^3 uses an absolute tolerance of 0.001 at every N. A read-only look before writing the check
+    gave 4.559797 at N = 50 and 4.559795 at 100-400.
+  - The timing slope is a least-squares fit of log seconds_fft on log n over N = 200 ... 1600.
