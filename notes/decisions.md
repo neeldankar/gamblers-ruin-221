@@ -309,3 +309,28 @@
   - check_c02's expected text for err_over_kappa_u still says 0.10-0.25. The spec did not list check_c02, so
     it is unchanged; its tolerance [0.02, 1] is the same either way.
 
+- Results (git 0328a23; e04_condition 11 s, e04_errors 3.7 min, e04_mechanism 41 s on 1 thread):
+  33 PASS, 0 WARN, 1 FAIL; the only red flag is the data-term flag below.
+  - data_term_tiny = -(u/4) cond_tiny to 2.2e-16 relative at every N, and data_term_over_N2u -> -0.09709.
+  - The solvers' own error at the tiny entry (exact reference, N <= 80) is 8.5e-17 to 2.5e-14. At N = 80
+    that is -2.5e-14 for CHOLMOD and +2.3e-14 for SuperLU, against a data term of -6.9e-14. Every solver-only
+    error at N = 40 and 80 is below the data term.
+  - aposteriori_bound: 1.5e-11 (160), 8.1e-11 (320), 3.8e-10 (640), 1.8e-9 (1280). Up to rounding these are
+    the spec's values.
+  - (N3_x_tiny - C) N^4 = 34.325, 34.374, 34.317 at N = 80, 160, 320.
+  - CG none, rtol 1e-6, N = 1280 gives a negative probability: -4.18e-9.
+  - e04_mechanism:
+    - Its out_first_3 rows match e04_errors exactly.
+    - g_norm = 1.17023 in all 40 rows; the smallest state is (1, 1, N-2) for all four right-hand sides.
+    - abs_err_smallest is 4.5e-5 to 0.022 of g_norm ||r||_2. That is wider than the spec's "observed 5e-4 to
+      1.5e-2", but the row's test (the bound holds) passes.
+    - Ratios at N = 640 are exactly the spec's: land_mid 34-48, land_quarter 440 to 8.0, order_321 10.3 to
+      0.385. The median over all states is 1.8e-4 to 4.0e-4.
+    - At N = 640, rtol 1e-10, the absolute error is 5e-13 at the corner, 1.9e-10 at the median and 1.6e-9 at
+      the maximum.
+- FAIL (for the Project chat): the data_term_tiny row, through rounding in the spec's listed values only.
+  - The measured -1.1038e-12 (320), -4.4153e-12 (640) and -1.7661e-11 (1280) sit 3.4e-3, 1.1e-3 and 2.2e-3
+    from the 3-figure values -1.10e-12, -4.42e-12 and -1.77e-11.
+  - N <= 160 agree to 3e-4 or better. Matching the information-only line, the column agrees with the exact
+    prediction -(u/4) cond_tiny to 2.2e-16.
+  - Suggested fix: list N = 320, 640, 1280 to 5 figures (-1.1038e-12, -4.4153e-12, -1.7661e-11).
