@@ -15,9 +15,8 @@ story you should be able to tell after this chunk:
 1. With the natural (lexicographic) order the factor fills its whole envelope:
    nnz(L) = n + (N-3) + (N-1)(N-2)(N-3)/3, which is about (2/3) of the band and grows like n^{3/2}.
    Flops grow like n^2.
-2. Fill-reducing orders (minimum degree, nested dissection) cut fill to n log n (George 1973);
-   the fitted exponent 1.1 is a local slope
-   and flops to n^{3/2} (George's nested dissection theorem for 2D meshes).
+2. Fill-reducing orders (minimum degree, nested dissection) cut fill to n log n (George 1973; the fitted exponent
+   1.1 is a local slope) and flops to n^{3/2}.
 3. Every method is backward stable (backward error a few u), and the forward error grows like
    kappa_inf * u, 0.07 to 0.33 kappa_inf u here. Of this, (3/16 - 27/(16 N^2)) kappa_inf u is not solver error:
    it is the rounding of 1/6 in the stored matrix, identical for every solver, because A^{-1} t = t (1 + e2)/4

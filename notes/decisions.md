@@ -310,7 +310,9 @@
     it is unchanged; its tolerance [0.02, 1] is the same either way.
 
 - Results (git 0328a23; e04_condition 11 s, e04_errors 3.7 min, e04_mechanism 41 s on 1 thread):
-  33 PASS, 0 WARN, 1 FAIL; the only red flag is the data-term flag below.
+  32 PASS, 0 WARN, 1 FAIL; the only red flag is the data-term flag below. (The commit message of
+  083d5ab says "33 PASS": that was my miscount. There are 33 rows: 19 from chunk 4 plus 14 new, because
+  the spec's aposteriori_bound row renames an existing row.)
   - data_term_tiny = -(u/4) cond_tiny to 2.2e-16 relative at every N, and data_term_over_N2u -> -0.09709.
   - The solvers' own error at the tiny entry (exact reference, N <= 80) is 8.5e-17 to 2.5e-14. At N = 80
     that is -2.5e-14 for CHOLMOD and +2.3e-14 for SuperLU, against a data term of -6.9e-14. Every solver-only
@@ -334,3 +336,28 @@
   - N <= 160 agree to 3e-4 or better. Matching the information-only line, the column agrees with the exact
     prediction -(u/4) cond_tiny to 2.2e-16.
   - Suggested fix: list N = 320, 640, 1280 to 5 figures (-1.1038e-12, -4.4153e-12, -1.7661e-11).
+
+
+## Plan: 4b cleanups and chunk 7 revision (Nov 10)
+- The Project chat sanity-checked the chunk 4b report and approved these edits; I made exactly these.
+  1. data_term_tiny row: N = 320, 640, 1280 are now printed as -1.1038e-12, -4.4153e-12, -1.7661e-11, with
+     the tolerance unchanged (1e-3 relative). The mechanism bound row now reads "observed 4.5e-5 to 2.2e-2".
+     - Both rows were edited in plan/c04b_review_fixes.md and also in plan/c04_accuracy.md, which holds copies
+       of the same rows (the user confirmed this).
+     - Mirrored in check_c04.py (DATA_TERM_REF and the expected-text strings).
+  2. plan/c02_direct.md story point 2 now reads: "Fill-reducing orders (minimum degree, nested dissection) cut
+     fill to n log n (George 1973; the fitted exponent 1.1 is a local slope) and flops to n^{3/2}." The old
+     "(George's nested dissection theorem for 2D meshes)" is gone, as in the approved text.
+  3. plan/c04_accuracy.md (e04_errors spec): "trusted to its certified bound" became "a direct solve of the
+     stored system; its own error is about the size of the data term". No "certified" is left in that file.
+  4. check_c02.py: the expected text for err_over_kappa_u is now "0.07-0.33", with tolerances unchanged.
+  5. plan/c07_fixes.md was replaced by the revised spec from the Project chat (moved, no copy left behind).
+     The revision reports every chunk 7 result against both the stored solution and the true probability,
+     and adds data_term_tiny and err_vs_stored_* columns and rows.
+     - tests/c07_fixes/ was not part of this change. Before chunk 7, check that its tests still fit the
+       revised spec.
+- Reran only the checks, on the same CSVs (no experiment was rerun).
+  - check_c04: 33 PASS, 0 WARN, 0 FAIL, no red flags. data_term_tiny now agrees with the listed values to 3e-4
+    or better at every N.
+  - check_c02: unchanged except for the expected text. err_over_kappa_u is 0.074 to 0.326, PASS.
+

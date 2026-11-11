@@ -16,7 +16,7 @@ Source: `results/e02_direct.csv` (git 7cd1f96, 2026-11-09T22:33:06, macOS-15.6.1
 | nnz at N = 1200: amd / metis | 1.40, in [1.15, 1.65] | 1.401 | PASS |
 | nnz at N = 1200: (MMD_AT_PLUS_A / 2) / metis | 0.98, in [0.85, 1.15] | 0.979 | PASS |
 | nnz at N = 1200: (COLAMD / 2) / metis | 2.41, in [1.8, 3.0] | 2.412 | PASS |
-| err_over_kappa_u, every row with N >= 100 | 0.10-0.25; in [0.02, 1] WARN; above 10 FAIL | 0.074 to 0.326 over 44 rows (0 outside [0.02, 1]; max at N = 400 splu NATURAL) | PASS |
+| err_over_kappa_u, every row with N >= 100 | 0.07-0.33; in [0.02, 1] WARN; above 10 FAIL | 0.074 to 0.326 over 44 rows (0 outside [0.02, 1]; max at N = 400 splu NATURAL) | PASS |
 | backward_error, every row | 2-15 u (2e-16 to 2e-15); above 50 u WARN; above 1e-13 FAIL | 1.62e-16 to 2.63e-15 = 1.5 to 23.7 u over 64 rows | PASS |
 | solve_time / setup_time, splu and cholmod, N >= 400 | 0.01-0.04, below 0.1 | 0.0061 to 0.0925 over 24 rows (max at N = 400 cholmod natural) | PASS |
 | setup_time, cholmod amd, N = 1200 | about 11 s on the reference, 2-30 s | 1.95 s | WARN |

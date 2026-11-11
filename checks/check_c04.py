@@ -42,8 +42,8 @@ N3_REF = {10: 9.122614, 20: 9.119797, 40: 9.119602, 80: 9.119590}  # N >= 160: 9
 COND_REF = {20: 0.3846, 40: 0.3874, 80: 0.3881, 160: 0.3883, 320: 0.3884, 640: 0.3884}
 CG_REF = {1e-10: {20: 2.1e-8, 40: 3.7e-8, 80: 2.5e-8, 160: 6.8e-7, 320: 5.8e-6, 640: 1.4e-5},
           1e-14: {160: 7e-12, 320: 4e-10, 640: 1.6e-9}}
-DATA_TERM_REF = {10: -1.036e-15, 20: -4.270e-15, 40: -1.7206e-14, 80: -6.895e-14, 160: -2.76e-13, 320: -1.10e-12,
-                 640: -4.42e-12, 1280: -1.77e-11}
+DATA_TERM_REF = {10: -1.036e-15, 20: -4.270e-15, 40: -1.7206e-14, 80: -6.895e-14, 160: -2.76e-13, 320: -1.1038e-12,
+                 640: -4.4153e-12, 1280: -1.7661e-11}
 MECH_RTOLS = [1e-6, 1e-8, 1e-10, 1e-12, 1e-14]
 
 
@@ -252,8 +252,8 @@ def checks_4b(of3, err, mech):
     # 4b-1. data_term_tiny against the listed values
     devs = data_term_devs(of3)
     out.append(("data_term_tiny (e04_condition, out_first_3)",
-                "-1.036e-15 (10), -4.270e-15 (20), -1.7206e-14 (40), -6.895e-14 (80), -2.76e-13 (160), -1.10e-12 (320), "
-                "-4.42e-12 (640), -1.77e-11 (1280); 1e-3 relative",
+                "-1.036e-15 (10), -4.270e-15 (20), -1.7206e-14 (40), -6.895e-14 (80), -2.76e-13 (160), -1.1038e-12 (320), "
+                "-4.4153e-12 (640), -1.7661e-11 (1280); 1e-3 relative",
                 ", ".join(f"N={N}: {of3.loc[N, 'data_term_tiny']:.5g} ({devs[N]:+.1e})" for N in devs) if devs else "no rows",
                 status(len(devs) == len(DATA_TERM_REF) and all(abs(v) <= 1e-3 for v in devs.values()), "FAIL",
                        bool(devs))))
@@ -312,7 +312,7 @@ def checks_4b(of3, err, mech):
     # 4b-8. the rigorous bound abs_err <= g_norm ||r||
     frac = mech["abs_err_smallest"] / mech["residual_bound_abs"]
     out.append(("mechanism: abs_err_smallest <= residual_bound_abs, every row",
-                "holds (observed 5e-4 to 1.5e-2 of the bound); 1e-6 relative slack",
+                "holds (observed 4.5e-5 to 2.2e-2 of the bound); 1e-6 relative slack",
                 f"abs_err / bound {frac.min():.2g} to {frac.max():.2g} over {len(mech)} rows" if len(mech) else "no rows",
                 status(len(mech) > 0 and bool((frac <= 1 + 1e-6).all()), "FAIL", len(mech) > 0)))
 

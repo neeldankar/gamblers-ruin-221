@@ -23,14 +23,14 @@ Sources: `results/e04_condition.csv` (git 0328a23, 2026-11-10T21:06:49), `result
 | CG none, rtol 1e-14 reached (converged) for N <= 1280 | yes up to N = 640 (1331 iterations); N = 1280 not measured | N=20: yes (41), N=40: yes (85), N=80: yes (170), N=160: yes (339), N=320: yes (670), N=640: yes (1331), N=1280: yes (2623) | PASS |
 | worst-case perturbation ratio | 1.00000 for eps <= 1e-8; up to 1.0015 at eps = 1e-6, N = 80; within 1e-3 for eps <= 1e-8 | eps <= 1e-8: max |ratio - 1| 1.5e-05 over 8 rows; eps = 1e-6: 1.00001 to 1.00149 | PASS |
 | random perturbation max ratio | 0.24-0.39; below 1 + 1e-3 | 0.240 to 0.394 over 12 rows | PASS |
-| data_term_tiny (e04_condition, out_first_3) | -1.036e-15 (10), -4.270e-15 (20), -1.7206e-14 (40), -6.895e-14 (80), -2.76e-13 (160), -1.10e-12 (320), -4.42e-12 (640), -1.77e-11 (1280); 1e-3 relative | N=10: -1.0362e-15 (+2.3e-04), N=20: -4.2702e-15 (+4.5e-05), N=40: -1.7206e-14 (-1.4e-05), N=80: -6.8948e-14 (-2.9e-05), N=160: -2.7592e-13 (-3.0e-04), N=320: -1.1038e-12 (+3.4e-03), N=640: -4.4153e-12 (-1.1e-03), N=1280: -1.7661e-11 (-2.2e-03) | FAIL |
+| data_term_tiny (e04_condition, out_first_3) | -1.036e-15 (10), -4.270e-15 (20), -1.7206e-14 (40), -6.895e-14 (80), -2.76e-13 (160), -1.1038e-12 (320), -4.4153e-12 (640), -1.7661e-11 (1280); 1e-3 relative | N=10: -1.0362e-15 (+2.3e-04), N=20: -4.2702e-15 (+4.5e-05), N=40: -1.7206e-14 (-1.4e-05), N=80: -6.8948e-14 (-2.9e-05), N=160: -2.7592e-13 (-3.0e-04), N=320: -1.1038e-12 (-6.9e-06), N=640: -4.4153e-12 (-1.2e-06), N=1280: -1.7661e-11 (+1.7e-05) | PASS |
 | data_term_over_N2u | tends to -0.0971 (= -cond_tiny / (4 N^2)); within 1% for N >= 80 | N=10: -0.09334, N=20: -0.09616, N=40: -0.09686, N=80: -0.09704, N=160: -0.09708, N=320: -0.09709, N=640: -0.09709, N=1280: -0.09709 | PASS |
 | exact-reference direct rows: abs(solver_err_tiny) | 4e-17 to 2.5e-14 (N = 80: +2.1e-14 SuperLU, -1.1e-14 CHOLMOD on Linux); below 5e-14 | 8.5e-17 to 2.5e-14 over 9 rows; N=20 cholmod: +4.7e-16, N=20 splu: +8.5e-17, N=20 banded: +2.9e-15, N=40 cholmod: -3.9e-15, N=40 splu: +2e-15, N=40 banded: +3.1e-15, N=80 cholmod: -2.5e-14, N=80 splu: +2.3e-14, N=80 banded: +6.6e-16 | PASS |
 | exact-reference direct rows, N = 40 and 80: abs(solver_err_tiny) < abs(data_term_tiny) | yes | N=40 cholmod: 3.9e-15 vs 1.7e-14, N=40 splu: 2e-15 vs 1.7e-14, N=40 banded: 3.1e-15 vs 1.7e-14, N=80 cholmod: 2.5e-14 vs 6.9e-14, N=80 splu: 2.3e-14 vs 6.9e-14, N=80 banded: 6.6e-16 vs 6.9e-14 | PASS |
 | (N3_x_tiny - C) N^4, N = 80, 160, 320 | 34.32, 34.37, 34.32 (true values 34.325, 34.375, 34.388; the last is already bent by the solver's bias); in [34.2, 34.5] | N=80: 34.325, N=160: 34.374, N=320: 34.317 (C = 9.11958899992) | PASS |
 | CG none, rtol 1e-6, N = 1280: value_tiny | negative (-4.18e-9 for a probability of +4.35e-9); negative | -4.18e-09 (relative error 1.96) | PASS |
 | mechanism: out_first_3 rows vs e04_errors (same N, rtol) | same rel_err at the tiny entry; 1% | max relative difference 0.0e+00 over 10 (N, rtol) pairs | PASS |
-| mechanism: abs_err_smallest <= residual_bound_abs, every row | holds (observed 5e-4 to 1.5e-2 of the bound); 1e-6 relative slack | abs_err / bound 4.5e-05 to 0.022 over 40 rows | PASS |
+| mechanism: abs_err_smallest <= residual_bound_abs, every row | holds (observed 4.5e-5 to 2.2e-2 of the bound); 1e-6 relative slack | abs_err / bound 4.5e-05 to 0.022 over 40 rows | PASS |
 | mechanism: g_norm, every row | 1.1702; 1e-3 | 1.17023 to 1.17023 over 40 rows (smallest states: (1, 1, 318), (1, 1, 638)) | PASS |
 | mechanism: land_mid ratio_to_cond_rtol, N = 640 | 34, 48, 16, 18, 13 for rtol 1e-6 ... 1e-14; each in [3, 150] | 34.3, 48.2, 16.1, 18.3, 12.9 (rtol 1e-6 ... 1e-14) | PASS |
 | mechanism: land_quarter ratio, N = 640 | 440, 12, 24, 8.0, 18; each above 3 | 440, 12.3, 23.7, 8.04, 18.1 (rtol 1e-6 ... 1e-14) | PASS |
@@ -38,7 +38,7 @@ Sources: `results/e04_condition.csv` (git 0328a23, 2026-11-10T21:06:49), `result
 | mechanism: out_first_3 median_ratio_all_states, N = 640 | 4.0e-4, 1.8e-4, 1.9e-4 at rtol 1e-8, 1e-10, 1e-12; below 0.01 | rtol 1e-08: 0.0004, rtol 1e-10: 0.00018, rtol 1e-12: 0.00019 | PASS |
 | mechanism: out_first_3, N = 640, rtol 1e-10: absolute errors | corner 5.0e-13, median 1.9e-10, max 1.6e-9; corner below median | corner 5e-13, median 1.9e-10, max 1.6e-09 | PASS |
 
-Summary: 32 PASS, 0 WARN, 1 FAIL.
+Summary: 33 PASS, 0 WARN, 0 FAIL.
 
 ## Red flags (automatic checks of the spec's list)
 
@@ -48,7 +48,7 @@ Summary: 32 PASS, 0 WARN, 1 FAIL.
 | cond_tiny grows like N^2 (fitted exponent over N >= 160 in [1.95, 2.05]) and argmax cond at (1, 1, N-2) | exponent 2.0001; argmax off the tiny state at 0 rows | yes |
 | worst-case ratio not 1 (eps <= 1e-8, beyond 1e-3) | max |ratio - 1| 1.5e-05 | yes |
 | CG converged to rtol 1e-14 with componentwise backward error near u (read: below 100 u, N >= 80) | componentwise omega 253 u to 2.19e+07 u over 15 converged rows (min: N = 80 mic0) | yes |
-| data_term_tiny off by more than 1e-3 from the listed values | N=10: +2.3e-04, N=20: +4.5e-05, N=40: -1.4e-05, N=80: -2.9e-05, N=160: -3.0e-04, N=320: +3.4e-03, N=640: -1.1e-03, N=1280: -2.2e-03 | NO |
+| data_term_tiny off by more than 1e-3 from the listed values | N=10: +2.3e-04, N=20: +4.5e-05, N=40: -1.4e-05, N=80: -2.9e-05, N=160: -3.0e-04, N=320: -6.9e-06, N=640: -1.2e-06, N=1280: +1.7e-05 | yes |
 | info: data_term_tiny vs the exact prediction -(u/4) cond_tiny (no printed digits involved; within 1e-12 relative) | max relative deviation 2.2e-16 over 8 N | yes |
 | a solver-only error larger than the data term at N = 80 (tiny entry, direct rows) | cholmod: 2.5e-14 vs 6.9e-14, splu: 2.3e-14 vs 6.9e-14, banded: 6.6e-16 vs 6.9e-14 | yes |
 | rigorous bound abs_err_smallest <= g_norm ||r||_2 violated (e04_mechanism) | largest abs_err / bound 0.022 over 40 rows | yes |

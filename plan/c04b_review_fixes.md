@@ -173,7 +173,7 @@ right-hand side and at typical states (N = 320).
 
 | Check | Expected | Tolerance | Kind |
 |---|---|---|---|
-| data_term_tiny (e04_condition, out_first_3) | -1.036e-15 (10), -4.270e-15 (20), -1.7206e-14 (40), -6.895e-14 (80), -2.76e-13 (160), -1.10e-12 (320), -4.42e-12 (640), -1.77e-11 (1280) | 1e-3 relative | FAIL |
+| data_term_tiny (e04_condition, out_first_3) | -1.036e-15 (10), -4.270e-15 (20), -1.7206e-14 (40), -6.895e-14 (80), -2.76e-13 (160), -1.1038e-12 (320), -4.4153e-12 (640), -1.7661e-11 (1280) | 1e-3 relative | FAIL |
 | data_term_over_N2u | tends to -0.0971 (= -cond_tiny / (4 N^2)) | within 1% for N >= 80 | FAIL |
 | exact-reference direct rows: abs(solver_err_tiny) | 4e-17 to 2.5e-14 (N = 80: +2.1e-14 SuperLU, -1.1e-14 CHOLMOD on Linux) | below 5e-14 | WARN |
 | exact-reference direct rows, N = 40 and 80: abs(solver_err_tiny) < abs(data_term_tiny) | yes | | WARN |
@@ -181,7 +181,7 @@ right-hand side and at typical states (N = 320).
 | (N3_x_tiny - C) N^4, N = 80, 160, 320 | 34.32, 34.37, 34.32 (true values 34.325, 34.375, 34.388; the last is already bent by the solver's bias) | in [34.2, 34.5] | WARN |
 | CG none, rtol 1e-6, N = 1280: value_tiny | negative (-4.18e-9 for a probability of +4.35e-9) | negative | WARN |
 | mechanism: out_first_3 rows vs e04_errors (same N, rtol) | same rel_err at the tiny entry | 1% | FAIL |
-| mechanism: abs_err_smallest <= residual_bound_abs, every row | holds (observed 5e-4 to 1.5e-2 of the bound) | 1e-6 relative slack | FAIL |
+| mechanism: abs_err_smallest <= residual_bound_abs, every row | holds (observed 4.5e-5 to 2.2e-2 of the bound) | 1e-6 relative slack | FAIL |
 | mechanism: g_norm, every row | 1.1702 | 1e-3 | FAIL |
 | mechanism: land_mid ratio_to_cond_rtol, N = 640 | 34, 48, 16, 18, 13 for rtol 1e-6 ... 1e-14 | each in [3, 150] | WARN |
 | mechanism: land_quarter ratio, N = 640 | 440, 12, 24, 8.0, 18 | each above 3 | WARN |

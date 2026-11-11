@@ -9,19 +9,32 @@
 
 ## Goal
 
-Chunk 4 showed that normwise stopping misses the tiny probabilities. This chunk builds and measures three
-fixes, and explains why the third one works so well:
+Chunk 4 (with 4b) showed that normwise stopping misses the tiny probabilities, and that every float solver
+works on the stored matrix, whose exact solution is already off from the true probability by the data term
+-(u/4) cond_i = -0.097 N^2 u at the tiny entry (chunk 4b). So there are two targets, and every result here is
+reported against both:
+- **the stored solution** x_stored (what a float solver can reach at best), approximated by
+  x_ref (1 + data_error_term(x_ref)); and
+- **the true probability** x_true (the ideal rational system: `flint_solve` for N <= 80, refinement with the
+  exact integer residual above).
+
+This chunk builds and measures three fixes:
 
 1. **Componentwise stopping.** Stop CG when the Oettli-Prager backward error of the true residual is below a
-   tolerance. CG can reach omega of about 1e-15 here, so the tiny entry ends up as accurate as with a direct
-   solve, for 1.3 to 2 times the iterations of the usual rtol 1e-10 rule.
-2. **Iterative refinement with an accurate residual.** 6N A and 6N b are integers, so b - A x can be computed
-   to one rounding per entry with error-free transformations. Two refinement steps after a direct solve (or
-   four with a sloppy rtol 1e-6 CG inner solve) give every entry correctly rounded: error 0 against exact
-   rationals.
+   tolerance. CG can reach omega of 10 to 70 u here. At tol 1e-14 the tiny entry ends up closer to the stored
+   solution than CHOLMOD is (3e-14 against 1.5e-13 at N = 160; about 5e-13 against 2.2e-12 at N = 640), for
+   1.3 to 2 times the iterations of the usual rtol 1e-10 rule. Against the true probability both are limited by
+   the data term.
+2. **Iterative refinement with an exact residual.** 6N A and 6N b are integers that stand for the ideal system,
+   so b - A x computed from them with error-free transformations is the residual of the true problem, not of
+   the stored one. Refinement therefore removes the data error as well as the solver error: two steps after a
+   direct solve (or four with a sloppy rtol 1e-6 CG inner solve) give every entry correctly rounded, error 0
+   against exact rationals.
 3. **GTH elimination.** Compute each pivot as (row sum) + (minus the off-diagonals) instead of by subtraction.
-   Every entry comes out to about 0.3 N u (34 u at N = 80, 120 u at N = 400) against about 0.07 N^2 u for
-   ordinary elimination.
+   Every entry comes out to about 0.3 N u of the true probability (34 u at N = 80, 120 u at N = 400) against
+   about 0.07 N^2 u for ordinary elimination. GTH is also nearly immune to the rounding of 1/6: storing 1/6 low
+   scales the off-diagonals, the row sums and b by the same factor (up to a rounding of size u in a few row
+   sums), and that common factor cancels in the solution.
 
 Why 3 works: perturb the off-diagonal entries, the row sums and b relatively by eps, and the solution entries
 move by only about 2 to 5 eps, at every N. The componentwise condition number from chunk 4 (0.39 N^2) measures
@@ -63,14 +76,18 @@ the CHOLMOD nesdis solve ("refined"; it is correctly rounded at N <= 80, which t
 `direct` (CHOLMOD nesdis), `gth` (N <= 640), `cg` at rtol 1e-10 and `cg_componentwise` at tol 1e-12 and 1e-14 for
 kinds none (check_every 10), mic0 (5) and amg (1), `ir_direct`, `ir_cg_mic0` and `ir_cg_amg` (inner CG at rtol
 1e-6, max_steps 15). Columns: `N, method, kind, param, iterations_or_steps, seconds, reference, rel_err_tiny,
-max_rel_err, max_rel_err_in_u, omega, cond_tiny`. `--quick`: N in {20, 40}.
+max_rel_err, max_rel_err_in_u, omega, cond_tiny, data_term_tiny, err_vs_stored_tiny, max_err_vs_stored`.
+rel_err_* and max_rel_err are against the true probability (the reference). data_term_tiny =
+`data_error_term(x_ref, solve)` at the tiny state; the stored solution is x_ref (1 + data_error_term(x_ref, solve))
+(first order in 2^-54, accurate to about u); err_vs_stored_* are relative errors against it. `--quick`: N in {20, 40}.
 
 `experiments/e07_fft_check.py` -> `results/e07_fft_check.csv` (needs chunk 6's `gr.fft_solver`; skip with a
 message if it is missing). Chunk 6 found that for b = rhs_order(S, 0, 1, 2) (order 123) the FFT and splu
 disagree at the smallest entry, the state (N-2, 1, 1), by 6e-7 to 2e-6 at N = 800. Settle which one is off:
 for N in {50, 100, 200, 400, 800}, compare `fft_solve`, splu (COLAMD) and CHOLMOD against `ir_direct` (and
 against `flint_solve` for N <= 60) at that state and over all entries. Columns: `N, method, rel_err_smallest,
-max_rel_err, normwise_rel_err`.
+max_rel_err, normwise_rel_err, data_term_smallest`. Note: the data term for an order right-hand side is the same
+-2^-54 E_i[T | event] plus a rounding of size u (chunk 4b), so splu should sit near it.
 
 `experiments/e07_structured.py` -> `results/e07_structured.csv`. N in {10, 20, 40, 80, 160}, eps = 1e-8:
 (a) 20 random structured perturbations: each off-diagonal entry, each row sum and each b_i multiplied by
@@ -79,8 +96,11 @@ record max_i |x'_i - x_i| / x_i / eps over all trials; (b) the structured push: 
 times (1 + eps); (c) for comparison, cond_max from chunk 4's entry_condition. Columns: `N, n,
 structured_random_max, structured_push, cond_max, two_n_minus_1`.
 
-Figures: `figures/f07_accuracy.py` (max_rel_err_in_u vs N for direct, gth, ir_*, cg_componentwise, log-log, with
-guide lines u N and u N^2); `figures/f07_structured.py` (structured ratios vs cond_max against N).
+Figures: `figures/f07_accuracy.py`, two panels: (a) error at the tiny entry against the true probability vs N
+for direct, gth, ir_direct, cg_componentwise (tol 1e-14) and cg (rtol 1e-10), log-log, with the data-term line
+(u/4) cond_tiny and guide lines u N and u N^2; (b) the same methods against the stored solution
+(err_vs_stored_tiny), without ir_* and gth (they target the true probability). `figures/f07_structured.py`
+(structured ratios vs cond_max against N).
 
 ## Acceptance tests
 
@@ -100,14 +120,17 @@ CG stopping rule.
 | ir_direct steps | 2 | at most 3 | WARN |
 | ir_cg_mic0 and ir_cg_amg steps | 4 | at most 8 | WARN |
 | gth max_rel_err_in_u | 8 (20), 12 (40), 25 (60), 34 (80), 46 (160), 120 (400) | below N; above 10 N is FAIL | WARN/FAIL |
-| direct max_rel_err_in_u / N^2 | about 0.07 (39 u at 20, 267 u at 60, 431 u at 80, 8018 u at 400) | in [0.02, 0.2] | WARN |
-| gth beats direct by N/4 or more, N >= 80 | yes | | WARN |
+| direct max_rel_err_in_u / N^2 (against the true probability; mostly the data term) | about 0.07 (39 u at 20, 267 u at 60, 431 u at 80, 8018 u at 400) | in [0.02, 0.2] | WARN |
+| direct err_vs_stored_tiny (the solver's own error) | -1.1e-14 (80), +1.5e-13 (160), +5.9e-13 (320), +2.3e-12 (640), +8.5e-12 (1280): about +0.05 N^2 u, opposite in sign to the data term | absolute value below 0.2 N^2 u | WARN |
+| data_term_tiny | as in chunk 4b: -6.895e-14 (80), -2.7592e-13 (160), -1.1038e-12 (320), -4.4153e-12 (640), -1.7661e-11 (1280) | 1e-3 relative | FAIL |
+| gth beats direct (true probability), N >= 80 | by a factor growing with N: 13 at N = 80, 67 at N = 400 | gth smaller at every N >= 80 | WARN |
 | cg rtol 1e-10, kind none: rel_err_tiny | 5e-8 (60), 6.8e-7 (160), 1.4e-5 (640) | as in chunk 4 | WARN |
-| cg_componentwise tol 1e-14: rel_err_tiny | 4e-14 to 6e-14 (60), 3e-13 (160), 5e-12 (640) | below cond_tiny * tol | FAIL |
+| cg_componentwise tol 1e-14: rel_err_tiny (true probability) | 4e-14 to 6e-14 (60), 3e-13 (160), 5e-12 (640): at N >= 160 this is the data term | below cond_tiny * tol | FAIL |
+| cg_componentwise tol 1e-14: err_vs_stored_tiny, N >= 160 | 3e-14 (160), 1e-13 (320), about 5e-13 (640) | below the direct solver's err_vs_stored_tiny at the same N | WARN |
 | cg_componentwise iterations / cg rtol 1e-10 iterations | none 1.3-1.5, mic0 1.5-1.8, amg 1.4-2.2 | in [1.1, 2.5] | WARN |
 | cg_componentwise tol 1e-14 converged, every N up to 1280 | yes | | WARN |
 | ir_direct seconds minus direct seconds at N = 640 | about 0.1 s (factor 2.2 s) | under 50% of the factor time | WARN |
-| e07_fft_check: which solver is off at (N-2, 1, 1) | expected: the FFT (normwise accurate only), splu within about 0.07 N^2 u of ir_direct | | WARN |
+| e07_fft_check: which solver is off at (N-2, 1, 1) | expected: the FFT (normwise accurate only); splu within about 0.1 N^2 u of ir_direct, and near data_term_smallest | | WARN |
 | e07_fft_check: FFT rel_err_smallest at N = 800 | about 1e-6 (chunk 6's disagreement) | | WARN |
 | structured_random_max | 1.5-2.4 at every N | below 10 | FAIL |
 | structured_push | 3.9, 4.3, 4.5, 4.6 (N = 10 ... 80) | below 10 | WARN |
@@ -120,6 +143,8 @@ CG stopping rule.
 - GTH error growing like N^2: some step is subtracting (usually the diagonal is being updated instead of
   recomputed from the row sum).
 - cg_componentwise never reaching tol 1e-14: that would change the story; report the smallest omega reached.
+- Refinement landing on the stored solution instead of the true one (error near data_term_tiny at N >= 160):
+  the residual is being computed from the stored A, not from the integer system.
 - A structured ratio growing with N.
 
 ## Done when

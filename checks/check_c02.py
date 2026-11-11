@@ -135,7 +135,7 @@ def run_checks(df):
     worst = d.loc[e.idxmax()] if len(d) else None
     status = "FAIL" if (not len(d) or (e > 10).any()) else ("PASS" if e.between(0.02, 1).all() else "WARN")
     n_out = int((~e.between(0.02, 1)).sum())
-    out.append(("err_over_kappa_u, every row with N >= 100", "0.10-0.25; in [0.02, 1] WARN; above 10 FAIL",
+    out.append(("err_over_kappa_u, every row with N >= 100", "0.07-0.33; in [0.02, 1] WARN; above 10 FAIL",
                 f"{e.min():.3f} to {e.max():.3f} over {len(d)} rows ({n_out} outside [0.02, 1]; max at N = "
                 f"{int(worst['N'])} {worst['method']} {worst['ordering']})" if len(d) else "no rows", status))
 
