@@ -508,3 +508,33 @@
     estimate. The effect is within the tolerances. Not fixed: it would need a pyamg seed in gr/krylov.py.
 - check_c07 (only the check was rerun; e07_fixes and e07_structured are unchanged): 22 PASS, 2 WARN, 0 FAIL,
   no red flags. The two WARNs are the e07_fft_check rows (chunk 6 not built).
+
+## Chunk 8: ICM application (Nov 11)
+- gr/icm.py: `icm_orders`, `place_probabilities`, `equity`, plus `ORDERS`. Labels as in gr.matrix: "ijk" = i out
+  first, k wins. The docstring carries the two-line proof of the equity identity.
+  `pytest tests/c00_core tests/c08_icm`: 80 passed (34 new).
+- Spec readings in experiments/e08_icm.py:
+  - States in e08_icm_errors are sorted strings "a-b-c". e08_wikipedia keeps player 1 first ("198-1-1").
+  - max_rel_err_p3 is unsigned, |P_ICM(3rd) - P(3rd)| / P(3rd). The ICM overrates it, so the sign is +.
+  - Maxima are over all three players: `np.argmax` on (3, n) arrays. Ties would go to the first in C order.
+    The spec gives runner-up gaps of at least 1.3e-6, so this does not matter.
+  - frac_middle_overrated: the denominator is the number of states with three distinct stacks.
+  - `seconds` in e08_icm_errors covers the solve plus the analysis. In e08_limit it is the solve only.
+  - e08_states_N120 is also written under --quick, so the chunk 11 pipeline can draw f08_icm_map from quick
+    results.
+  - PUBLISHED is copied into the experiment from the test file, not imported (experiments do not import tests).
+- check_c08: a row whose listed N is missing gets the row's kind, never PASS. So a --quick results folder
+  shows FAIL on the per-N rows; that is the intended behaviour.
+- f08_limit: orders with the same winner k sum to x_k/N, the same at every N, so their |P(N) - P(N/2)| are
+  equal and the lines coincide. The second order of each pair is drawn dashed with hollow markers and labelled
+  "same as". The six colors are categorical slots 1-6. They pass the validator's adjacent-pair gates; three are
+  below 3:1 contrast, so each series also gets its own marker shape and the data is in the report.
+- f08_icm_map: barycentric triangle, `tripcolor` (gouraud) on the lattice. Blue-gray-red diverging, symmetric
+  about 0. The zero contour is dashed, and the extreme over- and underrate states are marked.
+- Full run (git b9c10ec, 7 s in total, 1 thread): check_c08 gives 18 PASS, 0 WARN, 0 FAIL, no red flags.
+  - Every value matches the spec to well inside its tolerance. max_abs_err_p2 rises 0.035889 -> 0.036050.
+  - obs_order is 3.998-4.000 at N = 320 and 3.979-4.030 at N = 640 (rounding shows there, as the spec says).
+  - The N = 640 solve took 3.8 s.
+  - identity_max_dev grows about 4x per doubling of N: 2.3e-13 (30) to 3.8e-11 (480). It is a rounding residue
+    of differences of O(1) sums, still under the 1e-10 limit at 480, but would pass it near N = 960. Fine for
+    the spec's N list; worth knowing if chunk 10 reuses it at larger N.
