@@ -575,3 +575,9 @@
   - min_p123 x N^3 uses an absolute tolerance of 0.001 at every N. A read-only look before writing the check
     gave 4.559797 at N = 50 and 4.559795 at 100-400.
   - The timing slope is a least-squares fit of log seconds_fft on log n over N = 200 ... 1600.
+- Results (full run, git 84eec92, 63 s wall, peak RSS 1.4 GB): check_c06 gives 10 PASS, 0 WARN, 0 FAIL, and no
+  red flags.
+  - fwd_err_over_eps_kappa 0.017-0.37. resid_random up to 3.1e-12 at N = 1600. err_vs_splu 0.08-0.16 eps k2.
+  - FFT 1.89 s at N = 1600, timing slope 1.17. Speedup over splu 10x at N = 400 and 22x at N = 800 (rfft2).
+  - p123_reldiff rises from 1.9e-12 (N = 50) to 4.8e-7 (N = 800), a ratio of 2.4e5. It dips slightly from
+    N = 100 to 200, as the spec allows.
