@@ -429,3 +429,44 @@
   - Figures: f07_accuracy uses kind none for both CG lines. ir_direct (error exactly 0) is drawn hollow at
     1e-17. Colors are categorical slots 1-5 of the dataviz palette (validated; the low-contrast slots get
     markers + legend).
+- Results (git 522a5a2; e07_fixes 24 min, e07_structured 2 s, 1 thread): 17 PASS, 4 WARN, 0 FAIL, plus one
+  real red flag.
+  - Refinement:
+    - Every ir_* row at N <= 80 equals the exact rationals rounded to double (0 u).
+    - ir_direct takes 2 steps at every N; ir_cg_mic0 and ir_cg_amg take 3, or 4 at N >= 640.
+    - At N >= 160, ir_cg_* agree with ir_direct to 0-2 u.
+    - Refinement costs 0.056 s at N = 640 against a 1.34 s factorization.
+  - GTH:
+    - 8, 12, 25, 34, 46, 60, 200 u at N = 20 ... 640 (0.19-0.42 N). The log-log slope is 0.86.
+    - At N >= 160 it sits within 2e-15 to 2e-14 of the refined reference, against a data term of 3e-13 to
+      4e-12. GTH never uses refinement, so this confirms that refinement lands on the TRUE probability, not
+      the stored one.
+  - Direct against the true probability: 0.065-0.13 N^2 u.
+    - At N = 80 that is 848 u, against the spec's 431 u. The spec number is probably SuperLU or Linux; chunk 4
+      saw the same CHOLMOD-on-Mac difference.
+    - That is why the GTH factor at N = 80 is 25, not 13.
+  - Direct err_vs_stored_tiny: +0.032 N^2 u at N >= 160, opposite in sign to the data term, as the spec says.
+    At N <= 80 it is smaller and has the same sign (-2.5e-14 at N = 80, as chunk 4 measured on this Mac).
+  - cg_componentwise tol 1e-14:
+    - Within N >= 160, every kind's err_vs_stored_tiny is below the direct solver's.
+    - Its rel_err_tiny is the data term (at most 0.005 cond_tiny tol).
+    - Iteration ratios: none 1.25-1.49, mic0 1.36-1.90, amg 1.38-1.86, except one row below.
+- Red flag (for the Project chat): plain CG (kind none) at N = 1280 never reaches omega <= 1e-14.
+  - It hit maxiter 30000; the run log says the smallest omega on its history was 3.46e-14 (312 u), and the final
+    omega in the CSV is 4.0e-14 (360 u).
+  - mic0 and amg reach it at N = 1280 (64 u each). At N = 640, none only just made it (89.2 u, against a
+    threshold of 1e-14 = 90 u).
+  - So plain CG's attainable omega rises with N past 90 u somewhere between N = 640 and 1280. The spec's "CG can
+    reach omega of 10 to 70 u" holds for the preconditioned kinds, not for plain CG at the largest N.
+  - The accuracy cost is small: rel_err_tiny is 1.6e-11, about the data term, and err_vs_stored_tiny is
+    1.3e-12, still below direct's 5.7e-12.
+  - This failure also causes two WARNs: the iteration ratio at N = 1280 is 13.97 (= 30000 / 2147), and
+    "converged" holds in 23/24 rows.
+  - The smallest omega is only in the run log, not in the CSV. A min_omega column needs a ~25 min rerun; not
+    done without asking.
+- The other WARNs are the two e07_fft_check rows (no CSV, chunk 6 missing).
+- f07_accuracy now draws the non-converged point hollow. This is a figure-script change only; the CSVs are
+  unchanged.
+- Side check in a scratch script, NOT in the CSVs: perturbing the off-diagonal pairs symmetrically gives
+  structured_random_max of 1.1-1.6 over three seeds. The literal nonsymmetric reading (in the CSV) gives
+  1.5-2.9, closer to the spec's 1.5-2.4. Either way the ratio stays O(1) while cond_max grows like N^2.

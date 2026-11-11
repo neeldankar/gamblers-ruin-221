@@ -3,7 +3,7 @@
 (a) against the true probability (rel_err_tiny): direct (CHOLMOD), gth, ir_direct, cg_componentwise at tol 1e-14
     and cg at rtol 1e-10 (both kind none), with the data-term line (u/4) cond_tiny and guide lines u N and u N^2.
     ir_direct's error is exactly 0 at every N (correctly rounded at N <= 80; at N >= 160 it is the reference), so
-    it is drawn hollow at a floor.
+    it is drawn hollow at a floor. cg_componentwise rows that hit maxiter (omega never <= 1e-14) are drawn hollow.
 (b) against the stored solution (|err_vs_stored_tiny|): direct, cg_componentwise tol 1e-14 and cg rtol 1e-10.
     ir_* and gth are left out: they target the true probability.
 Reads results/e07_fixes.csv only.
@@ -40,6 +40,16 @@ def pick(df, method, param):
     if param is not None:
         d = d[np.isclose(d["param"], param, rtol=1e-9, atol=0)]
     return d.sort_values("N")
+
+
+def mark_not_converged(ax, d, y, color, marker):
+    """Redraw rows that hit maxiter hollow: their stopping rule was never met."""
+    bad = d["converged"].astype(str) != "True"
+    if bad.any():
+        ax.plot(d["N"][bad], y[bad], color=color, marker=marker, markersize=7, markerfacecolor="white",
+                linestyle="none", zorder=5)
+        ax.plot([], [], color=color, marker=marker, markersize=7, markerfacecolor="white", linestyle="none",
+                label="hollow triangle: not converged (maxiter 30000)")
 
 
 def style(ax, title, Ns):
@@ -82,6 +92,8 @@ def main():
         ax_a.plot([], [], color=color, marker=marker, markersize=6, linewidth=2,  # legend entry
                   markerfacecolor="white" if zero.all() else color,
                   label=label + (": error 0, drawn at 1e-17" if zero.all() else ""))
+        if method == "cg_componentwise":
+            mark_not_converged(ax_a, d, d["rel_err_tiny"], color, marker)
     dterm = pick(df, "direct", None)
     ax_a.plot(dterm["N"], U / 4 * dterm["cond_tiny"], color=MUTED, linewidth=1.5, linestyle=(0, (5, 2)), zorder=2,
               label="data term (u/4) cond_tiny")
@@ -100,6 +112,8 @@ def main():
         if len(d):
             ax_b.plot(d["N"], d["err_vs_stored_tiny"].abs(), color=color, marker=marker, markersize=6, linewidth=2,
                       zorder=3, label=label)
+            if method == "cg_componentwise":
+                mark_not_converged(ax_b, d, d["err_vs_stored_tiny"].abs(), color, marker)
     ax_b.plot(Ns, U * Ns ** 2, color=INK, linewidth=1, linestyle=(0, (3, 1, 1, 1)), zorder=1, label="guide u N$^2$")
     style(ax_b, "(b) against the stored solution (what a float solver can reach)", Ns)
     ax_b.legend(frameon=False, fontsize=7.5, labelcolor=INK, loc="upper left", bbox_to_anchor=(0.35, -0.12),
