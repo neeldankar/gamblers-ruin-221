@@ -826,3 +826,54 @@ approved the edits below to plan/c09_four_players.md and CLAUDE.md. tests/ is un
     1.677 and a flop rate of 9.7, 14.4 and 18.4 GFLOP/s.
   - alpha_extrapolated is 5.720687 (1/N^2 fit), 1.2e-6 below the cone value 5.720688. The last local
     slope is 5.72055.
+
+## Chunk 10: extras, least squares by QR and unequal skill (Nov 12)
+- gr/extras.py has the names the spec lists. All 35 chunk 10 tests passed on the first run, and so does the
+  full suite.
+- Part A fits:
+  - fit_normal_equations forms X^T X and uses scipy cho_factor / cho_solve.
+  - fit_qr uses np.linalg.qr (LAPACK Householder, reduced) and solve_triangular.
+  - fit_svd uses the thin SVD.
+  - ne_column_scaled lives in the experiment script, not in gr/: divide each column by its 2-norm, solve the
+    normal equations, divide the coefficients by the same norms.
+- Part B:
+  - build_A_bt writes the move probability as s_a / (3 (s_a + s_b)). With equal skills that is exactly
+    1/6, so it equals build_A bit for bit.
+  - p2_win uses l = log(s_j / s_k). It takes expm1(y l) / expm1(N l) when k is stronger, and
+    exp((y - N) l) expm1(-y l) / expm1(-N l) when k is weaker, so no factor above 1 is ever formed.
+  - symmetrize_bt scales each COO entry by exp((lp_row - lp_col) / 2).
+- e10_bt_solvers:
+  - CG on S is our gr.krylov.cg, the chunk 3 convention: stop at ||r_k|| <= rtol ||b|| on the recurrence
+    residual.
+  - GMRES is scipy's, called exactly as the spec writes it. iters counts inner iterations
+    (callback_type="pr_norm").
+  - seconds is the median of 3 solves. Building A and S is setup and is not timed. For splu_S the
+    factorization counts as part of the solve.
+  - lowpi is the ceil(0.1 n) states with the smallest log pi.
+- The extra CSV e10_bt_states_N80 holds per-state errors at N = 80 for P(strongest wins). The figure needs
+  them, and figures may read only CSVs; this follows the e08_states_N120 precedent.
+- Overflow:
+  - "naive pi" is prod s_i^x_i at (1, 1, N-2). It is inf from N = 1026 (1.5 * 2^1024).
+  - "naive sqrt(pi)" is prod sqrt(s_i)^x_i, inf from N = 2050. Taking sqrt of the naive pi would
+    overflow at 1026 too, so this is the only reading that gives the spec's 2050.
+  - The naive S at N = 1030 is sqrt(pi_x) A_xy / sqrt(pi_y) from the naive pi, computed entry by entry. A
+    first attempt built it from prod sqrt(s_i)^x_i, which is still finite at 1030, and had no non-finite
+    entries. A second attempt used the sparse product diags(sqrt pi) @ A @ diags(1/sqrt pi), which reported
+    only 24 non-finite entries where the entry-wise formula finds 204, so I used the entry-wise formula.
+    204 non-finite entries is about 34 inf-pi states times 6 neighbours.
+- check_c10 readings for rows that list only observed values:
+  - ne_column_scaled (WARN): at least 10x qr and inside [1e-8, 1e-4].
+  - Degree sweep: degrees 2-6 within 1e-3 relative (FAIL), degree 8 within 10% (WARN), and 213 must stay
+    >= 0.02 (FAIL).
+  - gmres iters (WARN): 59 exactly for P(weakest wins). P(strongest wins) within 2% of 122, 291 and 512,
+    and within 5% of "about 820".
+  - cg iters (WARN): in [61, 80] for every N and right-hand side.
+  - cg P(strongest wins) (FAIL): below 1e-3 at N = 40 and above 1e-3 at N >= 80.
+  - cg E[rounds] (WARN): within a factor of 10 of 2.4e-8, 1.3e-2 and 0.45.
+  - A row is never PASS when an N or order it lists is missing.
+- QR coefficient error. On this Mac, QR's coefficients differ from the SVD's by 1.6e-10 (321), 1.8e-11
+  (312) and 1.9e-13 (213), against the spec's observed 7e-14 to 2e-11. Both QR and SVD carry a coefficient
+  error of order cond(X) eps = 2e-9, so the difference between them depends on the LAPACK build. The FAIL
+  row (below 1e-7) passes easily.
+- Not checked: Diaconis and Ethier's exact regression design (degree, state set, targets). Nothing here
+  is compared with their published coefficients.
