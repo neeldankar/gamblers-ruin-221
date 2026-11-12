@@ -74,7 +74,8 @@ def main():
     panel(axes[1], df, "peak_rss_mb", "(b) peak resident memory of the run's process", "MB")
     last = df.sort_values("n").groupby("method").last()  # memory: anchor at the largest run, past the
     if "amg_cg" in last.index:                            # fixed cost of a Python process with its libraries
-        guide(axes[1], n, 1, last.loc["amg_cg", "n"], last.loc["amg_cg", "peak_rss_mb"], r"$n$")
+        top = n[n >= n[-1] / 30]  # the upper decade and a half only, so the guide does not stretch the axis
+        guide(axes[1], top, 1, last.loc["amg_cg", "n"], last.loc["amg_cg", "peak_rss_mb"], r"$n$")
 
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=4, frameon=False, fontsize=9, labelcolor=INK)

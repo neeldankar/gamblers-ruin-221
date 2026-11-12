@@ -764,3 +764,22 @@
     or the library's first-call setup. Without it, the cholmod setup at N = 20 read 0.019 s instead of 0.005 s.
   - That run's other numbers agree with the spec: all P values, slopes 5.72055 (last) and 5.72098
     (extrapolated), and amg_cg 7 ... 14 iterations. It was replaced by the run below.
+- Results: full run from git e2f4ae7, 1 thread, about 10 min. check_c09 gives 20 PASS, 1 WARN, 0 FAIL, and no red flags.
+  - Free memory at the start was 4915 MB, so workers were killed above 2949 MB. None was killed.
+  - Skipped for memory: only splu (COLAMD) at N = 100. Its projected factor was 3.5 GB > 3 GB, from nnz 3.65e7
+    and 1.54e8 at N = 60 and 80. At N = 80 it took one 76 s run and peaked at 1828 MB.
+  - splu_mmd at N = 100 ran (205 s, one run): its projected factor was under 3 GB (nnz 2.81e8, 2.2 GB of values).
+    But its peak, 2944 MB, came within 5 MB of the kill line. On a machine with less free memory the guard would
+    have stopped it. This run is the reason the guard exists.
+  - cholmod (METIS) nnz(L) is 8.0e6, 2.76e7 and 7.45e7 at N = 60, 80 and 100 (within 0.2% of the spec), with
+    slope 1.42. Peak memory is 240, 616 and 1463 MB, close to the reference's 0.2 / 0.65 / 1.7 GB now that each
+    run has its own process.
+  - WARN: the cholmod setup_s slope is 1.663 (setup 0.56, 2.24 and 7.75 s at N = 60, 80, 100), against
+    [1.7, 2.6]. This is a timing row. This Mac factors N = 100 in 7.8 s against 73 s on the validation container,
+    and a fixed per-factor cost (ordering, symbolic analysis) flattens the slope over a range this short.
+    Read as machine speed, not a theory miss. nnz grows like n^1.42, as the theory says.
+  - amg_cg: 7, 9, 10, 11, 12, 13, 13, 14 iterations for N = 20 ... 200, time slope 0.976, rel_err at most 8.1e-14.
+    N = 200 (n = 1.29M) takes 3.2 s setup + 4.0 s solve and 1.39 GB.
+  - Lumped chain: every P is within 3.1e-13 relative of the spec. Local slopes rise from 5.6762 to 5.7205.
+    alpha_extrapolated is 5.7210 (last slope 5.72055). N = 200 takes 10.2 s and 1.9 GB with CHOLMOD.
+  - Three players: slope 3.00000 and P N^3 = 9.119589.
