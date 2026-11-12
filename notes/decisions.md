@@ -646,7 +646,7 @@
     markers because it coincides with simplicial or supernodal.
 - Results:
   - Runs from git 3ccfc4e, 1 thread: e07_structured 1:48, e07_baselines 1:17, peak RSS 2.4 GB.
-  - check_c07: 42 PASS, 1 WARN, 0 FAIL, no red flags.
+  - check_c07: 46 PASS, 1 WARN, 0 FAIL, no red flags.
   - Every structured value matches the Project chat's Linux numbers to the printed digits. kappa_tiny =
     779.2398 at N = 640 (1.2176 N), and the attaining perturbation reaches it to 2.3e-6. coherent_tiny =
     637.0017 (N - 3).
