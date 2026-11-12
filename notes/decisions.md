@@ -692,3 +692,15 @@
   - rho_SOR(N = 6) - (sqrt 5 - 2) = -8e-17;
   - gap x N^4 = 10.133 ... 18.792;
   - best fine ones offset +0.0175 (14%) at N = 20.
+- Results (full runs from git a9b0187, 1 thread): e05_iterations 90 s, e05_omega_sweep 50 s, e05_sor_spectra
+  199 s (seconds_dense 148 s at N = 100). check_c05 gives 28 PASS, 0 WARN, 0 FAIL, and no red flags.
+  - Every reference count matches exactly: Jacobi 169 ... 44322, GS 86 ... 22163, SOR 31 ... 2062.
+  - SOR b = ones: exponent_ratio 0.7485-0.7502, iterations / 3/4-law prediction 1.076-1.080, iterations / Young
+    1.434-1.441, iterations / N 3.20-3.23.
+  - law_relerr is at most 1.5e-14 at all 13 N. rho_SOR(6) - (sqrt 5 - 2) = -8e-17. gap x N^4 rises from 10.133 to
+    19.201. sor_over_young falls from 1.6180 to 1.0260.
+  - Omega sweep: rho_dense is smallest exactly at omega* (N = 20, 40). The best b = ones counts sit at +0.0175,
+    +0.0125 and +0.0075, with 14%, 16% and 17% fewer sweeps. These are the spec's measured values.
+  - SOR b = out_first (no range): exponent_ratio 0.750, 0.751, 0.758, 0.784, 0.845, 0.917, 0.970 for N = 10 ... 640.
+    The count falls below Young's prediction at N = 320 (713 vs 718.1) and N = 640 (1377 vs 1436.2), as the
+    spec describes. This is the run stopping before the slowest mode takes over, not evidence for Young's law.
