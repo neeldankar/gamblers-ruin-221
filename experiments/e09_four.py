@@ -3,8 +3,8 @@
 Writes results/e09_identities.csv, e09_solvers.csv, e09_big_stack.csv and e09_alpha.csv.
     PYTHONPATH=. python experiments/e09_four.py [--quick] [--big] [--outdir DIR]
 
-Every solver run of e09_solvers, and every four-player lumped solve of e09_big_stack, happens in a fresh process
-(experiments/e09_worker.py), so its peak memory is its own. Memory safety (the spec's red flag: never let the laptop swap):
+Every solver run of e09_solvers (each of the 3 timing repeats too), and every four-player lumped solve of
+e09_big_stack, happens in a fresh process (experiments/e09_worker.py), so its peak memory is its own. Memory safety (the spec's red flag: never let the laptop swap):
   * a direct method skips a size when its projected factor memory (8 bytes per stored entry, nnz_factor
     fitted against n on the sizes already done) exceeds 3 GB, and then skips every larger size too;
   * the parent watches each worker's resident memory and kills it above 60% of the free memory measured at
@@ -45,6 +45,8 @@ BYTES_PER_ENTRY = 8
 SLOPE_ONE_POINT = 1.5  # fill exponent assumed when only one size has been factored
 KILL_FRACTION = 0.6
 POLL_S = 0.5
+REPEATS = 3
+LONG_RUN_S = 60.0  # a first run longer than this is not repeated
 
 
 def free_memory_mb():
@@ -123,6 +125,27 @@ def run_worker(method, N, kill_mb):
     return json.loads(out.strip().splitlines()[-1]), None
 
 
+def repeat_worker(method, N, kill_mb):
+    """Median of REPEATS runs, each in a fresh worker process; a single run if the first takes LONG_RUN_S or more.
+    peak_rss_mb is the largest of the runs; rel_err the largest too (the runs are identical computations)."""
+    runs = []
+    while len(runs) < REPEATS:
+        res, bad = run_worker(method, N, kill_mb)
+        if res is None:
+            return None, bad
+        runs.append(res)
+        if runs[0]["setup_s"] + runs[0]["solve_s"] >= LONG_RUN_S:
+            break
+    out = dict(runs[0])
+    out["setup_s"] = float(np.median([r["setup_s"] for r in runs]))
+    out["solve_s"] = float(np.median([r["solve_s"] for r in runs]))
+    out["peak_rss_mb"] = max(r["peak_rss_mb"] for r in runs)
+    out["rel_err"] = max(r["rel_err"] for r in runs)
+    out["status"] = (f"ok (median of {REPEATS} processes)" if len(runs) == REPEATS
+                     else f"ok (1 run, over {LONG_RUN_S:.0f} s)")
+    return out, None
+
+
 def projected_factor_gb(done, n):
     """Factor memory at size n from a log-log fit of nnz_factor against n over the sizes done."""
     if not done:
@@ -155,7 +178,7 @@ def solver_rows(quick, kill_mb):
                 print(f"{method:8s} N = {N:3d}  {stopped}", flush=True)
                 continue
             t0 = time.perf_counter()
-            res, bad = run_worker(method, N, kill_mb)
+            res, bad = repeat_worker(method, N, kill_mb)
             if res is None:
                 rows.append(empty_row(N, n, method, bad))
                 stopped = bad

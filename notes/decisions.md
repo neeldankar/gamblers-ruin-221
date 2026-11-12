@@ -751,3 +751,16 @@
   - The red flag "AMG iterations growing like N" fires if iters(200) / iters(20) exceeds sqrt(200 / 20).
 - Quick run (scratch): every four-player P for N = 8 ... 40 matches the spec to within 2.3e-13 relative.
   T ranges at N = 20 are within 4e-7 of the spec. P N^3 (three players) = 9.119590 at N = 80.
+- First full run (git 86005db), measurement problem found and fixed before any results were committed:
+  - The worker ran its 3 timing repeats inside one process. scikit-sparse 0.5 does not give a CHOLMOD factor's
+    memory back. At N = 60, RSS went 241 -> 374 -> 488 MB over three METIS factorizations, even with `del` and
+    gc.collect between them, so peak_rss_mb counted three factors.
+    - That run reported cholmod at 497 MB (N = 60) and 1452 MB (N = 80), against 0.2 and 0.65 GB in the spec's
+      reference.
+    - It killed cholmod at N = 100 at the 2.05 GB guard, 16 s in, most likely during a repeat.
+  - Fix: each repeat is its own worker process (the spec's "each solver run happens in a fresh subprocess").
+    The parent takes the median of setup_s and solve_s, and the largest peak_rss_mb and rel_err.
+  - Every worker now warms up on N = 8 before timing, so a fresh process does not count the scikit-sparse import
+    or the library's first-call setup. Without it, the cholmod setup at N = 20 read 0.019 s instead of 0.005 s.
+  - That run's other numbers agree with the spec: all P values, slopes 5.72055 (last) and 5.72098
+    (extrapolated), and amg_cg 7 ... 14 iterations. It was replaced by the run below.

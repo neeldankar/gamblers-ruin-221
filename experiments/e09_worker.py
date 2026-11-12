@@ -1,7 +1,9 @@
 """Chunk 9 worker: one solver run in its own process.
 
 Started by experiments/e09_four.py, one process per (method, N), so that peak_rss_mb (the process's maximum
-resident memory) belongs to this run alone and the parent can kill a run that grows too large.
+resident memory) belongs to this run alone and the parent can kill a run that grows too large. Each worker does
+one setup and one solve; the parent starts a new worker for each repeat. (Repeats inside one process are not
+used: scikit-sparse 0.5 does not give a CHOLMOD factor's memory back, so the peak would grow by a factor each time.)
 Methods splu, splu_mmd, cholmod, amg_cg solve the four-player system A u = e2 (exact answer 6 x1 x2 x3 x4).
 Method lumped computes P(player 4 busts first) from (1, 1, 1, N - 3) on the lumped chain.
 Prints one JSON line with the measurements.
@@ -13,7 +15,6 @@ for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "VECLI
     os.environ.setdefault(var, "1")
 
 import argparse
-import gc
 import itertools
 import json
 import resource
@@ -27,8 +28,6 @@ from gr.four import FourStateSpace, LumpedSpace, build_A4, build_lumped, solve_l
 
 METHODS = ["splu", "splu_mmd", "cholmod", "amg_cg", "lumped"]
 DIRECT = {"splu": ("splu", "COLAMD"), "splu_mmd": ("splu", "MMD_AT_PLUS_A"), "cholmod": ("cholmod", "metis")}
-LONG_RUN_S = 60.0  # a first run longer than this is not repeated
-REPEATS = 3
 
 
 def peak_rss_mb():
@@ -71,8 +70,11 @@ def main():
     parser.add_argument("--N", type=int, required=True)
     args = parser.parse_args()
     if args.method == "lumped":
+        lumped(8)  # warm-up: imports, library setup
         print(json.dumps(lumped(args.N)), flush=True)
         return
+
+    run_once(build_A4(FourStateSpace(8)).tocsc(), np.ones(35), args.method)  # warm-up: imports, library setup
 
     S = FourStateSpace(args.N)
     A = build_A4(S)  # built outside every timer
@@ -82,27 +84,17 @@ def main():
     b = sum(X[:, i] * X[:, j] for i, j in itertools.combinations(range(4), 2))  # e2
     exact = 6 * X.prod(axis=1)  # A^{-1} e2 = 6 x1 x2 x3 x4
 
-    setups, solves = [], []
-    while True:
-        setup, solve, x, nnz, iters = run_once(A, b, args.method)
-        setups.append(setup)
-        solves.append(solve)
-        if len(setups) == REPEATS or setups[0] + solves[0] >= LONG_RUN_S:
-            break
-        del x
-        gc.collect()
-    status = f"ok (median of {REPEATS})" if len(setups) == REPEATS else f"ok (1 run, over {LONG_RUN_S:.0f} s)"
+    setup, solve, x, nnz, iters = run_once(A, b, args.method)
     out = {
         "N": args.N,
         "n": S.n,
         "method": args.method,
-        "setup_s": float(np.median(setups)),
-        "solve_s": float(np.median(solves)),
+        "setup_s": setup,
+        "solve_s": solve,
         "peak_rss_mb": peak_rss_mb(),
         "nnz_factor": float(nnz),
         "iters": float(iters),
         "rel_err": float(np.max(np.abs(x - exact)) / np.max(exact)),
-        "status": status,
     }
     print(json.dumps(out), flush=True)
 
