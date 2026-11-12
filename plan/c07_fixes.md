@@ -45,7 +45,7 @@ This chunk builds and measures three fixes:
    sums), and that common factor cancels in the solution. Most of GTH's 25- to 133-fold gain over CHOLMOD is
    that missing data term plus supernodal CHOLMOD's own error. Against a band Cholesky of the integer matrix 6A,
    which has no data term either, GTH is better by 1.4 to 5 for N <= 160 and by a factor that grows with N above
-   (about 13 at N = 320 and 19 at N = 640: e07_baselines).
+   (about 11 at N = 320 and 20 at N = 640 on the Mac: e07_baselines).
 
 Why 3 works: the componentwise condition number from chunk 4 (0.39 N^2) measures sensitivity to perturbations
 of A's entries with the diagonal free, which is the wrong parametrization for an M-matrix (Alfa, Xue and Ye).
@@ -93,7 +93,9 @@ the CHOLMOD nesdis solve ("refined"; it is correctly rounded at N <= 80, which t
 `direct` (CHOLMOD nesdis), `gth` (N <= 640), `cg` at rtol 1e-10 and `cg_componentwise` at tol 1e-12 and 1e-14 for
 kinds none (check_every 10), mic0 (5) and amg (1), `ir_direct`, `ir_cg_mic0` and `ir_cg_amg` (inner CG at rtol
 1e-6, max_steps 15). Columns: `N, method, kind, param, iterations_or_steps, seconds, reference, rel_err_tiny,
-max_rel_err, max_rel_err_in_u, omega, cond_tiny, data_term_tiny, err_vs_stored_tiny, max_err_vs_stored`.
+max_rel_err, max_rel_err_in_u, omega, cond_tiny, data_term_tiny, err_vs_stored_tiny, max_err_vs_stored,
+corrections` (ir_* rows: the size of each refinement correction relative to x, one per step, %.3e joined by ";";
+empty otherwise).
 rel_err_* and max_rel_err are against the true probability (the reference). data_term_tiny =
 `data_error_term(x_ref, solve)` at the tiny state; the stored solution is x_ref (1 + data_error_term(x_ref, solve))
 (an exact identity evaluated in floating point, accurate to about u); err_vs_stored_* are relative errors against it. `--quick`: N in {20, 40}.
@@ -120,7 +122,12 @@ k10 = the iterations of `gr.krylov.cg` at rtol 1e-10 with the same preconditione
 `cg_componentwise(A, b, tol=0.0, M=M, check_every=c, maxiter=4 * k10)` (tol 0 never triggers, so it runs to
 maxiter); record the smallest omega after k = 0 and the iteration where it occurred. Columns: `N, kind,
 check_every, iters_rtol_1e10, maxiter, min_omega, min_omega_in_u, k_at_min, k_at_min_over_k10,
-final_omega_in_u`. One run, no timing repeats.
+final_omega_in_u, max_x_corner_ratio, max_x_inf_ratio`. The last two come from a second run,
+`gr.krylov.cg(A, b, rtol=0.0, M=M, maxiter=4 * k10)` from x0 = 0 with a callback on every iterate:
+max_x_corner_ratio = max_k |x_k[tiny]| / x_ref[tiny] and max_x_inf_ratio = max_k max |x_k| / max |x_ref|, tiny =
+(1, 1, N-2), x_ref = the CHOLMOD nesdis solve. Greenbaum (1997): rounding in the recursively updated residual grows
+with the largest iterate, so an iterate that overshoots at the corner can explain plain CG's componentwise floor;
+these two columns test that (review 2, question 4). One run, no timing repeats.
 
 Figures: `figures/f07_accuracy.py`, two panels: (a) error at the tiny entry against the true probability vs N
 for direct, gth, ir_direct, cg_componentwise (tol 1e-14) and cg (rtol 1e-10), log-log, with the data-term line
@@ -183,7 +190,7 @@ e07_baselines, and the Project chat's Linux recomputations.
 | baselines, gth max_true_err_in_u against e07_fixes gth max_rel_err_in_u | equal | 1.5 u or 2%, whichever is larger | FAIL |
 | baselines, cholmod_default own_err_tiny | equals cholmod_simplicial for N <= 80 and cholmod_supernodal for N >= 160 (that switch is the sign flip between 80 and 160) | 1e-9 relative | WARN |
 | baselines, cholmod_supernodal own_err_over_N2u, N >= 160 | +0.052, +0.052, +0.050 on Linux; expect +0.032 on the Mac | in [0.01, 0.1] | WARN |
-| baselines, cholmod_simplicial own_err_over_N2u, N >= 160 | -0.0056, -0.0058, -0.0066 on Linux | absolute value below 0.02 | WARN |
+| baselines, cholmod_simplicial own_err_over_N2u, N >= 160 | -0.0056, -0.0058, -0.0066 on Linux; -0.018 to -0.022 on the Mac | absolute value below 0.05 | WARN |
 | baselines, banded own_err_over_N2u, N >= 80 | +0.0009, +0.0014, -0.0004, -0.0048 on Linux | absolute value below 0.02 | WARN |
 | baselines, banded max_own_err_in_u | 28, 45, 40, 108, 496, 2324 on Linux | each within a factor 3 | WARN |
 | baselines, splu_colamd own_err_over_N2u, N >= 80 | +0.030, +0.031, +0.033, +0.035 on Linux | in [0.005, 0.1] | WARN |

@@ -67,19 +67,19 @@ def run_checks(rg, dg, sc, sv, ov):
     out.append(("cond_XtX / cond_X^2", "1; between 0.5 and 2",
                 f"{ratio:.4f} (cond_XtX {rg['cond_XtX'].iloc[0]:.4e})" if len(rg) else "no rows",
                 status(0.5 < ratio < 2, "FAIL", len(rg) > 0)))
-    out.append(("qr coef_relerr_vs_svd", "below 1e-7 (observed 7e-14 to 2e-11)",
+    out.append(("qr coef_relerr_vs_svd", "below 1e-7 (Linux 7e-14 to 2e-11; Mac 1.9e-13 to 1.6e-10: LAPACK dependent)",
                 ", ".join(f"{o}: {err(o, 'qr'):.2e}" for o in ORDERS),
                 status(all(err(o, "qr") < 1e-7 for o in ORDERS), "FAIL", have_reg)))
     out.append(("normal_equations coef_relerr_vs_svd", "at least 10x the qr value for each order",
                 ", ".join(f"{o}: {err(o, 'normal_equations') / err(o, 'qr'):.3g}x" for o in ORDERS),
                 status(all(err(o, "normal_equations") >= 10 * err(o, "qr") for o in ORDERS), "FAIL", have_reg)))
     out.append(("normal_equations coef_relerr_vs_svd",
-                "observed 1.2e-7 (213), 7.9e-7 (312), 3.8e-6 (321); between 1e-8 and 1e-4",
+                "Linux 1.2e-7 (213), 7.9e-7 (312), 3.8e-6 (321); Mac 5.6e-8, 8.9e-7, 5.6e-6; between 1e-8 and 1e-4",
                 ", ".join(f"{o}: {err(o, 'normal_equations'):.2e}" for o in ORDERS),
                 status(all(1e-8 <= err(o, "normal_equations") <= 1e-4 for o in ORDERS), "WARN", have_reg)))
     out.append(("ne_column_scaled coef_relerr_vs_svd",
-                "observed 4.8e-8 (213), 1.7e-6 (312), 3.8e-6 (321): scaling does not rescue the normal equations "
-                "here (read as: at least 10x qr and in [1e-8, 1e-4])",
+                "Linux 4.8e-8 (213), 1.7e-6 (312), 3.8e-6 (321); Mac 2.5e-8, 2.0e-6, 9.6e-6: scaling does not "
+                "rescue the normal equations here; at least 10x the qr value and in [1e-8, 1e-4]",
                 ", ".join(f"{o}: {err(o, 'ne_column_scaled'):.2e} ({err(o, 'ne_column_scaled') / err(o, 'qr'):.3g}x qr)"
                           for o in ORDERS),
                 status(all(1e-8 <= err(o, "ne_column_scaled") <= 1e-4 and err(o, "ne_column_scaled") >= 10 * err(o, "qr")
@@ -187,7 +187,7 @@ def run_checks(rg, dg, sc, sv, ov):
     ok = all(r.iters == 59 for r in weak) and all(abs(rel(strong[N].iters, GMRES_STRONG[N][0])) <= GMRES_STRONG[N][1]
                                                    for N in strong if N in GMRES_STRONG)
     out.append(("gmres30_A iters", "59 (weakest wins, every N); 122, 291, 512, about 820 (strongest wins, "
-                "N = 40 ... 320) (read as: 2%, 5% for about 820)",
+                "N = 40 ... 320; Mac 819); within 2% (5% for the N = 320 value)",
                 "weakest " + ", ".join(f"N={r.N}: {r.iters}" for r in weak) + "; strongest "
                 + ", ".join(f"N={N}: {r.iters}" for N, r in strong.items()) + sm,
                 status(ok, "WARN", sfull)))
@@ -206,7 +206,7 @@ def run_checks(rg, dg, sc, sv, ov):
     cr = {r.N: r for r in sel("cg_S_1e-10", "rounds")}
     ok = all(abs(math.log10(cr[N].max_err_rel / ref)) <= 1 for N, ref in CG_ROUNDS.items() if N in cr)
     out.append(("cg_S_1e-10 max_err_rel, E[rounds]", "2.4e-8 at N = 40, 1.3e-2 at 80, 0.45 at 160 "
-                "(read as: within a factor 10)", ", ".join(f"N={N}: {r.max_err_rel:.2e}" for N, r in cr.items()) + sm,
+                "(Mac 0.75 at 320); each within a factor 10", ", ".join(f"N={N}: {r.max_err_rel:.2e}" for N, r in cr.items()) + sm,
                 status(ok, "WARN", all(N in cr for N in CG_ROUNDS))))
     cw = sel("cg_S_1e-10", "weakest_wins")
     out.append(("cg_S_1e-10 max_err_rel, P(weakest wins)",

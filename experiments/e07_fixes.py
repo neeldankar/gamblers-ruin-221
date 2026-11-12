@@ -23,6 +23,8 @@ Column notes:
   * cond_tiny = entry_condition at x_ref; data_term_tiny = data_error_term(x_ref) at the tiny state.
   * The stored solution is x_stored = x_ref (1 + data_error_term(x_ref)). err_vs_stored_tiny is SIGNED,
     (x - x_stored) / x_stored at the tiny state; max_err_vs_stored = max_i |x - x_stored|_i / x_stored_i.
+  * corrections (ir_* rows only, empty otherwise): the size of each refinement correction relative to x,
+    max_i |d_i| / |x_i|, one value per step in %.3e, joined with ";" (how fast refinement converges).
 """
 import os
 
@@ -74,6 +76,11 @@ def reference_factor(A):
         return direct.factorize(A, "splu", "MMD_AT_PLUS_A")
 
 
+def joined(corrections):
+    """The refinement corrections as one CSV cell: %.3e values joined with ";"."""
+    return ";".join(f"{c:.3e}" for c in corrections)
+
+
 def warmup():
     """Compile every numba function on N = 10 before anything is timed."""
     krylov.warmup()
@@ -106,7 +113,7 @@ def run_size(N, kinds):
     data_term = acc.data_error_term(x_ref, F.solve)
     x_stored = x_ref * (1 + data_term)
 
-    def row(method, kind, x, seconds, setup=np.nan, param=np.nan, its=np.nan, converged=True):
+    def row(method, kind, x, seconds, setup=np.nan, param=np.nan, its=np.nan, converged=True, corrections=""):
         rel = acc.relative_errors(x, x_ref)
         vs_stored = (x - x_stored) / x_stored
         r = {"N": N, "n": S.n, "method": method, "kind": kind, "param": param, "iterations_or_steps": its,
@@ -114,7 +121,8 @@ def run_size(N, kinds):
              "rel_err_tiny": rel[tiny], "max_rel_err": rel.max(), "max_rel_err_in_u": rel.max() / acc.U,
              "omega": acc.componentwise_backward_error(A, x, b), "cond_tiny": cond[tiny],
              "data_term_tiny": data_term[tiny], "err_vs_stored_tiny": vs_stored[tiny],
-             "max_err_vs_stored": np.max(np.abs(vs_stored)), "signed_err_tiny": (x[tiny] - x_ref[tiny]) / x_ref[tiny]}
+             "max_err_vs_stored": np.max(np.abs(vs_stored)), "signed_err_tiny": (x[tiny] - x_ref[tiny]) / x_ref[tiny],
+             "corrections": corrections}
         flag = "" if converged else "  NOT CONVERGED"
         print(f"N = {N:4d}  {method:16s} {kind:7s} {param:7.0e}  its {its:>6}  {seconds:8.3f} s  "
               f"tiny {r['rel_err_tiny']:.2e}  max {r['max_rel_err_in_u']:9.1f} u  vs stored {vs_stored[tiny]:+.2e}  "
@@ -124,7 +132,7 @@ def run_size(N, kinds):
     rows = [row("direct", F.ordering, x_direct, factor_time + solve_time, setup=factor_time)]
     (x, info), t = timed(lambda: refine.iterative_refinement(A, b, F.solve, scale))
     rows.append(row("ir_direct", F.ordering, x, factor_time + t, setup=factor_time, its=info["steps"],
-                    converged=info["converged"]))
+                    converged=info["converged"], corrections=joined(info["corrections"])))
     del F
     gc.collect()
 
@@ -148,7 +156,8 @@ def run_size(N, kinds):
         if kind != "none":
             inner = lambda r: krylov.cg(A, r, rtol=INNER_RTOL, maxiter=MAXITER, M=M)[0]  # noqa: E731
             (x, info), t = timed(lambda: refine.iterative_refinement(A, b, inner, scale, max_steps=IR_CG_STEPS))
-            rows.append(row(f"ir_cg_{kind}", kind, x, setup + t, setup, INNER_RTOL, info["steps"], info["converged"]))
+            rows.append(row(f"ir_cg_{kind}", kind, x, setup + t, setup, INNER_RTOL, info["steps"], info["converged"],
+                            corrections=joined(info["corrections"])))
         del M
         gc.collect()
     return rows

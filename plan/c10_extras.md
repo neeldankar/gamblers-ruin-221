@@ -112,10 +112,10 @@ independent Fraction solver, and GMRES on A against CG on S at N = 80.
 |---|---|---|---|
 | cond_X (degree 6) | 1.68436e7 | 1e-4 relative | FAIL |
 | cond_XtX / cond_X^2 | 1 | between 0.5 and 2 | FAIL |
-| qr coef_relerr_vs_svd | below 1e-7 (observed 7e-14 to 2e-11) | | FAIL |
+| qr coef_relerr_vs_svd | below 1e-7 (Linux 7e-14 to 2e-11; Mac 1.9e-13 to 1.6e-10: LAPACK dependent) | | FAIL |
 | normal_equations coef_relerr_vs_svd | at least 10x the qr value for each order | | FAIL |
-| normal_equations coef_relerr_vs_svd | observed 1.2e-7 (213), 7.9e-7 (312), 3.8e-6 (321) | between 1e-8 and 1e-4 | WARN |
-| ne_column_scaled coef_relerr_vs_svd | observed 4.8e-8 (213), 1.7e-6 (312), 3.8e-6 (321): scaling does not rescue the normal equations here | | WARN |
+| normal_equations coef_relerr_vs_svd | Linux 1.2e-7 (213), 7.9e-7 (312), 3.8e-6 (321); Mac 5.6e-8, 8.9e-7, 5.6e-6 | between 1e-8 and 1e-4 | WARN |
+| ne_column_scaled coef_relerr_vs_svd | Linux 4.8e-8 (213), 1.7e-6 (312), 3.8e-6 (321); Mac 2.5e-8, 2.0e-6, 9.6e-6: scaling does not rescue the normal equations here | at least 10x the qr value and in [1e-8, 1e-4] | WARN |
 | fitted_maxdiff_vs_svd | below 1e-8 for every method | | FAIL |
 | svd resid_norm for 321, 312, 213 | 8.8633989e-05, 9.4584299e-05, 1.3297562e-01 | 1e-6 relative | FAIL |
 | svd max_abs_resid for 321, 312, 213 | 5.638098e-06, 6.657670e-06, 3.796276e-02 | 1e-3 relative | FAIL |
@@ -132,10 +132,10 @@ independent Fraction solver, and GMRES on A against CG on S at N = 80.
 | max_expected_rounds | 36.0536, 106.4723, 276.2373, 654.6066, 1465.9752 | 1e-4 relative | FAIL |
 | cond2_A_dense at N = 20, 40 | 35.389, 100.366 (above cond2_S: non-normality) | 1e-3 relative | FAIL |
 | gmres30_A max_err_rel | below 1e-8 for every N and right-hand side (observed up to 3e-9) | | FAIL |
-| gmres30_A iters | 59 (weakest wins, every N); 122, 291, 512, about 820 (strongest wins, N = 40 ... 320) | | WARN |
+| gmres30_A iters | 59 (weakest wins, every N); 122, 291, 512, about 820 (strongest wins, N = 40 ... 320; Mac 819) | within 2% (5% for the N = 320 value) | WARN |
 | cg_S_1e-10 iters | 61 to 80 at every N | | WARN |
 | cg_S_1e-10 max_err_rel, P(strongest wins) | 7.3e-7 at N = 40; above 1e-3 at N >= 80 (0.33 at 80, about 1 at 160 and 320) | | FAIL |
-| cg_S_1e-10 max_err_rel, E[rounds] | 2.4e-8 at N = 40, 1.3e-2 at 80, 0.45 at 160 | | WARN |
+| cg_S_1e-10 max_err_rel, E[rounds] | 2.4e-8 at N = 40, 1.3e-2 at 80, 0.45 at 160 (Mac 0.75 at 320) | each within a factor 10 | WARN |
 | cg_S_1e-10 max_err_rel, P(weakest wins) | below 1e-11 (b sits where pi is small, so the residual sees it) | | WARN |
 | splu_S max_err_rel | below 1e-12 | | FAIL |
 | overflow: first N where naive pi, naive sqrt(pi) overflow | 1026, 2050 | exact | FAIL |

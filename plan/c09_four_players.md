@@ -61,7 +61,7 @@ up to 13 nonzeros per row, and the questions are:
 
 ## Experiment
 
-`experiments/e09_four.py` (and `experiments/e09_worker.py`: each solver run happens in a fresh subprocess
+`experiments/e09_four.py` (and `experiments/worker_e09.py`, named so that run_all.py and the pipeline test do not treat it as an experiment: each solver run happens in a fresh subprocess
 so peak memory is measured per run, the way the prototype did it). Writes, through `gr.runlog.save_results`:
 
 1. `results/e09_identities.csv`: N in {10, 20, 30, 40, 60} (`--quick`: 10, 20). Columns: `N, n,

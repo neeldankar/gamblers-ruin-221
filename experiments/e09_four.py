@@ -4,7 +4,7 @@ Writes results/e09_identities.csv, e09_solvers.csv, e09_big_stack.csv and e09_al
     PYTHONPATH=. python experiments/e09_four.py [--quick] [--big] [--outdir DIR]
 
 Every solver run of e09_solvers (each of the 3 timing repeats too), and every four-player lumped solve of
-e09_big_stack, happens in a fresh process (experiments/e09_worker.py), so its peak memory is its own. Memory safety (the spec's red flag: never let the laptop swap):
+e09_big_stack, happens in a fresh process (experiments/worker_e09.py), so its peak memory is its own. Memory safety (the spec's red flag: never let the laptop swap):
   * a direct method skips a size when its projected factor memory (8 bytes per stored entry, nnz_factor
     fitted against n on the sizes already done) exceeds 3 GB, and then skips every larger size too;
   * the parent watches each worker's resident memory and kills it above 60% of the free memory measured at
@@ -33,7 +33,7 @@ from gr.runlog import save_results
 from gr.states import StateSpace
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-WORKER = ROOT / "experiments" / "e09_worker.py"
+WORKER = ROOT / "experiments" / "worker_e09.py"
 
 ID_N, ID_N_QUICK = [10, 20, 30, 40, 60], [10, 20]
 DIRECT_N, AMG_N, SOLVER_N_QUICK = [20, 40, 60, 80, 100], [20, 40, 60, 80, 100, 120, 150, 200], [20, 40]

@@ -188,7 +188,7 @@ by N^2 u; `max_true_err_in_ulp` = max_i |true_err_i xhat_i| / np.spacing(xhat_i)
 4. Fix 3: after "and that common factor cancels in the solution." add " Most of GTH's 25- to 133-fold gain over
    CHOLMOD is that missing data term plus supernodal CHOLMOD's own error. Against a band Cholesky of the integer
    matrix 6A, which has no data term either, GTH is better by 1.4 to 5 for N <= 160 and by a factor that grows
-   with N above (about 13 at N = 320 and 19 at N = 640: e07_baselines)."
+   with N above (about 11 at N = 320 and 20 at N = 640 on the Mac: e07_baselines)."
 5. Replace the whole paragraph that starts "Why 3 works:" by:
    "Why 3 works: the componentwise condition number from chunk 4 (0.39 N^2) measures sensitivity to perturbations
    of A's entries with the diagonal free, which is the wrong parametrization for an M-matrix (Alfa, Xue and Ye).
@@ -262,7 +262,7 @@ correct rounding of refinement at N = 160, and the exact stored-solution identit
 | baselines, gth max_true_err_in_u against e07_fixes gth max_rel_err_in_u | equal | 1.5 u or 2%, whichever is larger | FAIL |
 | baselines, cholmod_default own_err_tiny | equals cholmod_simplicial for N <= 80 and cholmod_supernodal for N >= 160 (that switch is the sign flip between 80 and 160) | 1e-9 relative | WARN |
 | baselines, cholmod_supernodal own_err_over_N2u, N >= 160 | +0.052, +0.052, +0.050 on Linux; expect +0.032 on the Mac | in [0.01, 0.1] | WARN |
-| baselines, cholmod_simplicial own_err_over_N2u, N >= 160 | -0.0056, -0.0058, -0.0066 on Linux | absolute value below 0.02 | WARN |
+| baselines, cholmod_simplicial own_err_over_N2u, N >= 160 | -0.0056, -0.0058, -0.0066 on Linux; -0.018 to -0.022 on the Mac | absolute value below 0.05 | WARN |
 | baselines, banded own_err_over_N2u, N >= 80 | +0.0009, +0.0014, -0.0004, -0.0048 on Linux | absolute value below 0.02 | WARN |
 | baselines, banded max_own_err_in_u | 28, 45, 40, 108, 496, 2324 on Linux | each within a factor 3 | WARN |
 | baselines, splu_colamd own_err_over_N2u, N >= 80 | +0.030, +0.031, +0.033, +0.035 on Linux | in [0.005, 0.1] | WARN |

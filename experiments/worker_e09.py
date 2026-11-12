@@ -7,7 +7,7 @@ used: scikit-sparse 0.5 does not give a CHOLMOD factor's memory back, so the pea
 Methods splu, splu_mmd, cholmod, amg_cg solve the four-player system A u = e2 (exact answer 6 x1 x2 x3 x4).
 Method lumped computes P(player 4 busts first) from (1, 1, 1, N - 3) on the lumped chain.
 Prints one JSON line with the measurements.
-    python experiments/e09_worker.py --method cholmod --N 60
+    python experiments/worker_e09.py --method cholmod --N 60
 """
 import os
 
@@ -50,6 +50,8 @@ def run_once(A, b, method):
     import pyamg
 
     t0 = time.perf_counter()
+    # pyamg's setup estimates a spectral radius from an unseeded np.random.rand: seed it so runs repeat
+    np.random.seed(221)
     ml = pyamg.smoothed_aggregation_solver(A)
     setup = time.perf_counter() - t0
     res = []

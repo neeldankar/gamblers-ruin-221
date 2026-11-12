@@ -886,3 +886,37 @@ approved the edits below to plan/c09_four_players.md and CLAUDE.md. tests/ is un
   - Tightening CG to rtol 1e-15 does not rescue it at N >= 160: the error is still 0.98 and 1.0 after 115
     iterations, because the S-residual cannot see states whose sqrt(pi) is 2^-78 below the top.
   - splu_S stays within 2.1e-14.
+
+## Pre-chunk-11 fixes (Nov 12)
+
+Approved in the Project chat. Code, spec and check changes only: no experiment was rerun and nothing in results/
+or figures/ was regenerated, because chunk 11 regenerates everything from one commit.
+
+1. Seeded pyamg. Its setup estimates a spectral radius from an unseeded np.random.rand, so two identical AMG
+   runs differed by 3e-11 at N = 320 (Project chat check). With `np.random.seed(221)` on the line before each
+   `smoothed_aggregation_solver(...)` call (gr/krylov.py make_preconditioner, experiments/worker_e09.py amg_cg)
+   the runs are bit-identical, as pyamg's own docstring recommends.
+2. Renamed experiments/e09_worker.py to experiments/worker_e09.py. tests/c11_pipeline globs
+   experiments/e[0-9][0-9]*.py and run_all.py will run every eNN_*.py; the worker is not an experiment and exits
+   with an error without --method/--N. Updated WORKER and the docstring in e09_four.py, the worker's usage line,
+   and plan/c09_four_players.md.
+3. The cholmod_simplicial own_err_over_N2u band (N >= 160) was set from Linux values only (about -0.006); the
+   Mac gives -0.018 to -0.022. The band is now "absolute value below 0.05" (WARN) in plan/c07_fixes.md,
+   plan/c07b_review_fixes.md and checks/check_c07.py.
+4. The GTH vs band Cholesky ratios in the spec text are now the same-machine (Mac) values, 10.8 and 20.5:
+   "about 11 at N = 320 and 20 at N = 640 on the Mac" (was 13 and 19).
+5. e07_fixes gets a `corrections` column: for ir_* rows the size of each refinement correction relative to x
+   (max_i |d_i| / |x_i|), one %.3e value per step joined with ";"; empty otherwise. Review 2, question 5: how fast
+   refinement converges. No check row; check_c07 prints them under "Information".
+6. e07_floor gets `max_x_corner_ratio` and `max_x_inf_ratio` from a second plain gr.krylov.cg run (rtol 0, the
+   same maxiter 4 k10, x0 = 0) whose callback records |x_k[tiny]| and max |x_k| for every iterate, against the
+   CHOLMOD nesdis solve. Greenbaum (1997): rounding in the recursively updated residual grows with the largest
+   iterate, so an overshooting iterate at the corner could explain plain CG's componentwise floor (review 2,
+   question 4). No check row; check_c07 prints them under "Information".
+7. check_c07 treats a missing new column as "not measured" (the committed CSVs predate them); every check script
+   was run on a copy of the committed results/ to confirm none crashes.
+8. Chunk 10 rows that had no stated tolerance (check_c10 used my readings, listed in the chunk 10 entry above)
+   now state it in plan/c10_extras.md, and one-machine "observed" values now give both machines: qr and the
+   normal equations (LAPACK dependent), ne_column_scaled (at least 10x qr and in [1e-8, 1e-4]), gmres30_A iters
+   (within 2%, 5% for the N = 320 value; Mac 819), cg_S_1e-10 E[rounds] (each within a factor 10; Mac 0.75 at 320).
+   check_c10's Expected text copies the new rows; its behavior is unchanged.

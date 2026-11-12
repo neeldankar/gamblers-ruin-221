@@ -202,6 +202,8 @@ def make_preconditioner(A, kind):
     else:
         import pyamg  # only this kind needs pyamg
 
+        # pyamg's setup estimates a spectral radius from an unseeded np.random.rand: seed it so runs repeat
+        np.random.seed(221)
         M = pyamg.smoothed_aggregation_solver(sp.csr_matrix(A)).aspreconditioner(cycle="V").matvec
     return M, float(time.perf_counter() - t0)
 
