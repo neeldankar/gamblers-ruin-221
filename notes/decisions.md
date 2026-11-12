@@ -704,3 +704,50 @@
   - SOR b = out_first (no range): exponent_ratio 0.750, 0.751, 0.758, 0.784, 0.845, 0.917, 0.970 for N = 10 ... 640.
     The count falls below Young's prediction at N = 320 (713 vs 718.1) and N = 640 (1377 vs 1436.2), as the
     spec describes. This is the run stopping before the slowest mode takes over, not evidence for Young's law.
+
+## Chunk 9: four players (Nov 11)
+
+- Build:
+  - `gr/four.py` holds FourStateSpace and LumpedSpace, as the spec and the tests require. This is an exception to the
+    CLAUDE.md rule that state indexing lives only in gr/states.py. That rule stays true for the three-player chain.
+  - Lookup: states are stored in lexicographic order of (x1, x2, x3), so the integer key
+    (x1 (N+1) + x2) (N+1) + x3 is sorted and `np.searchsorted` finds an index. This needs O(n) memory, where a dense
+    (N+1)^3 lookup would not. The enumeration loops over x1 and vectorizes (x2, x3).
+  - build_lumped counts the moves between sorted states as integers and divides by 12 once. So diag(weights) A_L is
+    symmetric to the last bit. Self-loops (a, a+1) -> (a+1, a) lower the diagonal.
+  - solve_lumped solves S v = W^(1/2) b with S = W^(1/2) A_L W^(-1/2), symmetrized as (S + S^T)/2 against rounding.
+    It uses CHOLMOD (METIS ordering) and falls back to SuperLU without scikit-sparse.
+  - `pytest tests/c00_core tests/c09_four`: 83 passed (37 new). Full `pytest -q`: 435 passed, 42 skipped.
+- Experiment readings:
+  - The `cholmod` method uses the METIS ordering. A pre-check at N = 60 gave nnz(L) = 7,999,881 with
+    `order="default"` and with `"metis"`. AMD gave 13,489,047 and NESDIS gave 7,527,941. The spec's 8.0e6 is
+    therefore METIS, which is also what CHOLMOD's default picks here. `gr.direct.factorize(A, "cholmod", "metis")`.
+  - `splu` is SuperLU COLAMD, `splu_mmd` is MMD_AT_PLUS_A, both through `gr.direct`. `amg_cg` is pyamg
+    `smoothed_aggregation_solver(A).solve(e2, tol=1e-12, accel="cg", maxiter=500)`, and iters is the number of
+    residuals minus 1. The right-hand side is e2 (not b = 1), so the exact answer 6 e4 is known.
+  - rel_err = max|x - 6 e4| / max(6 e4).
+  - Timings: a worker repeats setup and solve 3 times (median) unless the first setup + solve takes 60 s or more.
+  - e2_identity_relerr is the larger of max|A (6 e4) - e2| / max e2 and max|A^{-1} e2 - 6 e4| / max(6 e4).
+  - e09_identities uses one CHOLMOD factor for its 10 right-hand sides.
+- Memory safety:
+  - Every e09_solvers run and every four-player lumped solve runs in its own worker process, and peak_rss_mb is
+    that process's ru_maxrss.
+  - The parent polls the worker's RSS (`ps`) every 0.5 s. It kills the worker above 60% of the free memory at
+    the start of the run (the red flag's "60% of free memory"). Free memory = free + inactive + speculative pages
+    from vm_stat, which is conservative on macOS.
+  - A direct method skips a size when its projected factor memory exceeds 3 GB, and then skips every larger size.
+    The projection is 8 bytes x nnz_factor, the e02 memory_MB_est convention, with nnz fitted log-log against n
+    on the sizes already done (slope 1.5 assumed from a single point).
+- f09_big_stack draws its slope guides a factor 4 below each curve, so both curves and both guides stay visible.
+- check_c09, readings decided before the full run:
+  - A run stopped by the memory rules is listed but does not count as missing. Every other planned (method, N)
+    must be ok.
+  - amg_cg iters "growing slowly": every N = 40 ... 150 in [9, 14], and iters(150) >= iters(40).
+  - The amg_cg time slope uses all its sizes. The cholmod nnz and setup slopes use N = 60, 80, 100.
+  - "splu several times larger" means the peak_rss ratio is at least 3 at N = 60.
+  - "Ratio tends to 1/6" means the three exact fractions, plus |n_lumped / n_full - 1/6| decreasing in N.
+  - alpha_extrapolated is the intercept of a least-squares line slope = a + c / N_mid through the last four local
+    slopes, with N_mid = sqrt(N_prev N).
+  - The red flag "AMG iterations growing like N" fires if iters(200) / iters(20) exceeds sqrt(200 / 20).
+- Quick run (scratch): every four-player P for N = 8 ... 40 matches the spec to within 2.3e-13 relative.
+  T ranges at N = 20 are within 4e-7 of the spec. P N^3 (three players) = 9.119590 at N = 80.
