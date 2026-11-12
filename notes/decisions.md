@@ -656,3 +656,39 @@
   - The WARN: simplicial CHOLMOD's own error on the Mac is -0.018, -0.021, -0.022 N^2 u (N = 160, 320, 640),
     against -0.006 on Linux, so the |.| < 0.02 bound is crossed at 320 and 640. Machine-dependent, like
     supernodal's +0.032 here vs +0.05 on Linux. Left as WARN for the Project chat; the range is not changed.
+
+## Chunk 5: stationary methods and the SOR 3/4 law (Nov 11)
+- gr/stationary.py: `jacobi`, `gauss_seidel` (= `sor` with omega = 1), `sor`, `young_omega`, `iteration_matrix`,
+  `spectral_radius`, plus `warmup()`.
+  - Three numba kernels over the CSR arrays: a Jacobi sweep into a second buffer (buffers swapped each sweep),
+    an in-place forward SOR sweep in StateSpace order, and ||b - A x||_2. The diagonal is precomputed and the
+    sweeps skip j == i inside the row loop, so the CSR index order does not matter.
+  - One Python driver loop for all three methods. It records the residual of x_k, stops if it is <= rtol or if
+    k == maxiter, and otherwise sweeps. A Python loop per sweep costs about a microsecond; that is negligible
+    next to the kernels and easier to read than a fully compiled loop.
+  - `iteration_matrix`: Jacobi is I - D^-1 A. SOR is `np.linalg.solve(D + omega L, (1 - omega) D - omega U)` from
+    np.tril/np.triu of the dense A.
+  - `pytest tests/c00_core tests/c05_stationary`: 113 passed (67 new). Full `pytest -q`: 398 passed, 39 skipped.
+- Experiments, spec readings:
+  - rho_J comes from the formula in every script. `gr.spectrum.jacobi_rate` is the same number, but the spec
+    gives the cosine form.
+  - e05_iterations: `seconds` is one run of the solver call. The direct solve and the rhs are outside it.
+  - e05_omega_sweep: `seconds` is the two SOR runs of the row. The dense rho is not included.
+  - e05_sor_spectra: `seconds_dense` is the wall time of all three dense iteration matrices and eigenvalue
+    problems of that N (build + eigvals). The WARN row (under 5 min at N = 100) is read as the total.
+  - Each random b comes from a fresh `default_rng(221)` per N.
+- check_c05, readings:
+  - A row with a missing N gets its kind, never PASS.
+  - "jacobi: rate / rho_J" uses every b kind. So does "GS rate / rho_gs_dense" at N = 10, 20, 40, 80.
+  - The two count rows use the tolerance max(1% of the count, 1 sweep).
+  - Fine-grid "best": the fewest sweeps on the fine grid, with ties going to the smallest |offset|.
+    "Fewer" is 1 - best / (count at offset 0).
+  - "omega = 1.00 rows" compares both iterations_ones and iterations_random with the gauss_seidel rows.
+  - The SOR out_first values are printed in their own table without a range, as the spec says.
+  - The report shows the omega sweep as summary rows per N (omega = 1.00, omega*, best ones, best random).
+    All 273 rows are in the CSV.
+- Quick run (scratch): every value the spec quotes for N <= 40 is reproduced. Examples:
+  - SOR 31, 64, 129 sweeps;
+  - rho_SOR(N = 6) - (sqrt 5 - 2) = -8e-17;
+  - gap x N^4 = 10.133 ... 18.792;
+  - best fine ones offset +0.0175 (14%) at N = 20.
