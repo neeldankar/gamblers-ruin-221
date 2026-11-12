@@ -877,3 +877,12 @@ approved the edits below to plan/c09_four_players.md and CLAUDE.md. tests/ is un
   row (below 1e-7) passes easily.
 - Not checked: Diaconis and Ethier's exact regression design (degree, state set, targets). Nothing here
   is compared with their published coefficients.
+- Full run: git 818b38a, 1 thread, 28 s in total. check_c10 gives 30 PASS, 0 WARN, 0 FAIL, and no red
+  flags.
+  - GMRES(30) on A: 59 iterations for P(weakest wins) at every N. For P(strongest wins) it takes 122, 291,
+    512 and 819 at N = 40 ... 320. Its largest error is 2.5e-9.
+  - CG on S: 61 to 80 iterations. Its P(strongest wins) error is 7.3e-7, 0.33, 1.0 and 1.0 at
+    N = 40 ... 320.
+  - Tightening CG to rtol 1e-15 does not rescue it at N >= 160: the error is still 0.98 and 1.0 after 115
+    iterations, because the S-residual cannot see states whose sqrt(pi) is 2^-78 below the top.
+  - splu_S stays within 2.1e-14.

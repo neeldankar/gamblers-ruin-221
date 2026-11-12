@@ -1,0 +1,9 @@
+N,quantity,value,git_hash,timestamp,platform,machine,python,numpy,scipy,omp_num_threads
+1026,first_N_naive_pi_overflows,1026,818b38a,2026-11-12T11:48:18,macOS-15.6.1-arm64-arm-64bit-Mach-O,arm64,3.13.18,2.5.4,1.18.1,1
+2050,first_N_naive_sqrt_pi_overflows,2050,818b38a,2026-11-12T11:48:18,macOS-15.6.1-arm64-arm-64bit-Mach-O,arm64,3.13.18,2.5.4,1.18.1,1
+1030,n,528906,818b38a,2026-11-12T11:48:18,macOS-15.6.1-arm64-arm-64bit-Mach-O,arm64,3.13.18,2.5.4,1.18.1,1
+1030,nnz_A,3696174,818b38a,2026-11-12T11:48:18,macOS-15.6.1-arm64-arm-64bit-Mach-O,arm64,3.13.18,2.5.4,1.18.1,1
+1030,naive_pi_nonfinite_states,34,818b38a,2026-11-12T11:48:18,macOS-15.6.1-arm64-arm-64bit-Mach-O,arm64,3.13.18,2.5.4,1.18.1,1
+1030,naive_S_nonfinite_entries,204,818b38a,2026-11-12T11:48:18,macOS-15.6.1-arm64-arm-64bit-Mach-O,arm64,3.13.18,2.5.4,1.18.1,1
+1030,logdomain_S_nonfinite_entries,0,818b38a,2026-11-12T11:48:18,macOS-15.6.1-arm64-arm-64bit-Mach-O,arm64,3.13.18,2.5.4,1.18.1,1
+1030,logdomain_S_rel_asym,2.7144952952085077e-14,818b38a,2026-11-12T11:48:18,macOS-15.6.1-arm64-arm-64bit-Mach-O,arm64,3.13.18,2.5.4,1.18.1,1
