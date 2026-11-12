@@ -783,3 +783,32 @@
   - Lumped chain: every P is within 3.1e-13 relative of the spec. Local slopes rise from 5.6762 to 5.7205.
     alpha_extrapolated is 5.7210 (last slope 5.72055). N = 200 takes 10.2 s and 1.9 GB with CHOLMOD.
   - Three players: slope 3.00000 and P N^3 = 9.119589.
+
+## Chunk 9 review fixes (Nov 11)
+The Project chat accepted chunk 9 after rechecking it on Linux with its own code: its own builder, its own
+lumping, and exact rationals at N = 5-8. Every P matches to 4e-14, and nnz(L) matches entry for entry. It
+approved the edits below to plan/c09_four_players.md and CLAUDE.md. tests/ is unchanged.
+- The WARN explanation in the chunk 9 entry was wrong. The low cholmod setup_s slope (1.66) is not a fixed
+  per-factor overhead. The flop count, sum colcount^2 of the METIS factor, grows like n^2.09, as theory says:
+  5.2907e9, 3.1766e10 and 1.4145e11 at N = 60, 80, 100. On Linux, setup time tracks flops at a constant
+  3.0 GFLOP/s, a slope of 2.1. On this Mac the flop rate rises with supernode size, from 9.4 to 14.2 to
+  18.2 GFLOP/s, so the time slope is lower. Changes:
+  - The check now tests flops as a FAIL row (slope in [1.9, 2.3], each value within 1%). Flops do not
+    depend on the machine.
+  - setup_s keeps a WARN row with a band, [1.4, 2.6], that covers both machines.
+  - e09_solvers gains a `flops` column, computed for cholmod only and NaN for the other methods.
+- The memory growth between CHOLMOD factorizations, recorded in the chunk 9 entry, is a Mac observation.
+  The Project chat did not reproduce it on Linux with scikit-sparse 0.5.1: ru_maxrss stayed flat at 166 MB
+  over 3 METIS factorizations at N = 60. Keeping one process per timing repeat costs nothing either way.
+- Exponent credit. O'Connor and Saloff-Coste (arXiv:2209.05264, 2022, Theorem 1.1) prove that P is of order
+  N^-alpha, with alpha = sqrt(1/4 + lambda) - 1/2, where lambda (about 38.447) is the first Dirichlet
+  eigenvalue of the tetrahedron's spherical vertex triangle. The paper prints alpha ~ 5.68, which does not
+  follow from its own lambda and formula; those give 5.7207. The Project chat computed lambda = 38.446962
+  independently, with P1 finite elements and Richardson extrapolation, so alpha = 5.720688.
+- 1/N^2 fit. The local slopes approach alpha like alpha - 4.4 / N^2, not like 1/N. alpha_rows now fits
+  slope = a + c / N_mid^2 over the last four slopes. On the earlier slopes this fit gives 5.720687; the old
+  1/N fit gave 5.72098. The alpha row is now a FAIL row: 5.720688, tolerance 1e-4.
+- CLAUDE.md: the indexing rule now says that the four-player spaces of chunk 9 live in gr/four.py, so a
+  later session does not "fix" it.
+- Commits: the code, check, spec and notes go first ("chunk 9: review fixes"), then the rerun's results.
+  CLAUDE.md requires that order.

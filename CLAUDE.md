@@ -14,7 +14,7 @@ A = I - Q, Q = transient-to-transient transitions. A is sparse SPD, <= 7 nonzero
 - Order "ijk" = i out first, j out second, k wins (Diaconis-Ethier notation).
 - P_x(ijk) solves A u = b with boundary value y_k/N on absorbing states where y_i = 0 (0 elsewhere).
 - Relabeling: P_x(ijk) = u_123(x_i, x_j, x_k), so one solve gives all six orders.
-- States ordered lexicographically by (x1, x2). State indexing lives ONLY in gr/states.py.
+- States ordered lexicographically by (x1, x2). State indexing lives ONLY in gr/states.py (three players); the four-player spaces of chunk 9 live in gr/four.py.
 
 ## How work is organized
 The project is split into chunks. plan/README.md has the chunk index, the loop and the conventions; each chunk

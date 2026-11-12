@@ -36,12 +36,17 @@ def peak_rss_mb():
 
 
 def run_once(A, b, method):
-    """One setup and one solve. Returns (setup_s, solve_s, x, nnz_factor, iters)."""
+    """One setup and one solve. Returns (setup_s, solve_s, x, nnz_factor, flops, iters).
+
+    flops (cholmod only) = sum of column_counts()^2 of the factor, the usual count for a Cholesky
+    factorization; it does not depend on the machine, unlike setup_s."""
     if method in DIRECT:
         F = direct.factorize(A, *DIRECT[method])
         t0 = time.perf_counter()
         x = F.solve(b)
-        return F.setup_time, time.perf_counter() - t0, x, F.nnz, np.nan
+        solve = time.perf_counter() - t0
+        flops = float((F.column_counts().astype(float) ** 2).sum()) if method == "cholmod" else np.nan
+        return F.setup_time, solve, x, F.nnz, flops, np.nan
     import pyamg
 
     t0 = time.perf_counter()
@@ -50,7 +55,7 @@ def run_once(A, b, method):
     res = []
     t0 = time.perf_counter()
     x = ml.solve(b, tol=1e-12, accel="cg", maxiter=500, residuals=res)
-    return setup, time.perf_counter() - t0, x, np.nan, len(res) - 1
+    return setup, time.perf_counter() - t0, x, np.nan, np.nan, len(res) - 1
 
 
 def lumped(N):
@@ -84,7 +89,7 @@ def main():
     b = sum(X[:, i] * X[:, j] for i, j in itertools.combinations(range(4), 2))  # e2
     exact = 6 * X.prod(axis=1)  # A^{-1} e2 = 6 x1 x2 x3 x4
 
-    setup, solve, x, nnz, iters = run_once(A, b, args.method)
+    setup, solve, x, nnz, flops, iters = run_once(A, b, args.method)
     out = {
         "N": args.N,
         "n": S.n,
@@ -93,6 +98,7 @@ def main():
         "solve_s": solve,
         "peak_rss_mb": peak_rss_mb(),
         "nnz_factor": float(nnz),
+        "flops": flops,
         "iters": float(iters),
         "rel_err": float(np.max(np.abs(x - exact)) / np.max(exact)),
     }

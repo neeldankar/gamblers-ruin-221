@@ -157,7 +157,7 @@ def projected_factor_gb(done, n):
 
 def empty_row(N, n, method, status):
     return {"N": N, "n": n, "method": method, "setup_s": np.nan, "solve_s": np.nan, "peak_rss_mb": np.nan,
-            "nnz_factor": np.nan, "iters": np.nan, "rel_err": np.nan, "status": status}
+            "nnz_factor": np.nan, "flops": np.nan, "iters": np.nan, "rel_err": np.nan, "status": status}
 
 
 def solver_rows(quick, kill_mb):
@@ -220,14 +220,15 @@ def big_stack_rows(quick, kill_mb):
 
 
 def alpha_rows(big):
-    """alpha_extrapolated: least-squares line slope = a + c / N_mid through the last four local slopes,
-    N_mid = sqrt(previous N * N); a is the slope at N = infinity."""
+    """alpha_extrapolated: least-squares line slope = a + c / N_mid^2 through the last four local slopes,
+    N_mid = sqrt(previous N * N); a is the slope at N = infinity. The x-variable is 1/N_mid^2, not 1/N_mid,
+    because the four-player slopes approach alpha like 1/N^2 (about alpha - 4.4 / N^2)."""
     rows = []
     for players in (3, 4):
         group = [r for r in big if r["players"] == players]
         Ns = np.array([r["N"] for r in group], dtype=float)
         slopes = np.array([r["local_slope"] for r in group])
-        x = 1 / np.sqrt(Ns[1:] * Ns[:-1])[-4:]
+        x = 1 / (Ns[1:] * Ns[:-1])[-4:]  # 1 / N_mid^2
         a = np.polyfit(x, slopes[1:][-4:], 1)[1]
         rows.append({"players": players, "alpha_last_slope": float(slopes[-1]), "alpha_extrapolated": float(a)})
         print(f"players {players}: last slope {slopes[-1]:.5f}, extrapolated {a:.5f}", flush=True)

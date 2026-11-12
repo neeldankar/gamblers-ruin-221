@@ -23,8 +23,8 @@ up to 13 nonzeros per row, and the questions are:
    T/(x1x2x3x4) varies by a factor of 2 to 6. Since A^{-1} >= 0 and 3N - 6 <= e2 <= 3N^2/8, we still get
    16 e4/N^2 <= T <= 2 e4/(N - 2), with e4 = x1x2x3x4.
 2. **Direct solvers hit a memory wall in 3D.** Nested-dissection fill grows like n^(4/3) and work like n^2,
-   so a direct solve that takes seconds for three players at n = 157k (N = 561) needs minutes and
-   gigabytes here (N = 100).
+   so at the same size, n = 157k, the CHOLMOD (METIS) factor has 11 times the fill of the three-player one
+   (74.5e6 at N = 100 against 6.6e6 at N = 561) and takes 127 times the flops (1.41e11 against 1.11e9).
    AMG-preconditioned CG stays near linear.
 3. **Symmetry reduction.** For quantities symmetric in players 1-3 (like P(player 4 busts first)),
    lumping states by sorting (x1, x2, x3) gives an exact chain about 6 times smaller. It is not
@@ -32,8 +32,13 @@ up to 13 nonzeros per row, and the questions are:
    the scaling is harmless) and CHOLMOD or CG apply.
 4. **A tiny probability with a new exponent.** From (1, 1, 1, N-3), P(the chip leader busts first)
    decays like N^-5.72 (three players, from (1, 1, N-2): exactly N^-3 with P N^3 -> 9.1196). The
-   exponent should be the harmonic exponent of the tetrahedron's vertex cone; we have no closed form,
-   so 5.72 is a measured value.
+   exponent is the harmonic exponent of the tetrahedron's vertex cone: alpha = sqrt(1/4 + lambda) - 1/2, with
+   lambda the first Dirichlet eigenvalue of its spherical triangle (angles arccos(1/3)). O'Connor and
+   Saloff-Coste (arXiv:2209.05264, 2022, Theorem 1.1) prove that P is of order N^-alpha and estimate
+   lambda ~ 38.447; they print alpha ~ 5.68, which does not follow from their own lambda and formula (5.7207).
+   Project chat, independent P1 finite elements with Richardson extrapolation (the octant gives 12 to 1e-8):
+   lambda = 38.446962, alpha = 5.720688. The chain's local slopes approach it like alpha - 4.4 / N^2
+   (three players: like N^-4).
 
 ## What to build (the tests import exactly these names)
 
@@ -69,7 +74,8 @@ so peak memory is measured per run, the way the prototype did it). Writes, throu
    {20, 40, 60, 80, 100} but skip a run when its projected factor memory (fit nnz(L) against n on the
    sizes already done) exceeds 3 GB; `amg_cg` N in {20, 40, 60, 80, 100, 120, 150, 200}. `--big` adds
    N = 120 for `cholmod` (needs about 5 GB) and N = 250 for `amg_cg`. `--quick`: N in {20, 40}.
-   Columns: `N, n, method, setup_s, solve_s, peak_rss_mb, nnz_factor, iters, rel_err, status`.
+   Columns: `N, n, method, setup_s, solve_s, peak_rss_mb, nnz_factor, flops, iters, rel_err, status`, with
+   flops = the sum of column_counts()^2 of the factor for cholmod (NaN for the other methods).
    Median of 3 timings when a run takes under 60 s, else 1 run (say so in `status`).
 3. `results/e09_big_stack.csv`: lumped chain, N in {8, 10, 12, 16, 20, 24, 30, 40, 50, 60, 80, 100, 120,
    160, 200} (`--quick`: up to 40; `--big` adds 240). Solve with CHOLMOD on W^(1/2) A_L W^(-1/2) (N = 200:
@@ -77,7 +83,8 @@ so peak memory is measured per run, the way the prototype did it). Writes, throu
    three-player value from (1, 1, N-2) with `gr.matrix` for N in {10, 20, 40, 80, 160, 320}. Columns:
    `players, N, n_full, n_lumped, P, local_slope, seconds, solver`, where local_slope =
    log(P(previous N) / P(N)) / log(N / previous N).
-4. Fit alpha from the last four local slopes (linear extrapolation in 1/N) and write it to
+4. Fit alpha from the last four local slopes (least-squares line slope = a + c / N_mid^2,
+   N_mid = sqrt(previous N * N), because the four-player slopes approach alpha like 1/N^2) and write it to
    `results/e09_alpha.csv` with columns `players, alpha_last_slope, alpha_extrapolated`.
 
 Figures: `figures/f09_solvers.py` (setup + solve time and peak memory against n, log-log, one line per
@@ -109,14 +116,15 @@ decay exponent, the T bounds, and one AMG-CG solve (skipped if pyamg is missing)
 | amg_cg iters | 9 to 14 for N = 40 ... 150, growing slowly | | WARN |
 | amg_cg setup_s + solve_s against n | slope of log time vs log n between 0.8 and 1.4 | | WARN |
 | cholmod nnz_factor against n (N = 60 to 100) | slope between 1.25 and 1.6 (theory n^(4/3)); 8.0e6, 2.76e7, 7.45e7 at N = 60, 80, 100 | 10% | WARN |
-| cholmod setup_s against n | slope between 1.7 and 2.6 (theory n^2) | | WARN |
+| cholmod flops against n (N = 60 to 100) | slope 2.09 (theory n^2); 5.2907e9, 3.1766e10, 1.4145e11 at N = 60, 80, 100 (Linux, independent builder; nnz identical to the Mac's) | slope in [1.9, 2.3]; each value within 1% | FAIL |
+| cholmod setup_s against n (N = 60 to 100) | Mac 1.66 (flop rate 9.4 to 18.2 GFLOP/s), Linux 2.1 (3.0 GFLOP/s) | slope in [1.4, 2.6] | WARN |
 | splu (COLAMD) peak memory vs cholmod at N = 60 | splu several times larger (about 1 GB vs 0.2 GB here) | | WARN |
 | e09_big_stack P (four players) at N = 8, 10, 12, 16, 20, 24, 30, 40, 50 | 5.577821161394e-03 (= 11017/1975144), 1.571739438951e-03, 5.568973643914e-04, 1.080249783339e-04, 3.022376155052e-05, 1.066742330410e-05, 2.980150693207e-06, 5.753800975152e-07, 1.606108031016e-07 | 1e-9 relative | FAIL |
 | P at N = 60, 80, 100, 120, 160, 200 | 5.661341422530e-08, 1.092193169790e-08, 3.047622700924e-09, 1.074036901898e-09, 2.071632598328e-10, 5.780085237687e-11 | 1e-8 relative | FAIL |
 | local_slope (four players) | increasing in N; 5.6762 (8 to 10), 5.7121 (20 to 24), 5.7171 (30 to 40), 5.7198 (60 to 80), 5.7201 (80 to 100), 5.7205 (120 to 160), 5.7206 (160 to 200) | 1e-3 abs | FAIL |
 | local_slope (three players) | 3.000 | 1e-3 abs | FAIL |
 | P N^3, three players, N >= 80 | 9.11959 | 1e-5 relative | FAIL |
-| alpha_extrapolated (four players) | 5.721 | 0.003 | WARN |
+| alpha_extrapolated (four players) | 5.720688 (cone eigenvalue lambda = 38.446962, Project chat FEM); the 1/N^2 fit of the Nov 11 slopes gives 5.720687 | 1e-4 | FAIL |
 | n_lumped / n_full | 41/165 at N = 12, 204/969 at N = 20, 27353/156849 at N = 100; ratio tends to 1/6 | exact | FAIL |
 | seconds for the lumped CHOLMOD solve at N = 200 | under 2 min | | WARN |
 

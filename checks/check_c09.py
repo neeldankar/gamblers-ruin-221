@@ -8,8 +8,8 @@ Conventions (logged in notes/decisions.md, chunk 9):
   * e09_solvers: a run whose status starts with "skipped" or "killed" was stopped by the memory rules; it is listed
     but does not count as missing data. Every other planned (method, N) must have status "ok ...".
   * amg_cg iters "growing slowly": every N in 40..150 in [9, 14] and iters(150) >= iters(40).
-  * Time slopes are least-squares slopes of log time against log n: amg_cg over all its sizes, cholmod over
-    N = 60, 80, 100 (the same sizes as the nnz row).
+  * Time and flop slopes are least-squares slopes of log time (or flops) against log n: amg_cg over all its
+    sizes, cholmod over N = 60, 80, 100 (the same sizes as the nnz row). cholmod flops = sum colcount^2.
   * "splu several times larger": peak_rss_mb(splu) >= 3 x peak_rss_mb(cholmod) at N = 60.
   * "ratio tends to 1/6": the three exact fractions, and |n_lumped / n_full - 1/6| decreasing in N.
 """
@@ -29,6 +29,8 @@ T_MAX = {20: 26.5324, 40: 106.3099, 60: 239.2719}
 DIRECT_N, AMG_N = [20, 40, 60, 80, 100], [20, 40, 60, 80, 100, 120, 150, 200]
 METHOD_N = {"splu": DIRECT_N, "splu_mmd": DIRECT_N, "cholmod": DIRECT_N, "amg_cg": AMG_N}
 CHOLMOD_NNZ = {60: 8.0e6, 80: 2.76e7, 100: 7.45e7}
+CHOLMOD_FLOPS = {60: 5.2907e9, 80: 3.1766e10, 100: 1.4145e11}  # sum colcount^2, Linux, independent builder
+ALPHA = 5.720688  # cone eigenvalue lambda = 38.446962 (Project chat FEM)
 P_SMALL = dict(zip([8, 10, 12, 16, 20, 24, 30, 40, 50],
                    [5.577821161394e-03, 1.571739438951e-03, 5.568973643914e-04, 1.080249783339e-04,
                     3.022376155052e-05, 1.066742330410e-05, 2.980150693207e-06, 5.753800975152e-07,
@@ -141,11 +143,23 @@ def solver_checks(sv):
                                                f"({ch.loc[N, 'nnz_factor'] / CHOLMOD_NNZ[N] - 1:+.1%})" for N in big)
                 + missing(set(big), CHOLMOD_NNZ),
                 status(1.25 <= s <= 1.6 and vals_ok, "WARN", len(big) == len(CHOLMOD_NNZ))))
+    fl = [N for N in CHOLMOD_FLOPS if "flops" in ch.columns and N in ch.index and ch.loc[N, "flops"] > 0]
+    s = slope(ch.loc[fl, "n"], ch.loc[fl, "flops"]) if fl else float("nan")
+    vals_ok = all(abs(ch.loc[N, "flops"] / CHOLMOD_FLOPS[N] - 1) <= 0.01 for N in fl)
+    out.append(("cholmod flops against n (N = 60 to 100)",
+                "slope 2.09 (theory n^2); 5.2907e9, 3.1766e10, 1.4145e11 at N = 60, 80, 100 (Linux, independent "
+                "builder; nnz identical to the Mac's); slope in [1.9, 2.3]; each value within 1%",
+                f"slope {s:.3f}; " + ", ".join(f"N={N}: {ch.loc[N, 'flops']:.5g} "
+                                               f"({ch.loc[N, 'flops'] / CHOLMOD_FLOPS[N] - 1:+.2%})" for N in fl)
+                + missing(set(fl), CHOLMOD_FLOPS),
+                status(1.9 <= s <= 2.3 and vals_ok, "FAIL", len(fl) == len(CHOLMOD_FLOPS))))
     s = slope(ch.loc[big, "n"], ch.loc[big, "setup_s"]) if big else float("nan")
-    out.append(("cholmod setup_s against n", "slope between 1.7 and 2.6 (theory n^2); fitted on N = 60, 80, 100",
+    rate = ", ".join(f"{ch.loc[N, 'flops'] / ch.loc[N, 'setup_s'] / 1e9:.1f}" for N in fl)
+    out.append(("cholmod setup_s against n (N = 60 to 100)",
+                "Mac 1.66 (flop rate 9.4 to 18.2 GFLOP/s), Linux 2.1 (3.0 GFLOP/s); slope in [1.4, 2.6]",
                 f"slope {s:.3f}; " + ", ".join(f"N={N}: {ch.loc[N, 'setup_s']:.2f} s" for N in big)
-                + missing(set(big), CHOLMOD_NNZ),
-                status(1.7 <= s <= 2.6, "WARN", len(big) == len(CHOLMOD_NNZ))))
+                + (f"; flop rate {rate} GFLOP/s" if fl else "") + missing(set(big), CHOLMOD_NNZ),
+                status(1.4 <= s <= 2.6, "WARN", len(big) == len(CHOLMOD_NNZ))))
 
     sp_ = okrows[(okrows["method"] == "splu") & (okrows["N"] == 60)]
     c60 = okrows[(okrows["method"] == "cholmod") & (okrows["N"] == 60)]
@@ -204,9 +218,11 @@ def big_stack_checks(bs, al):
     a4 = al[al["players"] == 4]
     if len(a4):
         a = a4["alpha_extrapolated"].iloc[0]
-        obs = f"{a:.4f} (last slope {a4['alpha_last_slope'].iloc[0]:.4f})"
-    out.append(("alpha_extrapolated (four players)", "5.721; 0.003", obs if len(a4) else "no row",
-                status(len(a4) and abs(a - 5.721) <= 0.003, "WARN", bool(len(a4)) and 200 in four.index)))
+        obs = f"{a:.6f} ({a - ALPHA:+.1e}; last slope {a4['alpha_last_slope'].iloc[0]:.5f})"
+    out.append(("alpha_extrapolated (four players)",
+                "5.720688 (cone eigenvalue lambda = 38.446962, Project chat FEM); the 1/N^2 fit of the Nov 11 "
+                "slopes gives 5.720687; 1e-4", obs if len(a4) else "no row",
+                status(len(a4) and abs(a - ALPHA) <= 1e-4, "FAIL", bool(len(a4)) and 200 in four.index)))
 
     parts, ok = [], True
     for N, (nl, nf) in LUMP.items():
