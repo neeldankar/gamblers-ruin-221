@@ -41,6 +41,21 @@ def entry_condition(A, b, x, solve):
     return solve(abs(A) @ np.abs(x) + np.abs(b)) / np.abs(x)
 
 
+def structured_condition(A, b, x, row_sums, solve):
+    """kappa_i = (A^{-1} v)_i / x_i with v_i = b_i + row_sums_i x_i + sum_{j != i} |a_ij| |x_i - x_j|.
+
+    The structured condition number: every off-diagonal entry, every row sum and every b_i perturbed relatively
+    by at most eps (diagonal rebuilt from them) moves entry i by at most eps kappa_i to first order, and the
+    perturbation w_ij -> w_ij (1 + eps sign(x_j - x_i)), s -> s (1 - eps), b -> b (1 + eps) attains it in every
+    entry at once. solve(r) applies A^{-1}. Hypotheses: off-diagonals <= 0, row sums >= 0, b >= 0, A^{-1} >= 0,
+    x > 0. Derivation: notes/proofs.md, section 7."""
+    C = sp.coo_matrix(A)
+    off = C.row != C.col
+    r, c, w = C.row[off], C.col[off], -C.data[off]  # w_ij = -a_ij >= 0
+    v = b + row_sums * x + np.bincount(r, weights=w * np.abs(x[r] - x[c]), minlength=C.shape[0])
+    return solve(v) / x
+
+
 def conditional_mean_time(A, x, solve):
     """(A^{-1} x)_i / x_i = E_i[T | event], the expected rounds to the first bust given the event x."""
     return solve(x) / x
@@ -49,7 +64,8 @@ def conditional_mean_time(A, x, solve):
 def data_error_term(x, solve):
     """DELTA_SIXTH * (A^{-1} x)_i / x_i = DELTA_SIXTH * E_i[T | event] = -(u/4) cond_i.
 
-    The relative change of each entry caused by storing 1/6 in float64, to first order:
+    The relative change of each entry caused by storing 1/6 in float64 (exactly: x' - x = d A_d^-1 x, and `solve`
+    applies the stored inverse A_d^-1, so x (1 + data_error_term(x)) is the stored solution up to rounding):
     (x_stored - x_ideal)_i / x_i. Every float solver inherits it; an exact rational solve of the ideal system
     does not. Exact (to 1e-15 relative) for right-hand sides built from 1/6 alone (rhs_out_first); for rhs_order
     the individually rounded entries of b add about u. Derivation: notes/proofs.md, section 3."""

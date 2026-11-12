@@ -587,3 +587,60 @@
   - FFT 1.89 s at N = 1600, timing slope 1.17. Speedup over splu 10x at N = 400 and 22x at N = 800 (rfft2).
   - p123_reldiff rises from 1.9e-12 (N = 50) to 4.8e-7 (N = 800), a ratio of 2.4e5. It dips slightly from
     N = 100 to 200, as the spec allows.
+
+## Chunk 7b: fixes from the external review of chunks 4b and 7 (Nov 11)
+- Why: review 2 found four things.
+  - The structured sensitivity grows like 1.22 N. Chunk 7 never tried the worst direction, so its "2-5 eps at
+    every N" was the random-perturbation level only.
+  - "Direct has an N^2 u error" was measured on one solver (supernodal CHOLMOD).
+  - The error has three sources (stopping rule, stored data, the solver's own arithmetic), not two.
+  - Wording: the stored solution is an exact identity, not first order; Dot2 is not "about 2u" in general; the
+    4u test is not a proof.
+- Files: the spec and test came from ~/Downloads, moved to plan/c07b_review_fixes.md and
+  tests/c07_fixes/test_c07b_review.py. Identical copies (checked with cmp) also sat untracked in the repo root;
+  those were deleted.
+- Code:
+  - `gr.accuracy.structured_condition` and `gr.refine.exact_residual` (with `_scaled_ints`) are the spec's
+    reference code, unchanged apart from docstrings.
+  - Docstring-only edits: refine module item 2, `accurate_residual`, `iterative_refinement`, and accuracy's
+    `data_error_term`. `build_A`, `gth_solve`, `accurate_residual` and `iterative_refinement` keep their code.
+  - `pytest tests/c00_core tests/c04_accuracy tests/c07_fixes`: 118 passed (20 new). Full suite: 331 passed,
+    34 skipped.
+- Approved text edits, made exactly as listed:
+  - plan/c07_fixes.md edits 1-13, rewrapped to the file's width. The structured rows replace the old three in
+    place, and the baselines rows go at the end of the Expected table.
+  - notes/proofs.md: sections 7-9, verbatim.
+  - The test_c04b_review.py docstring now reads "for N >= 40" (the item left open in chunk 7's follow-up).
+- e07_structured:
+  - The old computations keep their order, so the old columns do not change for N <= 160. The new ones come
+    after `cond_max`.
+  - kappa and g use one splu of the base structured matrix. coherent_tiny uses build_A and x0 = solve(A, b), as
+    in the spec.
+  - The attaining, coherent and drift ratios are signed.
+  - structured_argmax_state is stored as the string "(x1, x2, x3)".
+- e07_baselines:
+  - One CHOLMOD nesdis factor F per N applies A^-1 in the error formulas.
+  - `seconds` is one run from A to xhat, factorization included. cholmod_default and ir_direct reuse F, so F's
+    setup time is added to them. This is not a benchmark.
+  - banded_int is `direct.factorize(A6, "banded_cholesky", "natural")` on `integer_system(A, b, 6)`.
+  - This scikit-sparse has the `supernodal_mode` keyword, so no row is skipped.
+- check_c07:
+  - Mirrors edits 10-12 and adds the 26 rows. A row with a list of values needs every listed N present. The
+    ir_direct ulp row needs N = 1280. "Equals simplicial/supernodal" compares at the N where both rows exist.
+  - The structured red flag also requires coherent_tiny = N - 3 (1e-4).
+  - The report gains a table of the new e07_structured columns and an e07_baselines table.
+- Regression checks vs independent confirmations: the rows quoting Mac values (direct err_vs_stored, gth beats
+  direct, cg_componentwise err_vs_stored, the FFT value at N = 800, and so on) were rewritten from the Mac run,
+  so passing them is a regression result. The independent confirmations are:
+  - the exact-rational rows (N <= 80);
+  - GTH against refinement;
+  - the exact-integer rows of e07_baselines;
+  - the 7b rows taken from the Project chat's Linux code (structured values, data term, ulp).
+- Figures:
+  - f07_structured: five series (slots 1-5 of the validated palette; chunk 7's three keep their colors) and
+    guides 0.39 N^2 and 1.22 N. The legend sits outside the plot.
+  - f07_baselines: each method keeps one color in both panels. Panel (a) uses slots 1, 3, 4, 5, 6, 7 and
+    panel (b) slots 1, 2, 7, 8; each set was validated in its order (all checks pass, contrast WARN is relieved
+    by the legend and the CSV table).
+  - cholmod_int has no slot left, so it is drawn in ink with its own marker and dash. cholmod_default has hollow
+    markers because it coincides with simplicial or supernodal.

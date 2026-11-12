@@ -76,3 +76,69 @@ using Ferguson's Brownian approximation, and says the approximation is not rigor
 By symmetry P(3 out first) = 2 P(321) at (1, 1, N-2), and 2c = Gamma(1/3)^9 / (8 pi^4) = 9.11958899992 (reflection
 and duplication formulas; checked to 39 digits). Our addition: with a correctly rounded reference the values
 follow C + 34.39 / N^4 ((v - C) N^4 = 34.375, 34.388, 34.391 at N = 160, 320, 640), measured, not proved.
+
+### 7. The structured condition number
+
+Describe the M-matrix by its off-diagonal weights w_ij = -a_ij >= 0 (each ordered pair separately), its row sums
+s_i >= 0 and the right-hand side b_i >= 0; the diagonal is a_ii = s_i + sum_j w_ij, never data. Perturb every
+parameter by a relative amount of at most eps. With x = A^-1 b,
+(dA x)_i = ds_i x_i + sum_j dw_ij (x_i - x_j), and dx = A^-1 (db - dA x).
+Because A^-1 >= 0, the largest first-order change of entry k is eps (A^-1 v)_k with
+v_i = b_i + s_i x_i + sum_j w_ij |x_i - x_j|,
+and one perturbation attains it in every entry at once: dw_ij = eps w_ij sign(x_j - x_i) (a drift toward the
+event), ds = -eps s, db = +eps b. So kappa_k = (A^-1 v)_k / x_k. Since A^-1 b = x, the b term contributes exactly 1.
+Reading it as in section 2 (G(k, i) x_i / x_k is the expected number of visits to i of the walk conditioned on the
+event): kappa_k = 1 + E_k[ sum_{t < T} ( s(X_t) + sum_j w |x_j - x(X_t)| / x(X_t) ) | event ]. The componentwise
+number charges 2 per step (cond = 2 E[T | event]); the structured one charges the relative variation of x across
+one step, which near the corner is of order 1/r at distance r (x grows like r^3 there), and that adds up to order N
+(a heuristic for the growth; the numbers below are measured).
+
+Lower bound with no computation (review 2): let h_i = x3 at state i and H = diag(h). A(eps) = A + eps (HA - AH)
+has a_ij(eps) = a_ij (1 + eps (h_i - h_j)) with h_i - h_j in {-1, 0, 1}, the same diagonal, and row sums that move by
+eps (1/6) sum over busting moves of (h_i - h_y), at most eps s_i (h is harmonic for the six moves). So it is an
+admissible perturbation. For out_first_3, b lives where h = 1, so Hb = b and differentiating A(eps) x(eps) = b
+gives dx/deps = (H - I) x: entry i moves by (h_i - 1) eps x_i, that is N - 3 at (1, 1, N-2). Hence kappa_tiny >= N - 3.
+
+Measured (N = 10 ... 640): kappa_tiny = max_i kappa_i = 11.35, 23.80, 48.30, 97.10, 194.6, 389.5, 779.2, that is
+1.1353 N rising to 1.2176 N; the smallest kappa_i over all states is 2.5. If only symmetric perturbations are
+allowed (w_ij and w_ji move together), the tiny entry's number is
+(sum_i g_i (b_i + s_i x_i) + sum_{i<j} w_ij |g_i - g_j| |x_i - x_j|) / x_tiny with g = A^-1 e_tiny:
+6.2, 8.3, 10.2, 12.0, 13.8, 15.6, 17.4, about 1.8 more per doubling (log N). Random perturbations: 1.5 to 3.1.
+So there are four levels: 0.39 N^2 (entries of A, diagonal free), 1.22 N (structured), log N (structured and
+symmetric), O(1) (random). The chunk 7 statement "2 to 5 eps at every N" described the last one only.
+The Alfa-Xue-Ye bound for this parametrization has a coefficient of order n; it does not promise O(1) either.
+GTH's measured error, 0.19 to 0.42 N u, is 0.16 to 0.34 kappa u.
+
+### 8. Three sources of error at a tiny entry
+
+1. **The stopping rule.** A residual test bounds the absolute error (section 4): up to 100% relative error.
+2. **The stored data.** x'_i = E_i[(1+d)^T; event] exactly, because x' = sum_t (1+d)^(t+1) Q^t b. Hence
+   d E_i[T | event] <= (x' - x)_i / x_i <= d E_i[T | event] + (d^2 / 2) E_i[T^2 | event]; the second-order term is
+   about 3e-22 at N = 1280, and x' = x + d A_d^-1 x is an identity (section 3). In the parameters of section 7 the
+   rounding of 1/6 is harmless (it scales w, s and b by the same factor: that is why GTH does not see it). It
+   costs 0.097 N^2 u only because the stored matrix keeps its diagonal at 1: interior row sums go from 0 to
+   2^-54, which is not a small relative change of a row sum.
+3. **The solver's own arithmetic.** Against the stored solution, at the tiny entry, N = 160 to 640 (Linux):
+   supernodal CHOLMOD +0.05 N^2 u (Mac +0.032), SuperLU COLAMD +0.03, SuperLU natural -0.07 to -0.14, simplicial
+   CHOLMOD -0.006, LAPACK band Cholesky below 0.005. The N^2 growth means the rounding errors do not average
+   out; why they are coherent (identical local arithmetic on a regular lattice is our guess) is not established.
+   The constant changes with the algorithm, the ordering, the scaling (CHOLMOD on the integer matrix 6A:
+   +0.18 N^2 u) and the machine.
+
+What each fix removes: componentwise stopping removes 1 and leaves 2 and 3 (it lands as close to the stored
+solution as the best direct solves). Refinement with the residual of the ideal integer system removes all three:
+correctly rounded in every tested case (exact rationals for N <= 80; exact integer residuals for N = 160 to 1280).
+GTH never forms 2 and has no N^2 term in 3: 0.19 to 0.42 N u, not correctly rounded. A band Cholesky of the
+integer matrix 6A also avoids 2 but keeps a small N^2 term (0.0094 N^2 u at N = 640, 19 times GTH's error).
+
+### 9. What the compensated residual guarantees
+
+Dot2 (Ogita, Rump and Oishi 2005, Proposition 5.5) gives |r_hat - r| <= u |r| + gamma_m^2 sum_k |a_k x_k| with
+gamma_m = m u / (1 - m u): for a row with 7 nonzeros, about 2u |r_i| + 64 u^2 (|A||x| + |b|)_i after the division.
+It is not exact: for the row of state (2, 2, 16) at N = 20, coefficients (-20, -20, -20, 120, -20, -20, -20), and
+x = (q, t, 1, 3002399751580331 q, q, 0, 0) with q = 2^-54, t = 2^-174, the exact residual is 20 t and the loop
+returns 0 (review 2; reproduced). Near a solution the bound is far more than refinement needs, and in every
+case checked there (N = 12, 40, 160, the Project chat's transcription of the loop) the result equals the correctly
+rounded residual. The stopping
+test of the refinement (last correction at most 4u) is a stopping rule. Correct rounding is a measured result:
+after the last step the error is the inner solve's error on a correction of size u, plus one rounding.

@@ -193,7 +193,7 @@ def test_rhs_landing():
 @pytest.mark.parametrize("N", [40, 80])
 def test_entry_error_is_inverse_row_times_residual(N):
     """e_i = (A^-1 e_i) . r exactly, so |e_i| <= ||A^-1 e_i||_2 ||r||_2: a residual test bounds the absolute
-    error. At the corner ||A^-1 e_i||_2 = 1.1702 for every N (measured 1.17022 and 1.17023)."""
+    error. At the corner ||A^-1 e_i||_2 = 1.1702 for N >= 40 (measured 1.17022 and 1.17023)."""
     krylov = pytest.importorskip("gr.krylov")
     S, A, tiny = setup(N)
     b = rhs_out_first(S, 2)

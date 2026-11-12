@@ -2,7 +2,7 @@
 
 1. cg_componentwise: CG that stops on the Oettli-Prager backward error of the true residual, not on ||r||.
 2. iterative_refinement with accurate_residual: 6N A and 6N b are integers that stand for the IDEAL system
-   (1/6 exactly), so b - A x computed from them without rounding error is the residual of the true problem.
+   (1/6 exactly), so b - A x computed from them with a compensated (Dot2) sum is the residual of the true problem.
    Refinement then removes the error of storing 1/6 in float64 as well as the solver's own error.
 3. gth_solve: Gaussian elimination where every pivot comes from a row sum, so no step ever subtracts.
 
@@ -87,9 +87,43 @@ def _residual(Ai, B, x, scale):
 
 def accurate_residual(A, b, x, scale):
     """r = b - A x for the ideal system: (B - Ai x) / scale with error-free products and sums.
-    Each entry is correct to about 2u (one rounding of s + c, one of the division)."""
+    Error of entry i: at most 2u |r_i| + about 64 u^2 (|A||x| + |b|)_i (Ogita, Rump and Oishi's Dot2 bound).
+    That is about 2u only while the first term dominates; `exact_residual` is the exact (slow) version."""
     Ai, B = integer_system(A, b, scale)
     return _residual(Ai, B, x, scale)
+
+
+def _scaled_ints(v):
+    """Python integers V and a shift s with v[i] = V[i] / 2**s exactly."""
+    v = np.asarray(v, dtype=float)
+    m, e = np.frexp(v)
+    M = np.ldexp(m, 53).astype(np.int64)  # exact: m has 53 significant bits
+    s = int((53 - e).max())
+    return [int(a) << (s - 53 + int(k)) for a, k in zip(M.tolist(), e.tolist())], s
+
+
+def exact_residual(A, b, x, denom=1):
+    """(b - A x) / denom with every entry correctly rounded. For checks only: a slow Python loop.
+
+    The float values of A, b and x are converted to exact Python integers (each a multiple of a common power of
+    2), each row is summed exactly, and one integer division rounds once. denom must be a positive integer.
+    exact_residual(A, b, xhat) is the residual of the stored system; with Ai, B = integer_system(A, b, 6N),
+    exact_residual(Ai, B, xhat, denom=6N) is the residual of the ideal system."""
+    A = sp.csr_matrix(A)
+    ip, ix = A.indptr, A.indices
+    Ad, sa = _scaled_ints(A.data)
+    X, sx = _scaled_ints(x)
+    Bv, sb = _scaled_ints(b)
+    if int(denom) != denom or denom < 1 or sa + sx < sb:
+        raise ValueError("denom must be a positive integer (and b must not need more bits than A x)")
+    up, D = sa + sx - sb, int(denom) << (sa + sx)
+    r = np.empty(A.shape[0])
+    for i in range(A.shape[0]):
+        R = Bv[i] << up
+        for k in range(ip[i], ip[i + 1]):
+            R -= Ad[k] * X[ix[k]]
+        r[i] = R / D  # Python's int / int is correctly rounded
+    return r
 
 
 # ---------------------------------------------------------------- iterative refinement
@@ -99,6 +133,7 @@ def iterative_refinement(A, b, solve, scale, x0=None, max_steps=10):
 
     solve(r) applies an approximate A^{-1} (a direct factor, or a sloppy inner CG). x starts as solve(b), or x0.
     Stops when the correction max_i |d_i| / |x_i| is at most 4u, or after max_steps steps.
+    The 4u test is a stopping rule, not a proof of correct rounding.
     Returns x and {"steps": steps taken, "corrections": one per step, "converged": bool}.
     """
     Ai, B = integer_system(A, b, scale)  # built once, used in every step

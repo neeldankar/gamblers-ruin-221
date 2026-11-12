@@ -10,6 +10,16 @@ in the diagonal), and every solve is SuperLU (gr.matrix.solve). Ratios are |x'_i
   (b) structured_push: row sums times (1 - eps), b times (1 + eps), off-diagonals unchanged. Largest ratio.
   (c) cond_max = max_i cond_i from gr.accuracy.entry_condition (chunk 4's parametrization: A's entries).
   two_n_minus_1 = 2n - 1, for comparison.
+Chunk 7b additions (after the computations above, so their values do not change), with x the base solution,
+kappa = gr.accuracy.structured_condition on the base system and tiny = (1, 1, N-2):
+  (d) structured_cond_tiny, structured_cond_max, structured_argmax_state, structured_cond_over_N = max / N.
+  (e) attained_tiny, attained_max_dev: off-diagonal weights times 1 + eps sign(x_j - x_i), row sums times 1 - eps,
+      b times 1 + eps. ratio_i = (x'_i - x_i) / x_i / eps (signed): the ratio at tiny, and max_i |ratio_i / kappa_i - 1|.
+  (f) coherent_tiny: (A + eps (H A - A H)) x' = b, H = diag(x3), A = build_A; ratio at tiny against x0 = solve(A, b).
+  (g) drift_tiny: the weights of (e) only (row sums and b unchanged); ratio at tiny.
+  (h) symmetric_cond_tiny: with g = A^-1 e_tiny and each unordered pair {i, j} once,
+      (sum_i g_i (b_i + s_i x_i) + sum_{i<j} |a_ij| |g_i - g_j| |x_i - x_j|) / x_tiny.
+  (i) cond_tiny: chunk 4's entry_condition at tiny (next to cond_max).
     python experiments/e07_structured.py [--quick] [--outdir DIR]
 """
 import os
@@ -21,13 +31,14 @@ import argparse
 
 import numpy as np
 import scipy.sparse as sp
+import scipy.sparse.linalg as spla
 
 from gr import accuracy as acc
 from gr.matrix import boundary_rhs, build_A, rhs_out_first, solve
 from gr.runlog import save_results
 from gr.states import StateSpace
 
-FULL = [10, 20, 40, 80, 160]
+FULL = [10, 20, 40, 80, 160, 320, 640]
 QUICK = [10, 20]
 EPS = 1e-8
 DRAWS = 20
@@ -66,11 +77,44 @@ def run_size(N):
     push = np.max(np.abs(xp - x) / x / EPS)
 
     x0 = solve(A, b)
-    cond_max = acc.entry_condition(A, b, x0, lambda rhs: solve(A, rhs)).max()
+    cond = acc.entry_condition(A, b, x0, lambda rhs: solve(A, rhs))
+    cond_max = cond.max()
+
+    # chunk 7b: the structured condition number and the directions that attain it
+    tiny = S.index((1, 1, N - 2))
+    base = spla.splu(structured_matrix(r, c, v, sums).tocsc())  # factored once, for kappa and g
+    kappa = acc.structured_condition(A, b, x, sums, base.solve)
+    k_arg = int(np.argmax(kappa))
+    toward = 1 + EPS * np.sign(x[c] - x[r])  # weight up toward the larger x: a drift toward the event
+
+    xp = solve(structured_matrix(r, c, v * toward, sums * (1 - EPS)), b * (1 + EPS))
+    attained = (xp - x) / x / EPS
+
+    h = S.x3.astype(float)
+    H = sp.diags(h)
+    xp = solve((A + EPS * (H @ A - A @ H)).tocsr(), b)
+    coherent = (xp - x0) / x0 / EPS
+
+    xp = solve(structured_matrix(r, c, v * toward, sums), b)
+    drift = (xp - x) / x / EPS
+
+    e = np.zeros(S.n)
+    e[tiny] = 1.0
+    g = base.solve(e)
+    up = r < c  # each unordered pair {i, j} once (the matrix is symmetric)
+    pair = np.sum(-v[up] * np.abs(g[r[up]] - g[c[up]]) * np.abs(x[r[up]] - x[c[up]]))
+    symmetric = (np.sum(g * (b + sums * x)) + pair) / x[tiny]
+
     print(f"N = {N:4d}  n = {S.n:6d}  random max {random_max:.3f}  push {push:.3f}  cond_max {cond_max:.1f}  "
-          f"cond_max / push {cond_max / push:.1f}", flush=True)
+          f"kappa_tiny {kappa[tiny]:.4f} ({kappa[tiny] / N:.4f} N)  attained {attained[tiny]:.4f}  "
+          f"coherent {coherent[tiny]:.4f}  drift {drift[tiny]:.4f}  symmetric {symmetric:.4f}", flush=True)
     return {"N": N, "n": S.n, "structured_random_max": random_max, "structured_push": push, "cond_max": cond_max,
-            "two_n_minus_1": 2 * S.n - 1, "eps": EPS, "draws": DRAWS}
+            "two_n_minus_1": 2 * S.n - 1, "eps": EPS, "draws": DRAWS,
+            "structured_cond_tiny": kappa[tiny], "structured_cond_max": kappa[k_arg],
+            "structured_argmax_state": str(S.state(k_arg)), "structured_cond_over_N": kappa[k_arg] / N,
+            "attained_tiny": attained[tiny], "attained_max_dev": np.max(np.abs(attained / kappa - 1)),
+            "coherent_tiny": coherent[tiny], "drift_tiny": drift[tiny], "symmetric_cond_tiny": symmetric,
+            "cond_tiny": cond[tiny]}
 
 
 def main():
