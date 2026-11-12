@@ -812,3 +812,17 @@ approved the edits below to plan/c09_four_players.md and CLAUDE.md. tests/ is un
   later session does not "fix" it.
 - Commits: the code, check, spec and notes go first ("chunk 9: review fixes"), then the rerun's results.
   CLAUDE.md requires that order.
+- Rerun results. The full run used git e27cb2e and 1 thread, on AC power with ChatGPT and Chrome closed
+  and Cursor still open; it took about 10 min.
+  - Free memory at the start was 4946 MB (free + inactive + speculative pages from vm_stat), so the kill
+    limit was 2968 MB. Swap use was 8.7 GB before the run.
+  - No run was killed. splu (COLAMD) at N = 100 was skipped again, because its projected factor was
+    3.5 GB, over the 3 GB limit. splu_mmd at N = 100 ran with a peak of 2922 MB, only 46 MB under the kill
+    limit. Chunk 11 reruns everything on a freshly restarted machine, and only its CSVs go in the final
+    report.
+  - check_c09 gives 22 PASS, 0 WARN, 0 FAIL, and no red flags.
+  - cholmod flops are 5.2907e9, 3.1766e10 and 1.4145e11 at N = 60, 80, 100, which match the Linux
+    values to all printed digits; the slope is 2.085. Setup times are 0.55, 2.21 and 7.71 s, a slope of
+    1.677 and a flop rate of 9.7, 14.4 and 18.4 GFLOP/s.
+  - alpha_extrapolated is 5.720687 (1/N^2 fit), 1.2e-6 below the cone value 5.720688. The last local
+    slope is 5.72055.
