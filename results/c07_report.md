@@ -1,6 +1,6 @@
 # Chunk 7 report: three fixes for the tiny probabilities
 
-Sources: `results/e07_fixes.csv` (git 522a5a2, 2026-11-10T23:57:45), `results/e07_structured.csv` (git 522a5a2, 2026-11-10T23:33:25), `results/e07_floor.csv` (git c7eebd8, 2026-11-11T09:45:58), `results/e07_fft_check.csv` (git 86834dc, 2026-11-11T15:03:18); macOS-15.6.1-arm64-arm-64bit-Mach-O, Python 3.13.18, numpy 2.5.4, scipy 1.18.1, OMP_NUM_THREADS=1.
+Sources: `results/e07_fixes.csv` (git 522a5a2, 2026-11-10T23:57:45), `results/e07_structured.csv` (git 3ccfc4e, 2026-11-11T16:05:40), `results/e07_baselines.csv` (git 3ccfc4e, 2026-11-11T16:06:57), `results/e07_floor.csv` (git c7eebd8, 2026-11-11T09:45:58), `results/e07_fft_check.csv` (git 86834dc, 2026-11-11T15:03:18); macOS-15.6.1-arm64-arm-64bit-Mach-O, Python 3.13.18, numpy 2.5.4, scipy 1.18.1, OMP_NUM_THREADS=1.
 
 | Check | Expected | Observed | Status |
 |---|---|---|---|
@@ -20,26 +20,49 @@ Sources: `results/e07_fixes.csv` (git 522a5a2, 2026-11-10T23:57:45), `results/e0
 | cg_componentwise tol 1e-14 converged | mic0 and amg at every N up to 1280; none up to N = 640 (not at 1280: see e07_floor) | 23/24 rows converged (N up to 1280); required runs: 23/23; not converged: N=1280 none (final omega 360 u) | PASS |
 | ir_direct seconds minus direct seconds at N = 640 | about 0.06 s (factor 1.3 s, Mac); under 50% of the factor time | ir_direct - direct = 0.056 s, factor 1.34 s (4%) | PASS |
 | e07_fft_check: which solver is off at (N-2, 1, 1) | the FFT (normwise accurate only); splu within about 0.1 N^2 u of ir_direct, and near data_term_smallest | N=50: fft 1.9e-12, splu 2.1e-14 (0.077 N^2 u; signed -2.1e-14 vs data term -2.7e-14); N=100: fft 3e-10, splu 8.3e-14 (0.075 N^2 u; signed -8.3e-14 vs data term -1.1e-13); N=200: fft 2.5e-10, splu 3.2e-13 (0.073 N^2 u; signed -3.2e-13 vs data term -4.3e-13); N=400: fft 1.2e-07, splu 1.3e-12 (0.071 N^2 u; signed -1.3e-12 vs data term -1.7e-12); N=800: fft 4.8e-07, splu 5e-12 (0.070 N^2 u; signed -5e-12 vs data term -6.9e-12) | PASS |
-| e07_fft_check: FFT rel_err_smallest at N = 800 | about 1e-6 (chunk 6's disagreement, 6e-7 to 2e-6) | 4.8e-07 | WARN |
-| structured_random_max | 1.48, 1.96, 2.21, 2.94, 2.41 (N = 10 ... 160; a max over 20 random draws, so not monotone); below 10 | N=10: 1.48, N=20: 1.96, N=40: 2.21, N=80: 2.94, N=160: 2.41 | PASS |
-| structured_push | 3.85, 4.30, 4.53, 4.64, 4.69 (N = 10 ... 160); below 10 | N=10: 3.85 (3.85), N=20: 4.30 (4.3), N=40: 4.53 (4.53), N=80: 4.64 (4.64), N=160: 4.69 (4.69) | PASS |
-| cond_max / structured_push | grows like N^2: 37/3.85 (10), 2484/4.64 (80), 9941/4.69 (160); increasing | N=10: 37/3.85 = 9.7, N=20: 154/4.30 = 35.8, N=40: 620/4.53 = 137.0, N=80: 2484/4.64 = 535.7, N=160: 9941/4.69 = 2117.9 | PASS |
+| e07_fft_check: FFT rel_err_smallest at N = 800 | 4.8e-7 on the Mac (6e-7 and 2e-6 on two Linux reference implementations); in [1e-8, 1e-4] | 4.8e-07 | PASS |
+| structured_cond_tiny, N = 10 ... 640 | 11.35295, 23.79933, 48.30309, 97.09688, 194.5739, 389.4719, 779.2398; 1e-4 relative | N=10: 11.35295, N=20: 23.79933, N=40: 48.30309, N=80: 97.09688, N=160: 194.5739, N=320: 389.4719, N=640: 779.2398 | PASS |
+| structured_cond_max and structured_argmax_state | equal to structured_cond_tiny, at (1, 1, N-2); 1e-9 relative; exact | N=10: +0.0e+00 at (1, 1, 8), N=20: +0.0e+00 at (1, 1, 18), N=40: +0.0e+00 at (1, 1, 38), N=80: +0.0e+00 at (1, 1, 78), N=160: +0.0e+00 at (1, 1, 158), N=320: +0.0e+00 at (1, 1, 318), N=640: +0.0e+00 at (1, 1, 638) | PASS |
+| structured_cond_over_N | 1.1353, 1.1900, 1.2076, 1.2137, 1.2161, 1.2171, 1.2176: increasing, below 1.22; in [1.13, 1.22], increasing | N=10: 1.1353, N=20: 1.1900, N=40: 1.2076, N=80: 1.2137, N=160: 1.2161, N=320: 1.2171, N=640: 1.2176 | PASS |
+| attained_tiny / structured_cond_tiny; attained_max_dev | 1; at most 3.5e-6; within 1e-4; below 1e-4 | N=10: 1.0000001, dev 5.1e-08, N=20: 1.0000001, dev 7.7e-08, N=40: 1.0000002, dev 1.5e-07, N=80: 1.0000003, dev 3.1e-07, N=160: 1.0000006, dev 6.9e-07, N=320: 1.0000012, dev 1.6e-06, N=640: 1.0000023, dev 3.4e-06 | PASS |
+| coherent_tiny | N - 3: 7, 17, 37, 77, 157, 317, 637; 1e-4 relative | N=10: 7.00000, N=20: 17.00000, N=40: 37.00001, N=80: 77.00002, N=160: 157.00010, N=320: 317.00042, N=640: 637.00169 | PASS |
+| drift_tiny | 7.50173, 19.49928, 43.77809, 92.45941, 189.8802, 384.7504, 774.5056; 1e-4 relative | N=10: 7.501732, N=20: 19.49928, N=40: 43.77809, N=80: 92.45941, N=160: 189.8802, N=320: 384.7504, N=640: 774.5057 | PASS |
+| symmetric_cond_tiny | 6.228720, 8.265100, 10.17282, 12.01203, 13.81435, 15.59815, 17.37261 (about 1.8 more per doubling: log N); 1e-4 relative | N=10: 6.22872, N=20: 8.2651, N=40: 10.17282, N=80: 12.01203, N=160: 13.81435, N=320: 15.59815, N=640: 17.37261 | PASS |
+| cond_tiny / structured_cond_tiny / N | 0.3289, 0.3232, 0.3208, 0.3198, 0.3193, 0.3191, 0.3190; in [0.31, 0.33] | N=10: 0.3289, N=20: 0.3232, N=40: 0.3208, N=80: 0.3198, N=160: 0.3193, N=320: 0.3191, N=640: 0.3190 | PASS |
+| structured_random_max | 1.48, 1.96, 2.21, 2.94, 2.41, 2.85, 3.07 (N = 10 ... 640; a max over 20 draws, not monotone); below 10 | N=10: 1.48, N=20: 1.96, N=40: 2.21, N=80: 2.94, N=160: 2.41, N=320: 2.85, N=640: 3.07 | PASS |
+| structured_push | 3.8512, 4.3001, 4.5250, 4.6375, 4.6937, 4.7219, 4.7359; 1e-3 relative | N=10: 3.8512, N=20: 4.3001, N=40: 4.5250, N=80: 4.6375, N=160: 4.6937, N=320: 4.7219, N=640: 4.7359 | PASS |
+| structured_cond_max / structured_random_max | grows like N: 7.7 (10), 33 (80), 254 (640); above 0.3 N | N=10: 7.7 (0.77 N), N=20: 12.2 (0.61 N), N=40: 21.8 (0.55 N), N=80: 33.0 (0.41 N), N=160: 80.8 (0.51 N), N=320: 136.6 (0.43 N), N=640: 253.7 (0.40 N) | PASS |
+| baselines, stored-system methods: true_err_tiny - own_err_tiny | = data_term_tiny (-4.270e-15 at N = 20 ... -4.4153e-12 at 640, -1.7661e-11 at 1280); 1e-3 relative | 36 rows, worst deviation 1.2e-12 (N=320 splu_natural); data_term_tiny N=20: -4.2702e-15, N=40: -1.7206e-14, N=80: -6.8948e-14, N=160: -2.7592e-13, N=320: -1.1038e-12, N=640: -4.4153e-12, N=1280: -1.7661e-11 | PASS |
+| baselines, ir_direct: max_true_err_in_ulp, every N up to 1280 | at most 0.5 (correctly rounded; 0.500 in the Project chat's independent refinement); 1e-6 | N=20: 0.498968, N=40: 0.499467, N=80: 0.499025, N=160: 0.499976, N=320: 0.499975, N=640: 0.499996, N=1280: 0.499999 | PASS |
+| baselines, cholmod_default own_err_tiny against e07_fixes direct err_vs_stored_tiny, N >= 160 | equal (same solve, two ways of measuring: exact integers here, x_ref there); 2% | N=160: +9.071e-14 vs +9.054e-14 (+1.8e-03), N=320: +3.649e-13 vs +3.65e-13 (-3.3e-04), N=640: +1.47e-12 vs +1.47e-12 (+1.2e-04), N=1280: +5.743e-12 vs +5.743e-12 (-1.4e-05) | PASS |
+| baselines, gth max_true_err_in_u against e07_fixes gth max_rel_err_in_u | equal; 1.5 u or 2%, whichever is larger | N=20: 7.60 vs 8.00 u, N=40: 11.20 vs 11.75 u, N=80: 33.91 vs 33.84 u, N=160: 45.40 vs 45.76 u, N=320: 60.29 vs 59.54 u, N=640: 199.60 vs 199.82 u | PASS |
+| baselines, cholmod_default own_err_tiny | equals cholmod_simplicial for N <= 80 and cholmod_supernodal for N >= 160 (that switch is the sign flip between 80 and 160); 1e-9 relative | N=20: simplicial 0.0e+00, N=40: simplicial 0.0e+00, N=80: simplicial 0.0e+00, N=160: supernodal 0.0e+00, N=320: supernodal 0.0e+00, N=640: supernodal 0.0e+00 | PASS |
+| baselines, cholmod_supernodal own_err_over_N2u, N >= 160 | +0.052, +0.052, +0.050 on Linux; expect +0.032 on the Mac; in [0.01, 0.1] | N=160: +0.0319, N=320: +0.0321, N=640: +0.0323 | PASS |
+| baselines, cholmod_simplicial own_err_over_N2u, N >= 160 | -0.0056, -0.0058, -0.0066 on Linux; absolute value below 0.02 | N=160: -0.0179, N=320: -0.0207, N=640: -0.0215 | WARN |
+| baselines, banded own_err_over_N2u, N >= 80 | +0.0009, +0.0014, -0.0004, -0.0048 on Linux; absolute value below 0.02 | N=80: +0.0009, N=160: +0.0001, N=320: -0.0010, N=640: -0.0054 | PASS |
+| baselines, banded max_own_err_in_u | 28, 45, 40, 108, 496, 2324 on Linux; each within a factor 3 | N=20: 31, N=40: 45, N=80: 35, N=160: 91, N=320: 446, N=640: 2247 | PASS |
+| baselines, splu_colamd own_err_over_N2u, N >= 80 | +0.030, +0.031, +0.033, +0.035 on Linux; in [0.005, 0.1] | N=80: +0.0325, N=160: +0.0252, N=320: +0.0273, N=640: +0.0280 | PASS |
+| baselines, splu_natural own_err_over_N2u, N = 160, 320 | -0.067, -0.143 on Linux: natural order does not make SuperLU accurate; absolute value above 0.02 | N=160: -0.0481, N=320: -0.1261 | PASS |
+| baselines, banded_int max_true_err_in_u | 29, 56, 49, 194, 749, 3844 on Linux (0.0094 N^2 at N = 640); each within a factor 3 | N=20: 27, N=40: 54, N=80: 67, N=160: 156, N=320: 653, N=640: 4085 | PASS |
+| baselines, banded_int / banded: max_true_err_in_u at N = 640 | 0.09 on Linux (integer data removes the data term for a band solve); below 0.5 | 4085 / 41973 = 0.097 | PASS |
+| baselines, gth / banded_int: max_true_err_in_u at N = 160, 320, 640 | 0.24, 0.08, 0.05 (Mac GTH over Linux band solve); below 1, decreasing | N=160: 45 / 156 = 0.291, N=320: 60 / 653 = 0.092, N=640: 200 / 4085 = 0.049 | PASS |
+| baselines, cholmod_int true_err_over_N2u, N >= 160 | +0.18 on Linux: integer scaling does not help CHOLMOD (worse than the data term's 0.097); absolute value above 0.02 | N=160: +0.1385, N=320: +0.1416, N=640: +0.1421 | PASS |
 | e07_floor, none: min_omega_in_u | increasing in N: 9.9 (80), 17.7 (160), 26.5 (320), 57.4 (640), 193 (1280) on Linux with independent code; the Mac run log had 312 at 1280; each within a factor 2.5 of these | N=80: 10.1 u (1.02x), N=160: 15.5 u (0.88x), N=320: 25.0 u (0.94x), N=640: 50.8 u (0.89x), N=1280: 311.8 u (1.62x); increasing: yes | PASS |
 | e07_floor, none, N = 1280: min_omega | above 1e-14 (plain CG cannot reach tol 1e-14 there) | 3.46e-14 (312 u) | PASS |
 | e07_floor, mic0 and amg: min_omega_in_u | at most 90 at every N (they reach tol 1e-14 in e07_fixes) | amg: N=80: 3.9 u, N=160: 4.6 u, N=320: 7.1 u, N=640: 15.1 u, N=1280: 23.9 u; mic0: N=80: 6.0 u, N=160: 9.9 u, N=320: 19.3 u, N=640: 26.0 u, N=1280: 62.2 u | PASS |
 | e07_floor, none: k_at_min_over_k10 | 1.40, 1.45, 1.49, 1.61, 1.54 (Linux); in [1, 3.5]; above 3.5 means maxiter cut the run before the floor | N=80: 1.40, N=160: 1.42, N=320: 1.51, N=640: 1.54, N=1280: 1.60 | PASS |
 
-Summary: 23 PASS, 1 WARN, 0 FAIL.
+Summary: 46 PASS, 1 WARN, 0 FAIL.
 
 ## Red flags (automatic checks of the spec's list)
 
 | Red flag check | Observed | OK |
 |---|---|---|
 | refinement converged but not to the exact answer (N <= 80) | 0 of 12 converged ir rows above 2 u | yes |
-| GTH error growing like N^2 (log-log slope of max_rel_err_in_u, N >= 40) | slope 0.86 (ordinary elimination grows like N^2: slope 2) | yes |
+| GTH error growing like N^2 (log-log slope of max_rel_err_in_u, N >= 40) | slope 0.86 (the default CHOLMOD solve grows like N^2: slope 2) | yes |
 | cg_componentwise with mic0 or amg not reaching tol 1e-14 at some N, or plain CG not reaching it at N <= 640 (smallest omega: e07_floor) | all required runs converged; expected, not required: N=1280 none (final omega 360 u) | yes |
 | refinement landing on the stored solution (N >= 160): GTH, which does not use refinement, must sit far closer to the refined reference than the data term | N=160: gth rel_err_tiny 2.3e-15 vs |data term| 2.8e-13, N=320: gth rel_err_tiny 4.4e-15 vs |data term| 1.1e-12, N=640: gth rel_err_tiny 1.8e-14 vs |data term| 4.4e-12 | yes |
-| a structured ratio growing with N (log-log slope; cond_max's is about 2) | random max slope 0.20, push slope 0.07, cond_max slope 2.01 | yes |
+| structured_cond_over_N outside [1.1, 1.25], or the attaining perturbation not reaching kappa, or coherent_tiny not N - 3: the formula or the perturbation is wrong (kappa itself grows like N; that is the result) | structured_cond_over_N 1.1353 to 1.2176; attained / kappa 1.0000001 to 1.0000023; coherent / (N - 3) 1.000000 to 1.000003 | yes |
 | extra: every CG row converged within maxiter (excluding plain CG, tol 1e-14, N = 1280, which stalls above the tolerance: see e07_floor) | 70/70 rows | yes |
 
 ## Data (e07_fixes)
@@ -167,6 +190,84 @@ Summary: 23 PASS, 1 WARN, 0 FAIL.
 | 40 | 741 | 2.211 | 4.525 | 619.9 | 1481 | 1e-08 | 20 |
 | 80 | 3081 | 2.942 | 4.637 | 2484 | 6161 | 1e-08 | 20 |
 | 160 | 12561 | 2.407 | 4.694 | 9941 | 25121 | 1e-08 | 20 |
+| 320 | 50721 | 2.851 | 4.722 | 3.977e+04 | 101441 | 1e-08 | 20 |
+| 640 | 203841 | 3.071 | 4.736 | 1.591e+05 | 407681 | 1e-08 | 20 |
+
+| N | structured_cond_tiny | structured_cond_max | structured_argmax_state | structured_cond_over_N | attained_tiny | attained_max_dev | coherent_tiny | drift_tiny | symmetric_cond_tiny | cond_tiny |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 10 | 11.35 | 11.35 | (1, 1, 8) | 1.135 | 11.35 | 5.073e-08 | 7 | 7.502 | 6.229 | 37.33 |
+| 20 | 23.8 | 23.8 | (1, 1, 18) | 1.19 | 23.8 | 7.742e-08 | 17 | 19.5 | 8.265 | 153.8 |
+| 40 | 48.3 | 48.3 | (1, 1, 38) | 1.208 | 48.3 | 1.545e-07 | 37 | 43.78 | 10.17 | 619.9 |
+| 80 | 97.1 | 97.1 | (1, 1, 78) | 1.214 | 97.1 | 3.086e-07 | 77 | 92.46 | 12.01 | 2484 |
+| 160 | 194.6 | 194.6 | (1, 1, 158) | 1.216 | 194.6 | 6.867e-07 | 157 | 189.9 | 13.81 | 9941 |
+| 320 | 389.5 | 389.5 | (1, 1, 318) | 1.217 | 389.5 | 1.56e-06 | 317 | 384.8 | 15.6 | 3.977e+04 |
+| 640 | 779.2 | 779.2 | (1, 1, 638) | 1.218 | 779.2 | 3.4e-06 | 637 | 774.5 | 17.37 | 1.591e+05 |
+
+## Data (e07_baselines)
+
+| N | n | method | own_err_tiny | own_err_over_N2u | max_own_err_in_u | true_err_tiny | true_err_over_N2u | max_true_err_in_u | max_true_err_in_ulp | data_term_tiny | seconds |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 20 | 171 | cholmod_default | 4.228e-16 | 0.009521 | 7.097 | -3.847e-15 | -0.08664 | 36.37 | 31.84 | -4.27e-15 | 0.02785 |
+| 20 | 171 | cholmod_simplicial | 4.228e-16 | 0.009521 | 7.097 | -3.847e-15 | -0.08664 | 36.37 | 31.84 | -4.27e-15 | 0.0004175 |
+| 20 | 171 | cholmod_supernodal | -1.478e-16 | -0.003329 | 5.966 | -4.418e-15 | -0.09949 | 41.18 | 36.63 | -4.27e-15 | 0.000926 |
+| 20 | 171 | splu_colamd | 4.237e-17 | 0.000954 | 6.365 | -4.228e-15 | -0.0952 | 38.65 | 33.84 | -4.27e-15 | 0.0007962 |
+| 20 | 171 | splu_natural | 1.374e-15 | 0.03094 | 18.47 | -2.896e-15 | -0.06522 | 27.66 | 23.06 | -4.27e-15 | 0.0004792 |
+| 20 | 171 | banded | 2.896e-15 | 0.0652 | 30.76 | -1.375e-15 | -0.03095 | 16.33 | 13.67 | -4.27e-15 | 0.0005953 |
+| 20 | 171 | banded_int |  |  |  | 2.239e-15 | 0.05043 | 27.46 | 25.37 | -4.27e-15 | 0.0004587 |
+| 20 | 171 | cholmod_int |  |  |  | 8.517e-15 | 0.1918 | 80.66 | 76.37 | -4.27e-15 | 0.000482 |
+| 20 | 171 | gth |  |  |  | 3.373e-16 | 0.007596 | 7.599 | 6.653 | -4.27e-15 | 0.0003783 |
+| 20 | 171 | ir_direct |  |  |  | -4.309e-17 | -0.0009703 | 0.8443 | 0.499 | -4.27e-15 | 0.02816 |
+| 40 | 741 | cholmod_default | -3.838e-15 | -0.02161 | 38.84 | -2.104e-14 | -0.1185 | 189.5 | 183.3 | -1.721e-14 | 0.002487 |
+| 40 | 741 | cholmod_simplicial | -3.838e-15 | -0.02161 | 38.84 | -2.104e-14 | -0.1185 | 189.5 | 183.3 | -1.721e-14 | 0.00174 |
+| 40 | 741 | cholmod_supernodal | 3.581e-15 | 0.02016 | 35.22 | -1.363e-14 | -0.0767 | 122.7 | 117.3 | -1.721e-14 | 0.001941 |
+| 40 | 741 | splu_colamd | 2.059e-15 | 0.01159 | 36.86 | -1.515e-14 | -0.08527 | 137.6 | 133.3 | -1.721e-14 | 0.002092 |
+| 40 | 741 | splu_natural | 5.673e-15 | 0.03194 | 61.2 | -1.153e-14 | -0.06492 | 116.7 | 104.4 | -1.721e-14 | 0.001801 |
+| 40 | 741 | banded | 3.2e-15 | 0.01802 | 45.24 | -1.401e-14 | -0.07884 | 132.8 | 118.4 | -1.721e-14 | 0.0008923 |
+| 40 | 741 | banded_int |  |  |  | -5.826e-15 | -0.0328 | 54.19 | 47.44 | -1.721e-14 | 0.001007 |
+| 40 | 741 | cholmod_int |  |  |  | 3.659e-14 | 0.206 | 334.3 | 324.7 | -1.721e-14 | 0.001843 |
+| 40 | 741 | gth |  |  |  | -1.196e-16 | -0.0006733 | 11.2 | 9.396 | -1.721e-14 | 0.0007728 |
+| 40 | 741 | ir_direct |  |  |  | 7.062e-17 | 0.0003976 | 0.9894 | 0.4995 | -1.721e-14 | 0.002882 |
+| 80 | 3081 | cholmod_default | -2.525e-14 | -0.03553 | 238.1 | -9.42e-14 | -0.1326 | 848.4 | 830.1 | -6.895e-14 | 0.009519 |
+| 80 | 3081 | cholmod_simplicial | -2.525e-14 | -0.03553 | 238.1 | -9.42e-14 | -0.1326 | 848.4 | 830.1 | -6.895e-14 | 0.009742 |
+| 80 | 3081 | cholmod_supernodal | 3.144e-14 | 0.04424 | 284.5 | -3.751e-14 | -0.05279 | 339.6 | 332.1 | -6.895e-14 | 0.009943 |
+| 80 | 3081 | splu_colamd | 2.307e-14 | 0.03246 | 228.4 | -4.588e-14 | -0.06457 | 413.8 | 403.1 | -6.895e-14 | 0.009773 |
+| 80 | 3081 | splu_natural | -1.555e-14 | -0.02188 | 166.9 | -8.45e-14 | -0.1189 | 767.7 | 748.1 | -6.895e-14 | 0.0145 |
+| 80 | 3081 | banded | 6.211e-16 | 0.0008741 | 34.56 | -6.833e-14 | -0.09616 | 617.6 | 602.1 | -6.895e-14 | 0.004855 |
+| 80 | 3081 | banded_int |  |  |  | 3.576e-15 | 0.005033 | 67.01 | 60.86 | -6.895e-14 | 0.00503 |
+| 80 | 3081 | cholmod_int |  |  |  | 1.828e-13 | 0.2572 | 1652 | 1623 | -6.895e-14 | 0.009894 |
+| 80 | 3081 | gth |  |  |  | 3.196e-15 | 0.004497 | 33.91 | 31.12 | -6.895e-14 | 0.006601 |
+| 80 | 3081 | ir_direct |  |  |  | -3.815e-17 | -5.37e-05 | 0.9568 | 0.499 | -6.895e-14 | 0.01018 |
+| 160 | 12561 | cholmod_default | 9.071e-14 | 0.03192 | 821 | -1.852e-13 | -0.06516 | 1669 | 1641 | -2.759e-13 | 0.05206 |
+| 160 | 12561 | cholmod_simplicial | -5.081e-14 | -0.01788 | 469.4 | -3.267e-13 | -0.115 | 2944 | 2896 | -2.759e-13 | 0.05638 |
+| 160 | 12561 | cholmod_supernodal | 9.071e-14 | 0.03192 | 821 | -1.852e-13 | -0.06516 | 1669 | 1641 | -2.759e-13 | 0.0526 |
+| 160 | 12561 | splu_colamd | 7.169e-14 | 0.02522 | 669.7 | -2.042e-13 | -0.07186 | 1840 | 1810 | -2.759e-13 | 0.05475 |
+| 160 | 12561 | splu_natural | -1.368e-13 | -0.04813 | 1247 | -4.127e-13 | -0.1452 | 3724 | 3657 | -2.759e-13 | 0.1601 |
+| 160 | 12561 | banded | 3.57e-16 | 0.0001256 | 90.66 | -2.756e-13 | -0.09695 | 2489 | 2443 | -2.759e-13 | 0.04219 |
+| 160 | 12561 | banded_int |  |  |  | -8.302e-15 | -0.002921 | 156.1 | 150.1 | -2.759e-13 | 0.04471 |
+| 160 | 12561 | cholmod_int |  |  |  | 3.936e-13 | 0.1385 | 3546 | 3486 | -2.759e-13 | 0.05181 |
+| 160 | 12561 | gth |  |  |  | 2.351e-15 | 0.0008271 | 45.4 | 41.89 | -2.759e-13 | 0.09353 |
+| 160 | 12561 | ir_direct |  |  |  | 6.816e-17 | 2.398e-05 | 0.9743 | 0.5 | -2.759e-13 | 0.05466 |
+| 320 | 50721 | cholmod_default | 3.649e-13 | 0.0321 | 3290 | -7.389e-13 | -0.06499 | 6661 | 6613 | -1.104e-12 | 0.2642 |
+| 320 | 50721 | cholmod_simplicial | -2.352e-13 | -0.02069 | 2137 | -1.339e-12 | -0.1178 | 1.206e+04 | 1.197e+04 | -1.104e-12 | 0.3216 |
+| 320 | 50721 | cholmod_supernodal | 3.649e-13 | 0.0321 | 3290 | -7.389e-13 | -0.06499 | 6661 | 6613 | -1.104e-12 | 0.27 |
+| 320 | 50721 | splu_colamd | 3.099e-13 | 0.02726 | 2813 | -7.939e-13 | -0.06983 | 7151 | 7071 | -1.104e-12 | 0.372 |
+| 320 | 50721 | splu_natural | -1.434e-12 | -0.1261 | 1.294e+04 | -2.538e-12 | -0.2232 | 2.287e+04 | 2.269e+04 | -1.104e-12 | 2.191 |
+| 320 | 50721 | banded | -1.135e-14 | -0.0009979 | 445.9 | -1.115e-12 | -0.09809 | 1.005e+04 | 9967 | -1.104e-12 | 0.4808 |
+| 320 | 50721 | banded_int |  |  |  | -6.893e-14 | -0.006063 | 653.4 | 636.8 | -1.104e-12 | 0.4337 |
+| 320 | 50721 | cholmod_int |  |  |  | 1.61e-12 | 0.1416 | 1.45e+04 | 1.436e+04 | -1.104e-12 | 0.2716 |
+| 320 | 50721 | gth |  |  |  | 4.304e-15 | 0.0003786 | 60.29 | 54.57 | -1.104e-12 | 1.382 |
+| 320 | 50721 | ir_direct |  |  |  | -7.091e-17 | -6.237e-06 | 0.9937 | 0.5 | -1.104e-12 | 0.2761 |
+| 640 | 203841 | cholmod_default | 1.47e-12 | 0.03233 | 1.325e+04 | -2.945e-12 | -0.06476 | 2.653e+04 | 2.64e+04 | -4.415e-12 | 1.339 |
+| 640 | 203841 | cholmod_simplicial | -9.795e-13 | -0.02154 | 8833 | -5.395e-12 | -0.1186 | 4.859e+04 | 4.835e+04 | -4.415e-12 | 1.808 |
+| 640 | 203841 | cholmod_supernodal | 1.47e-12 | 0.03233 | 1.325e+04 | -2.945e-12 | -0.06476 | 2.653e+04 | 2.64e+04 | -4.415e-12 | 1.44 |
+| 640 | 203841 | splu_colamd | 1.273e-12 | 0.02799 | 1.149e+04 | -3.143e-12 | -0.06911 | 2.831e+04 | 2.815e+04 | -4.415e-12 | 3.792 |
+| 640 | 203841 | banded | -2.441e-13 | -0.005367 | 2247 | -4.659e-12 | -0.1025 | 4.197e+04 | 4.178e+04 | -4.415e-12 | 6.341 |
+| 640 | 203841 | banded_int |  |  |  | -4.481e-13 | -0.009854 | 4085 | 4043 | -4.415e-12 | 5.72 |
+| 640 | 203841 | cholmod_int |  |  |  | 6.464e-12 | 0.1421 | 5.822e+04 | 5.793e+04 | -4.415e-12 | 1.293 |
+| 640 | 203841 | gth |  |  |  | 1.776e-14 | 0.0003905 | 199.6 | 189.1 | -4.415e-12 | 21.25 |
+| 640 | 203841 | ir_direct |  |  |  | 6.732e-17 | 1.48e-06 | 0.9957 | 0.5 | -4.415e-12 | 1.405 |
+| 1280 | 817281 | cholmod_default | 5.743e-12 | 0.03157 | 5.173e+04 | -1.192e-11 | -0.06552 | 1.074e+05 | 1.071e+05 | -1.766e-11 | 6.587 |
+| 1280 | 817281 | ir_direct |  |  |  | -7.794e-17 | -4.285e-07 | 0.998 | 0.5 | -1.766e-11 | 6.855 |
 
 ## Data (e07_floor)
 

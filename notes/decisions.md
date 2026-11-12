@@ -644,3 +644,15 @@
     by the legend and the CSV table).
   - cholmod_int has no slot left, so it is drawn in ink with its own marker and dash. cholmod_default has hollow
     markers because it coincides with simplicial or supernodal.
+- Results:
+  - Runs from git 3ccfc4e, 1 thread: e07_structured 1:48, e07_baselines 1:17, peak RSS 2.4 GB.
+  - check_c07: 42 PASS, 1 WARN, 0 FAIL, no red flags.
+  - Every structured value matches the Project chat's Linux numbers to the printed digits. kappa_tiny =
+    779.2398 at N = 640 (1.2176 N), and the attaining perturbation reaches it to 2.3e-6. coherent_tiny =
+    637.0017 (N - 3).
+  - ir_direct is within half an ulp at every N up to 1280 (0.499999 at 1280).
+  - cholmod_default equals simplicial for N <= 80 and supernodal for N >= 160, to the bit. It also matches
+    e07_fixes' err_vs_stored to 0.2%.
+  - The WARN: simplicial CHOLMOD's own error on the Mac is -0.018, -0.021, -0.022 N^2 u (N = 160, 320, 640),
+    against -0.006 on Linux, so the |.| < 0.02 bound is crossed at 320 and 640. Machine-dependent, like
+    supernodal's +0.032 here vs +0.05 on Linux. Left as WARN for the Project chat; the range is not changed.
