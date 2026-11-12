@@ -5,6 +5,7 @@ import datetime
 import os
 import pathlib
 import platform
+import re
 import subprocess
 
 import numpy as np
@@ -39,6 +40,23 @@ def metadata():
         "scipy": scipy.__version__,
         "omp_num_threads": os.environ.get("OMP_NUM_THREADS", "unset"),
     }
+
+
+def repeats():
+    """Number of timing repeats: 3 by default, GR_REPEATS=5 in the chunk 11 final run (set by run_all.py)."""
+    return int(os.environ.get("GR_REPEATS", 3))
+
+
+def free_memory_mb():
+    """Memory the OS can hand out now: free + inactive + speculative pages (macOS), MemAvailable (Linux)."""
+    try:
+        text = subprocess.run(["vm_stat"], capture_output=True, text=True, check=True).stdout
+        page = int(re.search(r"page size of (\d+) bytes", text).group(1))
+        pages = {k: int(v) for k, v in re.findall(r"Pages (\w+):\s+(\d+)\.", text)}
+        return page * (pages["free"] + pages["inactive"] + pages["speculative"]) / 2**20
+    except (OSError, subprocess.CalledProcessError, AttributeError, KeyError):
+        with open("/proc/meminfo") as fh:
+            return int(re.search(r"MemAvailable:\s+(\d+) kB", fh.read()).group(1)) / 2**10
 
 
 def save_results(rows, name, outdir="results"):

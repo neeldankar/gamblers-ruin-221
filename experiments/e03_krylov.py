@@ -21,7 +21,7 @@ import numpy as np
 
 from gr import direct, krylov, spectrum
 from gr.matrix import build_A, rhs_order, rhs_out_first, rhs_rounds
-from gr.runlog import save_results
+from gr.runlog import repeats, save_results
 from gr.states import StateSpace
 
 FULL = [20, 40, 80, 160, 320, 640, 1280]
@@ -31,7 +31,7 @@ RTOL = 1e-10
 
 
 def repeats_for(N):
-    return 3 if N <= 640 else 1
+    return repeats() if N <= 640 else 1
 
 
 def right_hand_sides(S):

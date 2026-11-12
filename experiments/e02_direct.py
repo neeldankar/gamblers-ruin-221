@@ -18,13 +18,13 @@ import scipy.sparse as sp
 
 from gr import direct, spectrum
 from gr.matrix import build_A, rhs_rounds
-from gr.runlog import save_results
+from gr.runlog import repeats, save_results
 from gr.states import StateSpace
 
 FULL = [25, 50, 100, 200, 400, 800, 1200, 1600]
 QUICK = [25, 50, 100]
 BIG = [2400, 3200]
-REPEATS = 3
+REPEATS = repeats()  # 3 by default, 5 in the chunk 11 final run
 FLOPS_MAX_N = 800  # column counts of splu need a copy of L; skip above this
 U = 2.0**-53
 

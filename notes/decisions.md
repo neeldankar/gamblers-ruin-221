@@ -920,3 +920,51 @@ or figures/ was regenerated, because chunk 11 regenerates everything from one co
    normal equations (LAPACK dependent), ne_column_scaled (at least 10x qr and in [1e-8, 1e-4]), gmres30_A iters
    (within 2%, 5% for the N = 320 value; Mac 819), cg_S_1e-10 E[rounds] (each within a factor 10; Mac 0.75 at 320).
    check_c10's Expected text copies the new rows; its behavior is unchanged.
+
+## Chunk 11: pipeline (Nov 12)
+
+Built gr/runlog.py `repeats()`, experiments/run_all.py, experiments/peak_wrapper.py, figures/make_all.py and
+checks/check_all.py, with the four additions approved in the Project chat and two answers given this session.
+
+- Quick runs never touch results/. run_all passes `--outdir` to every experiment. With `--quick` the outdir
+  defaults to /tmp/c11quick, and run_all refuses an outdir that resolves to results/. The log goes to
+  `<outdir>/run_all_log.csv`.
+- Resume rule: without `--force`, a script is skipped only if the log has a row for it with exit_code 0,
+  quick False and the current git hash. Quick runs therefore never skip. Log columns: script, start, end,
+  seconds, exit_code, peak_mb, free_mem_mb_start, quick, repeats, git_hash. A row is appended as soon as each
+  experiment ends, so an interrupted run keeps what finished.
+- A full run refuses to start if `git status --porcelain -- gr experiments` is not empty (as the spec says).
+  `--quick` only warns, because its output goes to a scratch folder; that is what let the quick run come before
+  the pipeline commit.
+- Peak memory: each experiment runs under experiments/peak_wrapper.py, whose only child is that experiment, so
+  its `getrusage(RUSAGE_CHILDREN).ru_maxrss` is that experiment's own peak, including the e09 worker processes
+  it waits for. ru_maxrss is in bytes on macOS (/2**20) and in kilobytes on Linux (/2**10). The name
+  peak_wrapper.py does not match the eNN_* glob.
+- free_memory_mb() moved from experiments/e09_four.py to gr/runlog.py (code unchanged), so run_all measures free
+  memory at the start of each experiment exactly as e09 does.
+- repeats() (GR_REPEATS, default 3; run_all sets 5, or --repeats) replaces the hard-coded medians only: REPEATS
+  in e01, e02, e07_fixes, e09_four (one process per repeat; its status reads "median of 5 processes") and e10;
+  e03_krylov's repeats_for; e06's median_seconds. The single-run rules stay: e03 at N = 1280, e09 runs over
+  60 s, e02 --big. Timings documented as single runs (e05_*, e07_baselines, e08, e09 big_stack) stay single
+  runs (your answer, Nov 12): turning them into medians would add 1 to 1.5 h and change what their seconds
+  columns mean.
+- e02_direct_big.csv (the optional 6 GB --big run, git 7cd1f96, read by no check or figure): the overnight run
+  leaves it out to stay under 4 GB. After the full run, `run_all.py --e02-big` reruns only `e02_direct.py --big`
+  at the same commit. It writes only e02_direct_big.csv and is logged as e02_direct_big. check_all exempts the
+  file from the one-hash check only if its hash differs from the run's, and then says that the rerun was
+  skipped. The e02_direct_big log row is not counted in the 4 GB peak row.
+- check_all.py runs every check_cNN.py with `--results`, so the cNN_report.md files are regenerated. It counts
+  their PASS/WARN/FAIL/FLAG stdout lines, evaluates the chunk 11 Expected results table (latest log row per
+  script), and writes results/final_report.md.
+  - The "results equal to the per-chunk runs" row is PASS when nothing changed by more than 1e-12, and WARN
+    "for review in the Project chat" otherwise. It does not judge individual changes.
+  - A check script that exits nonzero without printing FAIL lines (a crash) counts as FAIL.
+- Changes table (against `git show 5de66f4:results/<name>.csv`):
+  - Rows are matched by N, the text columns that name a row (not *_state, status, solver, corrections or
+    at_reference_accuracy), and the occurrence number within that key.
+  - Timing and memory columns (names with time, second, speedup, rss, mem, _mb, MB, or a _s suffix) are left
+    out, and so are the metadata columns.
+  - Numbers: the largest |new - old| / |old|. Text and booleans: the count of differing rows.
+  - Tested on a copy of results/: 0 changes against itself, and a planted 1e-9 change and a deleted row were
+    both reported. pandas 3 str columns keep NaN through astype(str), so NaN is filled with "" before text
+    comparisons.

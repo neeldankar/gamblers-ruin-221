@@ -40,7 +40,7 @@ import numpy as np
 from gr import accuracy as acc
 from gr import direct, krylov, refine
 from gr.matrix import boundary_rhs, build_A, rhs_out_first
-from gr.runlog import save_results
+from gr.runlog import repeats, save_results
 from gr.states import StateSpace
 
 FULL = [20, 40, 60, 80, 160, 320, 640, 1280]
@@ -54,7 +54,7 @@ CW_TOLS = [1e-12, 1e-14]
 INNER_RTOL = 1e-6
 IR_CG_STEPS = 15
 MAXITER = 30000
-REPEATS = 3
+REPEATS = repeats()  # 3 by default, 5 in the chunk 11 final run
 
 
 def timed(fn, repeats=REPEATS):

@@ -3,7 +3,7 @@
 Writes results/e09_identities.csv, e09_solvers.csv, e09_big_stack.csv and e09_alpha.csv.
     PYTHONPATH=. python experiments/e09_four.py [--quick] [--big] [--outdir DIR]
 
-Every solver run of e09_solvers (each of the 3 timing repeats too), and every four-player lumped solve of
+Every solver run of e09_solvers (each of the REPEATS timing repeats too), and every four-player lumped solve of
 e09_big_stack, happens in a fresh process (experiments/worker_e09.py), so its peak memory is its own. Memory safety (the spec's red flag: never let the laptop swap):
   * a direct method skips a size when its projected factor memory (8 bytes per stored entry, nnz_factor
     fitted against n on the sizes already done) exceeds 3 GB, and then skips every larger size too;
@@ -19,7 +19,6 @@ import argparse
 import itertools
 import json
 import pathlib
-import re
 import subprocess
 import sys
 import time
@@ -29,7 +28,7 @@ import numpy as np
 from gr import direct
 from gr.four import FourStateSpace, build_A4, rhs_out_first4, rhs_win4
 from gr.matrix import build_A, rhs_out_first, solve
-from gr.runlog import save_results
+from gr.runlog import free_memory_mb, repeats, save_results
 from gr.states import StateSpace
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -45,20 +44,8 @@ BYTES_PER_ENTRY = 8
 SLOPE_ONE_POINT = 1.5  # fill exponent assumed when only one size has been factored
 KILL_FRACTION = 0.6
 POLL_S = 0.5
-REPEATS = 3
+REPEATS = repeats()  # 3 by default, 5 in the chunk 11 final run
 LONG_RUN_S = 60.0  # a first run longer than this is not repeated
-
-
-def free_memory_mb():
-    """Memory the OS can hand out now: free + inactive + speculative pages (macOS), MemAvailable (Linux)."""
-    try:
-        text = subprocess.run(["vm_stat"], capture_output=True, text=True, check=True).stdout
-        page = int(re.search(r"page size of (\d+) bytes", text).group(1))
-        pages = {k: int(v) for k, v in re.findall(r"Pages (\w+):\s+(\d+)\.", text)}
-        return page * (pages["free"] + pages["inactive"] + pages["speculative"]) / 2**20
-    except (OSError, subprocess.CalledProcessError, AttributeError, KeyError):
-        with open("/proc/meminfo") as fh:
-            return int(re.search(r"MemAvailable:\s+(\d+) kB", fh.read()).group(1)) / 2**10
 
 
 def e2_e4(S):

@@ -10,8 +10,8 @@ Writes six CSVs:
     python experiments/e10_extras.py [--quick] [--outdir DIR]
 
 Errors in e10_bt_solvers are max |u - u_ref| / max |u_ref| with u_ref = splu on A; "lowpi" restricts the max
-to the 10% of states with the smallest pi. seconds is the median of 3 solves; building A and S is not timed,
-and for splu_S the factorization is counted with the solve.
+to the 10% of states with the smallest pi. seconds is the median of REPEATS solves (3, or 5 in the final run);
+building A and S is not timed, and for splu_S the factorization is counted with the solve.
 """
 import os
 
@@ -28,7 +28,7 @@ import scipy.sparse.linalg as spla
 from gr.extras import (build_A_bt, design_matrix, fit_normal_equations, fit_qr, fit_svd, log_pi, monomials,
                        ratio_targets, rhs_win_bt, symmetrize_bt)
 from gr.krylov import cg
-from gr.runlog import save_results
+from gr.runlog import repeats, save_results
 from gr.states import StateSpace
 
 RNG = np.random.default_rng(221)  # project convention; nothing here is random
@@ -39,7 +39,7 @@ SPECTRUM_FULL, SPECTRUM_QUICK = [20, 40, 80, 160, 320], [20, 40]
 SOLVERS_FULL, SOLVERS_QUICK = [40, 80, 160, 320], [40, 80]
 RHS = {"weakest_wins": 0, "strongest_wins": 2, "rounds": None}
 OVERFLOW_BUILD_N = 1030
-REPEATS = 3
+REPEATS = repeats()  # 3 by default, 5 in the chunk 11 final run
 
 
 def timed(f, repeats=REPEATS):

@@ -22,7 +22,7 @@ from scipy.sparse.linalg import splu
 
 from gr.fft_solver import fft_solve
 from gr.matrix import build_A, rhs_order, rhs_out_first, solve
-from gr.runlog import save_results
+from gr.runlog import repeats, save_results
 from gr.spectrum import kappa2
 from gr.states import StateSpace
 
@@ -32,9 +32,9 @@ SPLU_MAX_N = 800
 EPS = 2.0 ** -52
 
 
-def median_seconds(f, runs=3):
+def median_seconds(f):
     times = []
-    for _ in range(runs):
+    for _ in range(repeats()):
         t0 = time.perf_counter()
         f()
         times.append(time.perf_counter() - t0)

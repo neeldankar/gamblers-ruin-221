@@ -16,13 +16,13 @@ import scipy.sparse.linalg as spla
 
 from gr import spectrum
 from gr.matrix import build_A
-from gr.runlog import save_results
+from gr.runlog import repeats, save_results
 from gr.states import StateSpace
 
 FULL = [10, 20, 30, 40, 80, 90, 160, 300, 320, 640]
 QUICK = [10, 20, 30, 40]
 EIGSH_MAX_N = 320
-REPEATS = 3
+REPEATS = repeats()  # 3 by default, 5 in the chunk 11 final run
 
 
 def eigsh_lambda_min(A):
