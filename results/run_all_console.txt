@@ -1,23 +1,24 @@
-run_all: git 2ef9083, repeats 5, quick False, outdir /Users/neeldankar/Downloads/gamblers-ruin-221/results
+run_all: git 5a73f57, repeats 5, quick False, outdir /Users/neeldankar/Downloads/gamblers-ruin-221/results
 
-=== e01_conditioning  (11:08:58)
-N =   10  n =     36  kappa2 = 11.2812  kappa_inf = 21.6  eigsh 0.000525 s
-N =   20  n =    171  kappa2 = 45.4714  kappa_inf = 88.2  eigsh 0.00079 s
-N =   30  n =    406  kappa2 = 102.464  kappa_inf = 200  eigsh 0.00149 s
-N =   40  n =    741  kappa2 = 182.254  kappa_inf = 354.9  eigsh 0.00273 s
-N =   80  n =   3081  kappa2 = 729.388  kappa_inf = 1421.55  eigsh 0.0136 s
-N =   90  n =   3916  kappa2 = 923.164  kappa_inf = 1800  eigsh 0.0182 s
-N =  160  n =  12561  kappa2 = 2917.93  kappa_inf = 5688.23  eigsh 0.0755 s
-N =  300  n =  44551  kappa2 = 10258.6  kappa_inf = 20000  eigsh 0.431 s
-N =  320  n =  50721  kappa2 = 11672.1  kappa_inf = 22754.9  eigsh 0.487 s
+=== e01_conditioning  (21:03:08)
+N =   10  n =     36  kappa2 = 11.2812  kappa_inf = 21.6  eigsh 0.00054 s
+N =   20  n =    171  kappa2 = 45.4714  kappa_inf = 88.2  eigsh 0.000821 s
+N =   30  n =    406  kappa2 = 102.464  kappa_inf = 200  eigsh 0.00156 s
+N =   40  n =    741  kappa2 = 182.254  kappa_inf = 354.9  eigsh 0.00282 s
+N =   80  n =   3081  kappa2 = 729.388  kappa_inf = 1421.55  eigsh 0.0137 s
+N =   90  n =   3916  kappa2 = 923.164  kappa_inf = 1800  eigsh 0.0179 s
+N =  160  n =  12561  kappa2 = 2917.93  kappa_inf = 5688.23  eigsh 0.0754 s
+N =  300  n =  44551  kappa2 = 10258.6  kappa_inf = 20000  eigsh 0.413 s
+N =  320  n =  50721  kappa2 = 11672.1  kappa_inf = 22754.9  eigsh 0.504 s
 N =  640  n = 203841  kappa2 = 46688.7  kappa_inf = 91021.6  eigsh nan s
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e01_conditioning.csv
-=== e01_conditioning: exit 0, 6 s, peak 348 MB
+=== e01_conditioning: manifest records e01_conditioning.csv
+=== e01_conditioning: exit 0, 6 s, peak 389 MB
 
-=== e02_direct  (11:09:04)
+=== e02_direct  (21:03:14)
 N =   25  dense_cholesky  natural       nnz      38,226  setup    0.001 s  solve  0.0001 s  fwd/(k u) 0.281  bwd 1.9e-16
 N =   25  banded_cholesky natural       nnz       6,348  setup    0.000 s  solve  0.0000 s  fwd/(k u) 0.154  bwd 2.1e-16
-N =   25  splu            NATURAL       nnz       8,692  setup    0.001 s  solve  0.0000 s  fwd/(k u) 0.094  bwd 2.0e-16
+N =   25  splu            NATURAL       nnz       8,692  setup    0.000 s  solve  0.0000 s  fwd/(k u) 0.094  bwd 2.0e-16
 N =   25  splu            COLAMD        nnz       6,344  setup    0.001 s  solve  0.0000 s  fwd/(k u) 0.281  bwd 2.5e-16
 N =   25  splu            MMD_AT_PLUS_A nnz       5,826  setup    0.001 s  solve  0.0000 s  fwd/(k u) 0.147  bwd 1.6e-16
 N =   25  splu            MMD_ATA       nnz       6,670  setup    0.001 s  solve  0.0000 s  fwd/(k u) 0.214  bwd 1.8e-16
@@ -25,7 +26,7 @@ N =   25  cholmod         natural       nnz       4,346  setup    0.000 s  solve
 N =   25  cholmod         amd           nnz       2,957  setup    0.000 s  solve  0.0000 s  fwd/(k u) 0.141  bwd 3.0e-16
 N =   25  cholmod         metis         nnz       3,247  setup    0.001 s  solve  0.0000 s  fwd/(k u) 0.100  bwd 2.7e-16
 N =   25  cholmod         nesdis        nnz       2,932  setup    0.001 s  solve  0.0000 s  fwd/(k u) 0.268  bwd 1.7e-16
-N =   50  dense_cholesky  natural       nnz     692,076  setup    0.023 s  solve  0.0025 s  fwd/(k u) 0.166  bwd 2.3e-16
+N =   50  dense_cholesky  natural       nnz     692,076  setup    0.024 s  solve  0.0027 s  fwd/(k u) 0.166  bwd 2.3e-16
 N =   50  banded_cholesky natural       nnz      56,448  setup    0.001 s  solve  0.0001 s  fwd/(k u) 0.223  bwd 2.9e-16
 N =   50  splu            NATURAL       nnz      76,142  setup    0.003 s  solve  0.0001 s  fwd/(k u) 0.176  bwd 3.5e-16
 N =   50  splu            COLAMD        nnz      48,862  setup    0.003 s  solve  0.0001 s  fwd/(k u) 0.143  bwd 2.3e-16
@@ -35,54 +36,55 @@ N =   50  cholmod         natural       nnz      38,071  setup    0.001 s  solve
 N =   50  cholmod         amd           nnz      19,787  setup    0.001 s  solve  0.0000 s  fwd/(k u) 0.190  bwd 3.2e-16
 N =   50  cholmod         metis         nnz      21,050  setup    0.003 s  solve  0.0000 s  fwd/(k u) 0.283  bwd 3.9e-16
 N =   50  cholmod         nesdis        nnz      20,292  setup    0.003 s  solve  0.0000 s  fwd/(k u) 0.283  bwd 3.4e-16
-N =  100  dense_cholesky  natural       nnz  11,768,526  setup    1.437 s  solve  0.1437 s  fwd/(k u) 0.169  bwd 3.3e-16
-N =  100  banded_cholesky natural       nnz     475,398  setup    0.008 s  solve  0.0005 s  fwd/(k u) 0.178  bwd 2.3e-16
+N =  100  dense_cholesky  natural       nnz  11,768,526  setup    1.447 s  solve  0.1411 s  fwd/(k u) 0.169  bwd 3.3e-16
+N =  100  banded_cholesky natural       nnz     475,398  setup    0.009 s  solve  0.0004 s  fwd/(k u) 0.178  bwd 2.3e-16
 N =  100  splu            NATURAL       nnz     637,292  setup    0.028 s  solve  0.0006 s  fwd/(k u) 0.193  bwd 5.2e-16
-N =  100  splu            COLAMD        nnz     341,922  setup    0.016 s  solve  0.0004 s  fwd/(k u) 0.146  bwd 3.6e-16
-N =  100  splu            MMD_AT_PLUS_A nnz     226,610  setup    0.009 s  solve  0.0003 s  fwd/(k u) 0.199  bwd 3.5e-16
-N =  100  splu            MMD_ATA       nnz     321,512  setup    0.014 s  solve  0.0004 s  fwd/(k u) 0.116  bwd 3.5e-16
+N =  100  splu            COLAMD        nnz     341,922  setup    0.015 s  solve  0.0004 s  fwd/(k u) 0.146  bwd 3.6e-16
+N =  100  splu            MMD_AT_PLUS_A nnz     226,610  setup    0.009 s  solve  0.0007 s  fwd/(k u) 0.199  bwd 3.5e-16
+N =  100  splu            MMD_ATA       nnz     321,512  setup    0.013 s  solve  0.0004 s  fwd/(k u) 0.116  bwd 3.5e-16
 N =  100  cholmod         natural       nnz     318,646  setup    0.006 s  solve  0.0008 s  fwd/(k u) 0.181  bwd 2.9e-16
 N =  100  cholmod         amd           nnz     120,237  setup    0.005 s  solve  0.0002 s  fwd/(k u) 0.074  bwd 6.1e-16
 N =  100  cholmod         metis         nnz     120,831  setup    0.017 s  solve  0.0002 s  fwd/(k u) 0.147  bwd 3.8e-16
 N =  100  cholmod         nesdis        nnz     117,398  setup    0.017 s  solve  0.0002 s  fwd/(k u) 0.109  bwd 3.6e-16
-N =  200  banded_cholesky natural       nnz   3,900,798  setup    0.077 s  solve  0.0036 s  fwd/(k u) 0.189  bwd 2.6e-16
-N =  200  splu            NATURAL       nnz   5,214,592  setup    0.366 s  solve  0.0045 s  fwd/(k u) 0.237  bwd 1.0e-15
-N =  200  splu            COLAMD        nnz   2,038,960  setup    0.108 s  solve  0.0022 s  fwd/(k u) 0.136  bwd 4.7e-16
-N =  200  splu            MMD_AT_PLUS_A nnz   1,195,896  setup    0.058 s  solve  0.0196 s  fwd/(k u) 0.210  bwd 4.8e-16
-N =  200  splu            MMD_ATA       nnz   2,009,222  setup    0.148 s  solve  0.0021 s  fwd/(k u) 0.116  bwd 5.7e-16
-N =  200  cholmod         natural       nnz   2,607,296  setup    0.049 s  solve  0.0061 s  fwd/(k u) 0.182  bwd 4.2e-16
+N =  200  banded_cholesky natural       nnz   3,900,798  setup    0.084 s  solve  0.0045 s  fwd/(k u) 0.189  bwd 2.6e-16
+N =  200  splu            NATURAL       nnz   5,214,592  setup    0.348 s  solve  0.0045 s  fwd/(k u) 0.237  bwd 1.0e-15
+N =  200  splu            COLAMD        nnz   2,038,960  setup    0.093 s  solve  0.0021 s  fwd/(k u) 0.136  bwd 4.7e-16
+N =  200  splu            MMD_AT_PLUS_A nnz   1,195,896  setup    0.046 s  solve  0.0016 s  fwd/(k u) 0.210  bwd 4.8e-16
+N =  200  splu            MMD_ATA       nnz   2,009,222  setup    0.090 s  solve  0.0024 s  fwd/(k u) 0.116  bwd 5.7e-16
+N =  200  cholmod         natural       nnz   2,607,296  setup    0.050 s  solve  0.0061 s  fwd/(k u) 0.182  bwd 4.2e-16
 N =  200  cholmod         amd           nnz     683,804  setup    0.021 s  solve  0.0008 s  fwd/(k u) 0.083  bwd 6.1e-16
-N =  200  cholmod         metis         nnz     622,487  setup    0.094 s  solve  0.0010 s  fwd/(k u) 0.152  bwd 5.3e-16
-N =  200  cholmod         nesdis        nnz     620,225  setup    0.087 s  solve  0.0009 s  fwd/(k u) 0.137  bwd 6.6e-16
-N =  400  banded_cholesky natural       nnz  31,601,598  setup    0.821 s  solve  0.0343 s  fwd/(k u) 0.187  bwd 3.7e-16
-N =  400  splu            NATURAL       nnz  42,189,192  setup    4.713 s  solve  0.0426 s  fwd/(k u) 0.326  bwd 1.5e-15
-N =  400  splu            COLAMD        nnz  11,664,390  setup    0.724 s  solve  0.0134 s  fwd/(k u) 0.135  bwd 7.6e-16
-N =  400  splu            MMD_AT_PLUS_A nnz   5,950,864  setup    0.298 s  solve  0.0078 s  fwd/(k u) 0.209  bwd 5.1e-16
-N =  400  splu            MMD_ATA       nnz  11,219,794  setup    0.670 s  solve  0.0140 s  fwd/(k u) 0.118  bwd 5.8e-16
-N =  400  cholmod         natural       nnz  21,094,596  setup    0.524 s  solve  0.0479 s  fwd/(k u) 0.185  bwd 6.2e-16
-N =  400  cholmod         amd           nnz   3,750,523  setup    0.116 s  solve  0.0049 s  fwd/(k u) 0.080  bwd 1.2e-15
-N =  400  cholmod         metis         nnz   3,078,404  setup    0.431 s  solve  0.0045 s  fwd/(k u) 0.165  bwd 7.6e-16
-N =  400  cholmod         nesdis        nnz   3,060,841  setup    0.438 s  solve  0.0041 s  fwd/(k u) 0.130  bwd 8.3e-16
-N =  800  splu            COLAMD        nnz  66,095,518  setup    6.890 s  solve  0.0745 s  fwd/(k u) 0.132  bwd 1.1e-15
-N =  800  splu            MMD_AT_PLUS_A nnz  29,089,860  setup    1.865 s  solve  0.0334 s  fwd/(k u) 0.212  bwd 6.4e-16
-N =  800  splu            MMD_ATA       nnz  59,372,538  setup    5.479 s  solve  0.0760 s  fwd/(k u) 0.122  bwd 1.0e-15
+N =  200  cholmod         metis         nnz     622,487  setup    0.089 s  solve  0.0009 s  fwd/(k u) 0.152  bwd 5.3e-16
+N =  200  cholmod         nesdis        nnz     620,225  setup    0.085 s  solve  0.0009 s  fwd/(k u) 0.137  bwd 6.6e-16
+N =  400  banded_cholesky natural       nnz  31,601,598  setup    0.870 s  solve  0.0300 s  fwd/(k u) 0.187  bwd 3.7e-16
+N =  400  splu            NATURAL       nnz  42,189,192  setup    4.695 s  solve  0.0425 s  fwd/(k u) 0.326  bwd 1.5e-15
+N =  400  splu            COLAMD        nnz  11,664,390  setup    0.719 s  solve  0.0129 s  fwd/(k u) 0.135  bwd 7.6e-16
+N =  400  splu            MMD_AT_PLUS_A nnz   5,950,864  setup    0.302 s  solve  0.0074 s  fwd/(k u) 0.209  bwd 5.1e-16
+N =  400  splu            MMD_ATA       nnz  11,219,794  setup    0.667 s  solve  0.0136 s  fwd/(k u) 0.118  bwd 5.8e-16
+N =  400  cholmod         natural       nnz  21,094,596  setup    0.517 s  solve  0.0480 s  fwd/(k u) 0.185  bwd 6.2e-16
+N =  400  cholmod         amd           nnz   3,750,523  setup    0.115 s  solve  0.0050 s  fwd/(k u) 0.080  bwd 1.2e-15
+N =  400  cholmod         metis         nnz   3,078,404  setup    0.431 s  solve  0.0046 s  fwd/(k u) 0.165  bwd 7.6e-16
+N =  400  cholmod         nesdis        nnz   3,060,841  setup    0.433 s  solve  0.0042 s  fwd/(k u) 0.130  bwd 8.3e-16
+N =  800  splu            COLAMD        nnz  66,095,518  setup    6.846 s  solve  0.0701 s  fwd/(k u) 0.132  bwd 1.1e-15
+N =  800  splu            MMD_AT_PLUS_A nnz  29,089,860  setup    1.904 s  solve  0.0327 s  fwd/(k u) 0.212  bwd 6.4e-16
+N =  800  splu            MMD_ATA       nnz  59,372,538  setup    5.463 s  solve  0.0687 s  fwd/(k u) 0.122  bwd 1.0e-15
 N =  800  cholmod         amd           nnz  19,401,349  setup    0.624 s  solve  0.0283 s  fwd/(k u) 0.081  bwd 1.3e-15
-N =  800  cholmod         metis         nnz  14,659,739  setup    2.076 s  solve  0.0217 s  fwd/(k u) 0.170  bwd 1.3e-15
-N =  800  cholmod         nesdis        nnz  14,583,368  setup    2.150 s  solve  0.0207 s  fwd/(k u) 0.131  bwd 1.2e-15
-N = 1200  splu            COLAMD        nnz 175,372,056  setup   29.126 s  solve  0.1882 s  fwd/(k u) 0.132  bwd 9.4e-16
-N = 1200  splu            MMD_AT_PLUS_A nnz  71,150,982  setup    5.370 s  solve  0.0833 s  fwd/(k u) 0.210  bwd 7.2e-16
-N = 1200  splu            MMD_ATA       nnz 151,667,342  setup   20.159 s  solve  0.1512 s  fwd/(k u) 0.129  bwd 1.7e-15
-N = 1200  cholmod         amd           nnz  50,925,514  setup    1.903 s  solve  0.0737 s  fwd/(k u) 0.081  bwd 1.6e-15
-N = 1200  cholmod         metis         nnz  36,351,321  setup    5.254 s  solve  0.0610 s  fwd/(k u) 0.169  bwd 2.6e-15
-N = 1200  cholmod         nesdis        nnz  35,936,492  setup    5.455 s  solve  0.0546 s  fwd/(k u) 0.126  bwd 2.4e-15
-N = 1600  splu            MMD_AT_PLUS_A nnz 134,990,166  setup   12.663 s  solve  0.1529 s  fwd/(k u) 0.212  bwd 9.3e-16
-N = 1600  cholmod         amd           nnz  96,852,751  setup    4.521 s  solve  0.1279 s  fwd/(k u) 0.081  bwd 1.8e-15
-N = 1600  cholmod         metis         nnz  68,525,601  setup   10.172 s  solve  0.1118 s  fwd/(k u) 0.167  bwd 1.9e-15
-N = 1600  cholmod         nesdis        nnz  67,893,115  setup   10.438 s  solve  0.0982 s  fwd/(k u) 0.128  bwd 1.9e-15
+N =  800  cholmod         metis         nnz  14,659,739  setup    2.086 s  solve  0.0252 s  fwd/(k u) 0.170  bwd 1.3e-15
+N =  800  cholmod         nesdis        nnz  14,583,368  setup    2.141 s  solve  0.0227 s  fwd/(k u) 0.131  bwd 1.2e-15
+N = 1200  splu            COLAMD        nnz 175,372,056  setup   29.105 s  solve  0.1773 s  fwd/(k u) 0.132  bwd 9.4e-16
+N = 1200  splu            MMD_AT_PLUS_A nnz  71,150,982  setup    5.369 s  solve  0.0823 s  fwd/(k u) 0.210  bwd 7.2e-16
+N = 1200  splu            MMD_ATA       nnz 151,667,342  setup   20.002 s  solve  0.1780 s  fwd/(k u) 0.129  bwd 1.7e-15
+N = 1200  cholmod         amd           nnz  50,925,514  setup    1.902 s  solve  0.0742 s  fwd/(k u) 0.081  bwd 1.6e-15
+N = 1200  cholmod         metis         nnz  36,351,321  setup    5.297 s  solve  0.0550 s  fwd/(k u) 0.169  bwd 2.6e-15
+N = 1200  cholmod         nesdis        nnz  35,936,492  setup    5.417 s  solve  0.0541 s  fwd/(k u) 0.126  bwd 2.4e-15
+N = 1600  splu            MMD_AT_PLUS_A nnz 134,990,166  setup   12.127 s  solve  0.1479 s  fwd/(k u) 0.212  bwd 9.3e-16
+N = 1600  cholmod         amd           nnz  96,852,751  setup    4.486 s  solve  0.1395 s  fwd/(k u) 0.081  bwd 1.8e-15
+N = 1600  cholmod         metis         nnz  68,525,601  setup   10.265 s  solve  0.1087 s  fwd/(k u) 0.167  bwd 1.9e-15
+N = 1600  cholmod         nesdis        nnz  67,893,115  setup   10.589 s  solve  0.0995 s  fwd/(k u) 0.128  bwd 1.9e-15
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e02_direct.csv
-=== e02_direct: exit 0, 704 s, peak 4342 MB
+=== e02_direct: manifest records e02_direct.csv
+=== e02_direct: exit 0, 695 s, peak 5656 MB
 
-=== e03_convergence  (11:20:48)
+=== e03_convergence  (21:14:49)
 N = 320  none  random    its  603  final err_A 2.89e-10  err_inf 2.87e-10
 N = 320  none  order321  its  587  final err_A 2.60e-10  err_inf 5.34e-10
 N = 320  ic0   random    its  183  final err_A 2.87e-10  err_inf 3.39e-10
@@ -92,9 +94,10 @@ N = 320  mic0  order321  its   67  final err_A 7.21e-11  err_inf 9.75e-11
 N = 320  amg   random    its   14  final err_A 8.09e-11  err_inf 1.04e-10
 N = 320  amg   order321  its   13  final err_A 5.99e-11  err_inf 1.64e-10
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e03_convergence.csv
-=== e03_convergence: exit 0, 4 s, peak 238 MB
+=== e03_convergence: manifest records e03_convergence.csv
+=== e03_convergence: exit 0, 4 s, peak 226 MB
 
-=== e03_krylov  (11:20:52)
+=== e03_krylov  (21:14:53)
 N =   20  direct  ones      setup   0.000 s  solve   0.0000 s
 N =   20  direct  random    setup   0.000 s  solve   0.0000 s
 N =   20  direct  out_first setup   0.000 s  solve   0.0000 s
@@ -104,7 +107,7 @@ N =   20  none    random    its    39  setup   0.000 s  solve    0.000 s  fwd 1.
 N =   20  none    out_first its    35  setup   0.000 s  solve    0.000 s  fwd 3.36e-11
 N =   20  none    order321  its    38  setup   0.000 s  solve    0.000 s  fwd 2.44e-11
 N =   20  jacobi  ones      its     9  setup   0.000 s  solve    0.000 s  fwd 6.44e-16
-N =   20  jacobi  random    its    39  setup   0.000 s  solve    0.000 s  fwd 1.84e-11
+N =   20  jacobi  random    its    39  setup   0.000 s  solve    0.001 s  fwd 1.84e-11
 N =   20  jacobi  out_first its    35  setup   0.000 s  solve    0.000 s  fwd 3.36e-11
 N =   20  jacobi  order321  its    38  setup   0.000 s  solve    0.000 s  fwd 2.44e-11
 N =   20  ic0     ones      its    15  setup   0.000 s  solve    0.000 s  fwd 3.09e-12
@@ -143,10 +146,10 @@ N =   40  amg     ones      its     9  setup   0.004 s  solve    0.002 s  fwd 2.
 N =   40  amg     random    its     8  setup   0.004 s  solve    0.002 s  fwd 1.60e-11
 N =   40  amg     out_first its     8  setup   0.004 s  solve    0.002 s  fwd 1.70e-11
 N =   40  amg     order321  its     8  setup   0.004 s  solve    0.002 s  fwd 1.25e-11
-N =   80  direct  ones      setup   0.010 s  solve   0.0001 s
-N =   80  direct  random    setup   0.010 s  solve   0.0001 s
-N =   80  direct  out_first setup   0.010 s  solve   0.0001 s
-N =   80  direct  order321  setup   0.010 s  solve   0.0001 s
+N =   80  direct  ones      setup   0.009 s  solve   0.0001 s
+N =   80  direct  random    setup   0.009 s  solve   0.0001 s
+N =   80  direct  out_first setup   0.009 s  solve   0.0001 s
+N =   80  direct  order321  setup   0.009 s  solve   0.0001 s
 N =   80  none    ones      its    40  setup   0.000 s  solve    0.001 s  fwd 3.58e-14
 N =   80  none    random    its   154  setup   0.000 s  solve    0.005 s  fwd 2.05e-10
 N =   80  none    out_first its   143  setup   0.000 s  solve    0.005 s  fwd 1.16e-10
@@ -178,87 +181,88 @@ N =  160  none    order321  its   298  setup   0.000 s  solve    0.030 s  fwd 1.
 N =  160  jacobi  ones      its    85  setup   0.000 s  solve    0.009 s  fwd 7.99e-14
 N =  160  jacobi  random    its   306  setup   0.000 s  solve    0.032 s  fwd 2.37e-10
 N =  160  jacobi  out_first its   282  setup   0.000 s  solve    0.030 s  fwd 3.07e-10
-N =  160  jacobi  order321  its   298  setup   0.000 s  solve    0.032 s  fwd 1.92e-10
-N =  160  ic0     ones      its    84  setup   0.003 s  solve    0.028 s  fwd 1.01e-11
-N =  160  ic0     random    its    95  setup   0.003 s  solve    0.032 s  fwd 4.07e-10
-N =  160  ic0     out_first its    93  setup   0.003 s  solve    0.031 s  fwd 5.39e-10
-N =  160  ic0     order321  its    91  setup   0.003 s  solve    0.030 s  fwd 4.07e-10
+N =  160  jacobi  order321  its   298  setup   0.000 s  solve    0.031 s  fwd 1.92e-10
+N =  160  ic0     ones      its    84  setup   0.002 s  solve    0.028 s  fwd 1.01e-11
+N =  160  ic0     random    its    95  setup   0.002 s  solve    0.033 s  fwd 4.07e-10
+N =  160  ic0     out_first its    93  setup   0.002 s  solve    0.031 s  fwd 5.39e-10
+N =  160  ic0     order321  its    91  setup   0.002 s  solve    0.031 s  fwd 4.07e-10
 N =  160  mic0    ones      its    56  setup   0.002 s  solve    0.018 s  fwd 5.43e-13
 N =  160  mic0    random    its    50  setup   0.002 s  solve    0.017 s  fwd 2.51e-11
 N =  160  mic0    out_first its    45  setup   0.002 s  solve    0.015 s  fwd 1.22e-10
 N =  160  mic0    order321  its    46  setup   0.002 s  solve    0.015 s  fwd 7.23e-11
-N =  160  amg     ones      its    13  setup   0.021 s  solve    0.023 s  fwd 1.98e-13
+N =  160  amg     ones      its    13  setup   0.021 s  solve    0.024 s  fwd 1.98e-13
 N =  160  amg     random    its    11  setup   0.021 s  solve    0.020 s  fwd 6.00e-11
 N =  160  amg     out_first its    10  setup   0.021 s  solve    0.018 s  fwd 1.96e-10
 N =  160  amg     order321  its    10  setup   0.021 s  solve    0.018 s  fwd 1.15e-10
-N =  320  direct  ones      setup   0.262 s  solve   0.0024 s
-N =  320  direct  random    setup   0.262 s  solve   0.0024 s
-N =  320  direct  out_first setup   0.262 s  solve   0.0029 s
-N =  320  direct  order321  setup   0.262 s  solve   0.0051 s
-N =  320  none    ones      its   172  setup   0.000 s  solve    0.062 s  fwd 3.87e-13
-N =  320  none    random    its   603  setup   0.000 s  solve    0.221 s  fwd 2.87e-10
+N =  320  direct  ones      setup   0.261 s  solve   0.0025 s
+N =  320  direct  random    setup   0.261 s  solve   0.0025 s
+N =  320  direct  out_first setup   0.261 s  solve   0.0025 s
+N =  320  direct  order321  setup   0.261 s  solve   0.0026 s
+N =  320  none    ones      its   172  setup   0.000 s  solve    0.063 s  fwd 3.87e-13
+N =  320  none    random    its   603  setup   0.000 s  solve    0.219 s  fwd 2.87e-10
 N =  320  none    out_first its   556  setup   0.000 s  solve    0.204 s  fwd 7.46e-10
-N =  320  none    order321  its   587  setup   0.000 s  solve    0.215 s  fwd 5.34e-10
-N =  320  jacobi  ones      its   172  setup   0.000 s  solve    0.067 s  fwd 3.87e-13
+N =  320  none    order321  its   587  setup   0.000 s  solve    0.216 s  fwd 5.34e-10
+N =  320  jacobi  ones      its   172  setup   0.000 s  solve    0.069 s  fwd 3.87e-13
 N =  320  jacobi  random    its   603  setup   0.000 s  solve    0.233 s  fwd 2.87e-10
 N =  320  jacobi  out_first its   556  setup   0.000 s  solve    0.215 s  fwd 7.46e-10
-N =  320  jacobi  order321  its   587  setup   0.000 s  solve    0.227 s  fwd 5.34e-10
+N =  320  jacobi  order321  its   587  setup   0.000 s  solve    0.228 s  fwd 5.34e-10
 N =  320  ic0     ones      its   157  setup   0.011 s  solve    0.208 s  fwd 2.76e-12
-N =  320  ic0     random    its   183  setup   0.011 s  solve    0.244 s  fwd 3.39e-10
-N =  320  ic0     out_first its   178  setup   0.011 s  solve    0.236 s  fwd 7.46e-10
-N =  320  ic0     order321  its   178  setup   0.011 s  solve    0.236 s  fwd 4.39e-10
-N =  320  mic0    ones      its    84  setup   0.010 s  solve    0.110 s  fwd 3.66e-13
-N =  320  mic0    random    its    73  setup   0.010 s  solve    0.096 s  fwd 2.39e-11
-N =  320  mic0    out_first its    66  setup   0.010 s  solve    0.087 s  fwd 1.39e-10
-N =  320  mic0    order321  its    67  setup   0.010 s  solve    0.089 s  fwd 9.75e-11
-N =  320  amg     ones      its    16  setup   0.071 s  solve    0.108 s  fwd 8.12e-13
-N =  320  amg     random    its    14  setup   0.071 s  solve    0.093 s  fwd 1.04e-10
-N =  320  amg     out_first its    13  setup   0.071 s  solve    0.088 s  fwd 1.57e-10
-N =  320  amg     order321  its    13  setup   0.071 s  solve    0.089 s  fwd 1.64e-10
-N =  640  direct  ones      setup   1.286 s  solve   0.0141 s
-N =  640  direct  random    setup   1.286 s  solve   0.0128 s
-N =  640  direct  out_first setup   1.286 s  solve   0.0123 s
-N =  640  direct  order321  setup   1.286 s  solve   0.0123 s
-N =  640  none    ones      its   344  setup   0.000 s  solve    0.508 s  fwd 1.48e-12
-N =  640  none    random    its  1198  setup   0.000 s  solve    1.741 s  fwd 3.24e-10
-N =  640  none    out_first its  1094  setup   0.000 s  solve    1.592 s  fwd 1.59e-09
+N =  320  ic0     random    its   183  setup   0.011 s  solve    0.241 s  fwd 3.39e-10
+N =  320  ic0     out_first its   178  setup   0.011 s  solve    0.238 s  fwd 7.46e-10
+N =  320  ic0     order321  its   178  setup   0.011 s  solve    0.237 s  fwd 4.39e-10
+N =  320  mic0    ones      its    84  setup   0.011 s  solve    0.112 s  fwd 3.66e-13
+N =  320  mic0    random    its    73  setup   0.011 s  solve    0.097 s  fwd 2.39e-11
+N =  320  mic0    out_first its    66  setup   0.011 s  solve    0.088 s  fwd 1.39e-10
+N =  320  mic0    order321  its    67  setup   0.011 s  solve    0.089 s  fwd 9.75e-11
+N =  320  amg     ones      its    16  setup   0.070 s  solve    0.112 s  fwd 8.12e-13
+N =  320  amg     random    its    14  setup   0.070 s  solve    0.096 s  fwd 1.04e-10
+N =  320  amg     out_first its    13  setup   0.070 s  solve    0.089 s  fwd 1.57e-10
+N =  320  amg     order321  its    13  setup   0.070 s  solve    0.087 s  fwd 1.64e-10
+N =  640  direct  ones      setup   1.279 s  solve   0.0128 s
+N =  640  direct  random    setup   1.279 s  solve   0.0123 s
+N =  640  direct  out_first setup   1.279 s  solve   0.0124 s
+N =  640  direct  order321  setup   1.279 s  solve   0.0135 s
+N =  640  none    ones      its   344  setup   0.000 s  solve    0.503 s  fwd 1.48e-12
+N =  640  none    random    its  1198  setup   0.000 s  solve    1.745 s  fwd 3.24e-10
+N =  640  none    out_first its  1094  setup   0.000 s  solve    1.590 s  fwd 1.59e-09
 N =  640  none    order321  its  1149  setup   0.000 s  solve    1.670 s  fwd 1.37e-09
-N =  640  ic0     ones      its   305  setup   0.048 s  solve    1.651 s  fwd 1.71e-12
-N =  640  ic0     random    its   363  setup   0.048 s  solve    1.957 s  fwd 2.36e-10
-N =  640  ic0     out_first its   336  setup   0.048 s  solve    1.818 s  fwd 3.19e-09
-N =  640  ic0     order321  its   349  setup   0.048 s  solve    1.881 s  fwd 8.95e-10
-N =  640  mic0    ones      its   125  setup   0.046 s  solve    0.679 s  fwd 4.09e-13
-N =  640  mic0    random    its   107  setup   0.046 s  solve    0.583 s  fwd 2.21e-11
-N =  640  mic0    out_first its    95  setup   0.046 s  solve    0.522 s  fwd 2.48e-10
-N =  640  mic0    order321  its    97  setup   0.046 s  solve    0.530 s  fwd 1.78e-10
-N =  640  amg     ones      its    19  setup   0.283 s  solve    0.519 s  fwd 9.32e-13
-N =  640  amg     random    its    16  setup   0.283 s  solve    0.437 s  fwd 1.17e-10
-N =  640  amg     out_first its    14  setup   0.283 s  solve    0.381 s  fwd 1.65e-09
-N =  640  amg     order321  its    15  setup   0.283 s  solve    0.407 s  fwd 1.46e-10
-N = 1280  direct  ones      setup   6.141 s  solve   0.0651 s
-N = 1280  direct  random    setup   6.141 s  solve   0.0653 s
-N = 1280  direct  out_first setup   6.141 s  solve   0.0573 s
-N = 1280  direct  order321  setup   6.141 s  solve   0.0563 s
-N = 1280  none    ones      its   686  setup   0.000 s  solve    5.052 s  fwd 6.30e-12
-N = 1280  none    random    its  2368  setup   0.000 s  solve   16.183 s  fwd 2.87e-10
-N = 1280  none    out_first its  2147  setup   0.000 s  solve   15.660 s  fwd 3.14e-09
-N = 1280  none    order321  its  2241  setup   0.000 s  solve   15.810 s  fwd 2.55e-09
-N = 1280  ic0     ones      its   590  setup   0.214 s  solve   14.424 s  fwd 1.62e-12
-N = 1280  ic0     random    its   714  setup   0.214 s  solve   17.581 s  fwd 3.57e-10
-N = 1280  ic0     out_first its   653  setup   0.214 s  solve   16.289 s  fwd 4.85e-09
-N = 1280  ic0     order321  its   630  setup   0.214 s  solve   15.236 s  fwd 4.22e-09
-N = 1280  mic0    ones      its   187  setup   0.193 s  solve    4.509 s  fwd 1.58e-12
-N = 1280  mic0    random    its   158  setup   0.193 s  solve    3.799 s  fwd 1.98e-11
-N = 1280  mic0    out_first its   137  setup   0.193 s  solve    3.434 s  fwd 3.50e-10
-N = 1280  mic0    order321  its   140  setup   0.193 s  solve    3.443 s  fwd 2.38e-10
-N = 1280  amg     ones      its    24  setup   1.212 s  solve    2.706 s  fwd 1.43e-12
-N = 1280  amg     random    its    21  setup   1.212 s  solve    2.359 s  fwd 1.21e-10
-N = 1280  amg     out_first its    19  setup   1.212 s  solve    2.148 s  fwd 1.05e-09
-N = 1280  amg     order321  its    19  setup   1.212 s  solve    2.145 s  fwd 6.61e-10
+N =  640  ic0     ones      its   305  setup   0.047 s  solve    1.653 s  fwd 1.71e-12
+N =  640  ic0     random    its   363  setup   0.047 s  solve    1.984 s  fwd 2.36e-10
+N =  640  ic0     out_first its   336  setup   0.047 s  solve    1.826 s  fwd 3.19e-09
+N =  640  ic0     order321  its   349  setup   0.047 s  solve    1.895 s  fwd 8.95e-10
+N =  640  mic0    ones      its   125  setup   0.048 s  solve    0.677 s  fwd 4.09e-13
+N =  640  mic0    random    its   107  setup   0.048 s  solve    0.579 s  fwd 2.21e-11
+N =  640  mic0    out_first its    95  setup   0.048 s  solve    0.516 s  fwd 2.48e-10
+N =  640  mic0    order321  its    97  setup   0.048 s  solve    0.525 s  fwd 1.78e-10
+N =  640  amg     ones      its    19  setup   0.284 s  solve    0.523 s  fwd 9.32e-13
+N =  640  amg     random    its    16  setup   0.284 s  solve    0.442 s  fwd 1.17e-10
+N =  640  amg     out_first its    14  setup   0.284 s  solve    0.392 s  fwd 1.65e-09
+N =  640  amg     order321  its    15  setup   0.284 s  solve    0.409 s  fwd 1.46e-10
+N = 1280  direct  ones      setup   6.127 s  solve   0.0618 s
+N = 1280  direct  random    setup   6.127 s  solve   0.0670 s
+N = 1280  direct  out_first setup   6.127 s  solve   0.0567 s
+N = 1280  direct  order321  setup   6.127 s  solve   0.0564 s
+N = 1280  none    ones      its   686  setup   0.000 s  solve    4.654 s  fwd 6.30e-12
+N = 1280  none    random    its  2368  setup   0.000 s  solve   17.450 s  fwd 2.87e-10
+N = 1280  none    out_first its  2147  setup   0.000 s  solve   15.171 s  fwd 3.14e-09
+N = 1280  none    order321  its  2241  setup   0.000 s  solve   15.532 s  fwd 2.55e-09
+N = 1280  ic0     ones      its   590  setup   0.207 s  solve   14.506 s  fwd 1.62e-12
+N = 1280  ic0     random    its   714  setup   0.207 s  solve   17.392 s  fwd 3.57e-10
+N = 1280  ic0     out_first its   653  setup   0.207 s  solve   15.999 s  fwd 4.85e-09
+N = 1280  ic0     order321  its   630  setup   0.207 s  solve   15.331 s  fwd 4.22e-09
+N = 1280  mic0    ones      its   187  setup   0.201 s  solve    4.443 s  fwd 1.58e-12
+N = 1280  mic0    random    its   158  setup   0.201 s  solve    3.770 s  fwd 1.98e-11
+N = 1280  mic0    out_first its   137  setup   0.201 s  solve    3.257 s  fwd 3.50e-10
+N = 1280  mic0    order321  its   140  setup   0.201 s  solve    3.414 s  fwd 2.38e-10
+N = 1280  amg     ones      its    24  setup   1.237 s  solve    2.753 s  fwd 1.43e-12
+N = 1280  amg     random    its    21  setup   1.237 s  solve    2.310 s  fwd 1.21e-10
+N = 1280  amg     out_first its    19  setup   1.237 s  solve    2.180 s  fwd 1.05e-09
+N = 1280  amg     order321  its    19  setup   1.237 s  solve    2.182 s  fwd 6.61e-10
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e03_krylov.csv
-=== e03_krylov: exit 0, 266 s, peak 2936 MB
+=== e03_krylov: manifest records e03_krylov.csv
+=== e03_krylov: exit 0, 266 s, peak 2971 MB
 
-=== e04_condition  (11:25:18)
+=== e04_condition  (21:19:19)
 N =   10  out_first_3  N^3 x_tiny 9.1226143  cond/N^2 0.37334  omega   1.5 u  bound 3.93e-14  data -1.036e-15  argmin (1, 1, 8)  argmax cond (1, 1, 8)
 N =   10  order_321    N^3 x_tiny 4.5613071  cond/N^2 0.37334  omega   1.4 u  bound 3.89e-14  data -1.036e-15  argmin (1, 1, 8)  argmax cond (1, 1, 8)
 N =   20  out_first_3  N^3 x_tiny 9.1197973  cond/N^2 0.38462  omega   2.5 u  bound 1.79e-13  data -4.270e-15  argmin (1, 1, 18)  argmax cond (1, 1, 18)
@@ -276,10 +280,11 @@ N =  640  order_321    N^3 x_tiny 4.5597945  cond/N^2 0.38837  omega  13.0 u  bo
 N = 1280  out_first_3  N^3 x_tiny 9.1195890  cond/N^2 0.38838  omega  17.2 u  bound 1.78e-09  data -1.766e-11  argmin (1, 1, 1278)  argmax cond (1, 1, 1278)
 N = 1280  order_321    N^3 x_tiny 4.5597945  cond/N^2 0.38838  omega  20.4 u  bound 2.01e-09  data -1.766e-11  argmin (1, 1, 1278)  argmax cond (1, 1, 1278)
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e04_condition.csv
-=== e04_condition: exit 0, 10 s, peak 1608 MB
+=== e04_condition: manifest records e04_condition.csv
+=== e04_condition: exit 0, 10 s, peak 1619 MB
 
-=== e04_errors  (11:25:28)
-N =   20  flint_solve 0.2 s
+=== e04_errors  (21:19:30)
+N =   20  flint_solve 0.1 s
 N =   20  cholmod nesdis  rtol     nan  its    nan  tiny 3.80e-15  max 4.06e-15  nw 1.26e-15  omega_nw 1.3e-16  omega_cw 2.8e-16  ratio nan
 N =   20  splu    COLAMD  rtol     nan  its    nan  tiny 4.18e-15  max 4.31e-15  nw 1.00e-15  omega_nw 1.6e-16  omega_cw 1.9e-16  ratio nan
 N =   20  banded  natural rtol     nan  its    nan  tiny 1.33e-15  max 1.87e-15  nw 7.54e-16  omega_nw 1.3e-16  omega_cw 2.7e-16  ratio nan
@@ -407,9 +412,10 @@ N = 1280  cg      amg     rtol   1e-10  its     19  tiny 1.42e-06  max 1.87e-06 
 N = 1280  cg      amg     rtol   1e-12  its     23  tiny 5.10e-08  max 5.57e-08  nw 5.72e-12  omega_nw 1.4e-13  omega_cw 5.6e-09  ratio 0.0801
 N = 1280  cg      amg     rtol   1e-14  its     26  tiny 1.06e-09  max 1.13e-09  nw 8.15e-13  omega_nw 3.4e-15  omega_cw 6.7e-11  ratio 0.167
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e04_errors.csv
-=== e04_errors: exit 0, 201 s, peak 6375 MB
+=== e04_errors: manifest records e04_errors.csv
+=== e04_errors: exit 0, 201 s, peak 6292 MB
 
-=== e04_mechanism  (11:28:49)
+=== e04_mechanism  (21:22:51)
 N =  320  out_first_3  rtol   1e-06  its   399  smallest (1, 1, 318)  rel 6.80e-02  ratio     1.71  abs 1.9e-08 <= bound 6.8e-06  g 1.17023  median ratio 5.5e-04
 N =  320  out_first_3  rtol   1e-08  its   482  smallest (1, 1, 318)  rel 6.48e-04  ratio     1.63  abs 1.8e-10 <= bound 6.9e-08  g 1.17023  median ratio 6.4e-04
 N =  320  out_first_3  rtol   1e-10  its   556  smallest (1, 1, 318)  rel 5.79e-06  ratio     1.46  abs 1.6e-12 <= bound 6.9e-10  g 1.17023  median ratio 3.0e-04
@@ -452,9 +458,10 @@ N =  640  land_quarter rtol   1e-12  its  1278  smallest (1, 1, 638)  rel 1.30e-
 N =  640  land_quarter rtol   1e-14  its  1407  smallest (1, 1, 638)  rel 2.93e-08  ratio     18.1  abs 1.5e-18 <= bound 3.3e-15  g 1.17023  median ratio 3.3e-03
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e04_mechanism_rhs.csv
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e04_mechanism_states.csv
-=== e04_mechanism: exit 0, 44 s, peak 520 MB
+=== e04_mechanism: manifest records e04_mechanism_rhs.csv, e04_mechanism_states.csv
+=== e04_mechanism: exit 0, 42 s, peak 514 MB
 
-=== e04_perturbation  (11:29:33)
+=== e04_perturbation  (21:23:32)
 N =  10  eps 1e-10  worst ratio 1.000000 to 1.000000  random max 0.3940
 N =  10  eps 1e-08  worst ratio 1.000000 to 1.000000  random max 0.3940
 N =  10  eps 1e-06  worst ratio 1.000007 to 1.000022  random max 0.3940
@@ -468,9 +475,10 @@ N =  80  eps 1e-10  worst ratio 1.000000 to 1.000000  random max 0.3788
 N =  80  eps 1e-08  worst ratio 1.000001 to 1.000015  random max 0.3788
 N =  80  eps 1e-06  worst ratio 1.000067 to 1.001491  random max 0.3788
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e04_perturbation.csv
+=== e04_perturbation: manifest records e04_perturbation.csv
 === e04_perturbation: exit 0, 1 s, peak 95 MB
 
-=== e05_iterations  (11:29:34)
+=== e05_iterations  (21:23:33)
 N =   10  jacobi        ones       k =    169  pred     169.1  rate 0.872677990  exp nan  fwd 1.00e-10  0.00 s
 N =   10  gauss_seidel  ones       k =     86  pred      84.5  rate 0.763114078  exp nan  fwd 9.03e-11  0.00 s
 N =   10  sor           ones       k =     31  pred      28.8  rate 0.449027516  exp 0.7499  fwd 6.09e-11  0.00 s
@@ -498,41 +506,43 @@ N =   40  sor           out_first  k =    105  pred     119.4  rate 0.822959490 
 N =   40  jacobi        random     k =   2232  pred    2793.8  rate 0.991792227  exp nan  fwd 1.96e-09  0.03 s
 N =   40  gauss_seidel  random     k =   1139  pred    1396.9  rate 0.983659245  exp nan  fwd 1.92e-09  0.02 s
 N =   40  sor           random     k =    116  pred     119.4  rate 0.818318908  exp 0.7798  fwd 7.83e-10  0.00 s
-N =   80  jacobi        ones       k =  11081  pred   11192.7  rate 0.997944885  exp nan  fwd 1.25e-10  0.56 s
+N =   80  jacobi        ones       k =  11081  pred   11192.7  rate 0.997944885  exp nan  fwd 1.25e-10  0.55 s
 N =   80  gauss_seidel  ones       k =   5542  pred    5596.3  rate 0.995894465  exp nan  fwd 1.25e-10  0.44 s
 N =   80  sor           ones       k =    258  pred     239.2  rate 0.908236663  exp 0.7500  fwd 5.91e-11  0.02 s
-N =   80  jacobi        out_first  k =   8967  pred   11192.7  rate 0.997944889  exp nan  fwd 5.85e-09  0.45 s
+N =   80  jacobi        out_first  k =   8967  pred   11192.7  rate 0.997944889  exp nan  fwd 5.85e-09  0.46 s
 N =   80  gauss_seidel  out_first  k =   4472  pred    5596.3  rate 0.995894470  exp nan  fwd 5.84e-09  0.35 s
 N =   80  sor           out_first  k =    198  pred     239.2  rate 0.904259844  exp 0.7842  fwd 2.88e-09  0.02 s
 N =   80  jacobi        random     k =   8578  pred   11192.7  rate 0.997944889  exp nan  fwd 7.14e-09  0.43 s
 N =   80  gauss_seidel  random     k =   4285  pred    5596.3  rate 0.995894470  exp nan  fwd 7.13e-09  0.34 s
 N =   80  sor           random     k =    230  pred     239.2  rate 0.903913426  exp 0.7872  fwd 2.04e-10  0.02 s
-N =  160  jacobi        ones       k =  44322  pred   44788.0  rate 0.999486021  exp nan  fwd 1.26e-10  9.15 s
-N =  160  gauss_seidel  ones       k =  22163  pred   22394.0  rate 0.998972337  exp nan  fwd 1.26e-10  7.32 s
-N =  160  sor           ones       k =    515  pred     478.7  rate 0.953031788  exp 0.7501  fwd 6.27e-11  0.18 s
-N =  160  jacobi        out_first  k =  33847  pred   44788.0  rate 0.999486024  exp nan  fwd 1.64e-08  6.93 s
+N =  160  jacobi        ones       k =  44322  pred   44788.0  rate 0.999486021  exp nan  fwd 1.26e-10  8.99 s
+N =  160  gauss_seidel  ones       k =  22163  pred   22394.0  rate 0.998972337  exp nan  fwd 1.26e-10  7.30 s
+N =  160  sor           ones       k =    515  pred     478.7  rate 0.953031788  exp 0.7501  fwd 6.27e-11  0.17 s
+N =  160  jacobi        out_first  k =  33847  pred   44788.0  rate 0.999486024  exp nan  fwd 1.64e-08  6.87 s
 N =  160  gauss_seidel  out_first  k =  16899  pred   22394.0  rate 0.998972342  exp nan  fwd 1.64e-08  5.58 s
 N =  160  sor           out_first  k =    375  pred     478.7  rate 0.947273568  exp 0.8446  fwd 7.66e-09  0.13 s
-N =  160  jacobi        random     k =  32507  pred   44788.0  rate 0.999486024  exp nan  fwd 1.30e-08  6.63 s
-N =  160  gauss_seidel  random     k =  16179  pred   22394.0  rate 0.998972341  exp nan  fwd 1.30e-08  5.35 s
+N =  160  jacobi        random     k =  32507  pred   44788.0  rate 0.999486024  exp nan  fwd 1.30e-08  6.62 s
+N =  160  gauss_seidel  random     k =  16179  pred   22394.0  rate 0.998972341  exp nan  fwd 1.30e-08  5.33 s
 N =  160  sor           random     k =    460  pred     478.7  rate 0.950838806  exp 0.7860  fwd 3.54e-10  0.15 s
 N =  320  sor           ones       k =   1030  pred     957.5  rate 0.976231020  exp 0.7502  fwd 6.29e-11  1.40 s
 N =  320  sor           out_first  k =    713  pred     957.5  rate 0.971024652  exp 0.9170  fwd 1.83e-08  0.97 s
-N =  320  sor           random     k =    920  pred     957.5  rate 0.975003576  exp 0.7895  fwd 1.30e-11  1.26 s
-N =  640  sor           ones       k =   2062  pred    1915.0  rate 0.988071053  exp 0.7485  fwd 6.17e-11  11.44 s
-N =  640  sor           out_first  k =   1377  pred    1915.0  rate 0.984570659  exp 0.9699  fwd 3.27e-08  7.64 s
+N =  320  sor           random     k =    920  pred     957.5  rate 0.975003576  exp 0.7895  fwd 1.30e-11  1.25 s
+N =  640  sor           ones       k =   2062  pred    1915.0  rate 0.988071053  exp 0.7485  fwd 6.17e-11  11.42 s
+N =  640  sor           out_first  k =   1377  pred    1915.0  rate 0.984570659  exp 0.9699  fwd 3.27e-08  7.62 s
 N =  640  sor           random     k =   1838  pred    1915.0  rate 0.987429504  exp 0.7891  fwd 4.40e-10  10.19 s
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e05_iterations.csv
-=== e05_iterations: exit 0, 89 s, peak 787 MB
+=== e05_iterations: manifest records e05_iterations.csv
+=== e05_iterations: exit 0, 89 s, peak 797 MB
 
-=== e05_omega_sweep  (11:31:03)
+=== e05_omega_sweep  (21:25:02)
 N =  20  omega* = 1.595706  best fine iterations_ones 55 at offset +0.0175
 N =  40  omega* = 1.773270  best fine iterations_ones 108 at offset +0.0125
 N =  80  omega* = 1.879561  best fine iterations_ones 214 at offset +0.0075
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e05_omega_sweep.csv
-=== e05_omega_sweep: exit 0, 48 s, peak 260 MB
+=== e05_omega_sweep: manifest records e05_omega_sweep.csv
+=== e05_omega_sweep: exit 0, 48 s, peak 253 MB
 
-=== e05_sor_spectra  (11:31:51)
+=== e05_sor_spectra  (21:25:50)
 N =   6  n =    10  rho_sor 0.236067977500  law relerr 2.2e-16  gap N^4 10.133  sor/young 1.6180  0.0 s
 N =   8  n =    21  rho_sor 0.358839514102  law relerr 1.8e-15  gap N^4 13.607  sor/young 1.4072  0.0 s
 N =  10  n =    36  rho_sor 0.449000689633  law relerr 2.2e-16  gap N^4 15.472  sor/young 1.3059  0.0 s
@@ -544,22 +554,24 @@ N =  30  n =   406  rho_sor 0.772896324321  law relerr 4.7e-15  gap N^4 18.792  
 N =  40  n =   741  rho_sor 0.824609362722  law relerr 9.3e-15  gap N^4 18.988  sor/young 1.0664  0.8 s
 N =  50  n =  1176  rho_sor 0.857149638657  law relerr 8.9e-16  gap N^4 19.079  sor/young 1.0527  2.5 s
 N =  60  n =  1711  rho_sor 0.879508610486  law relerr 1.3e-14  gap N^4 19.128  sor/young 1.0437  6.6 s
-N =  80  n =  3081  rho_sor 0.908237861805  law relerr 1.5e-14  gap N^4 19.178  sor/young 1.0326  38.5 s
-N = 100  n =  4851  rho_sor 0.925906018512  law relerr 1.0e-14  gap N^4 19.201  sor/young 1.0260  152.6 s
+N =  80  n =  3081  rho_sor 0.908237861805  law relerr 1.5e-14  gap N^4 19.178  sor/young 1.0326  38.6 s
+N = 100  n =  4851  rho_sor 0.925906018512  law relerr 1.0e-14  gap N^4 19.201  sor/young 1.0260  152.2 s
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e05_sor_spectra.csv
-=== e05_sor_spectra: exit 0, 202 s, peak 2585 MB
+=== e05_sor_spectra: manifest records e05_sor_spectra.csv
+=== e05_sor_spectra: exit 0, 202 s, peak 2547 MB
 
-=== e06_fft  (11:35:13)
+=== e06_fft  (21:29:12)
 N =    50  n =     1176  fft 0.001 s  splu 0.002 s  fwd/(eps k2) 0.366  resid 1.9e-15  vs splu 1.0e-14  sum 3.7e-14  min p123 N^3 4.559797 at 48-1-1  reldiff 1.9e-12
 N =   100  n =     4851  fft 0.003 s  splu 0.014 s  fwd/(eps k2) 0.017  resid 6.3e-15  vs splu 2.2e-14  sum 2.5e-14  min p123 N^3 4.559795 at 98-1-1  reldiff 3.0e-10
 N =   200  n =    19701  fft 0.014 s  splu 0.085 s  fwd/(eps k2) 0.099  resid 1.3e-13  vs splu 8.1e-14  sum 1.4e-13  min p123 N^3 4.559795 at 198-1-1  reldiff 2.5e-10
-N =   400  n =    79401  fft 0.067 s  splu 0.666 s  fwd/(eps k2) 0.148  resid 4.4e-14  vs splu 4.0e-13  sum 8.8e-13  min p123 N^3 4.559795 at 398-1-1  reldiff 1.2e-07
-N =   800  n =   318801  fft 0.301 s  splu 6.566 s  fwd/(eps k2) 0.020  resid 5.3e-13  vs splu 1.4e-12  sum 7.7e-13  min p123 N^3 4.559794 at 798-1-1  reldiff 4.8e-07
-N =  1600  n =  1277601  fft 1.329 s  splu nan s  fwd/(eps k2) 0.246  resid 3.1e-12  vs splu nan  sum 2.4e-11  min p123 N^3 nan at   reldiff nan
+N =   400  n =    79401  fft 0.062 s  splu 0.675 s  fwd/(eps k2) 0.148  resid 4.4e-14  vs splu 4.0e-13  sum 8.8e-13  min p123 N^3 4.559795 at 398-1-1  reldiff 1.2e-07
+N =   800  n =   318801  fft 0.316 s  splu 6.566 s  fwd/(eps k2) 0.020  resid 5.3e-13  vs splu 1.4e-12  sum 7.7e-13  min p123 N^3 4.559794 at 798-1-1  reldiff 4.8e-07
+N =  1600  n =  1277601  fft 1.306 s  splu nan s  fwd/(eps k2) 0.246  resid 3.1e-12  vs splu nan  sum 2.4e-11  min p123 N^3 nan at   reldiff nan
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e06_fft.csv
-=== e06_fft: exit 0, 73 s, peak 1766 MB
+=== e06_fft: manifest records e06_fft.csv
+=== e06_fft: exit 0, 73 s, peak 1723 MB
 
-=== e07_baselines  (11:36:27)
+=== e07_baselines  (21:30:25)
 N =   20  cholmod_default    own +4.228e-16 (+0.0095 N^2 u, max      7.1 u)  true -3.847e-15 (max      36.4 u, 31.840 ulp)     0.01 s
 N =   20  cholmod_simplicial own +4.228e-16 (+0.0095 N^2 u, max      7.1 u)  true -3.847e-15 (max      36.4 u, 31.840 ulp)     0.00 s
 N =   20  cholmod_supernodal own -1.478e-16 (-0.0033 N^2 u, max      6.0 u)  true -4.418e-15 (max      41.2 u, 36.629 ulp)     0.00 s
@@ -593,38 +605,39 @@ N =   80  ir_direct          own +nan (+nan N^2 u, max      nan u)  true -3.815e
 N =  160  cholmod_default    own +9.071e-14 (+0.0319 N^2 u, max    821.0 u)  true -1.852e-13 (max    1668.9 u, 1640.740 ulp)     0.05 s
 N =  160  cholmod_simplicial own -5.081e-14 (-0.0179 N^2 u, max    469.4 u)  true -3.267e-13 (max    2943.7 u, 2895.740 ulp)     0.06 s
 N =  160  cholmod_supernodal own +9.071e-14 (+0.0319 N^2 u, max    821.0 u)  true -1.852e-13 (max    1668.9 u, 1640.740 ulp)     0.05 s
-N =  160  splu_colamd        own +7.169e-14 (+0.0252 N^2 u, max    669.7 u)  true -2.042e-13 (max    1839.8 u, 1809.740 ulp)     0.05 s
-N =  160  splu_natural       own -1.368e-13 (-0.0481 N^2 u, max   1246.9 u)  true -4.127e-13 (max    3724.2 u, 3657.071 ulp)     0.16 s
-N =  160  banded             own +3.570e-16 (+0.0001 N^2 u, max     90.7 u)  true -2.756e-13 (max    2488.7 u, 2443.017 ulp)     0.05 s
+N =  160  splu_colamd        own +7.169e-14 (+0.0252 N^2 u, max    669.7 u)  true -2.042e-13 (max    1839.8 u, 1809.740 ulp)     0.06 s
+N =  160  splu_natural       own -1.368e-13 (-0.0481 N^2 u, max   1246.9 u)  true -4.127e-13 (max    3724.2 u, 3657.071 ulp)     0.17 s
+N =  160  banded             own +3.570e-16 (+0.0001 N^2 u, max     90.7 u)  true -2.756e-13 (max    2488.7 u, 2443.017 ulp)     0.04 s
 N =  160  banded_int         own +nan (+nan N^2 u, max      nan u)  true -8.302e-15 (max     156.1 u, 150.119 ulp)     0.04 s
 N =  160  cholmod_int        own +nan (+nan N^2 u, max      nan u)  true +3.936e-13 (max    3545.5 u, 3486.260 ulp)     0.05 s
 N =  160  gth                own +nan (+nan N^2 u, max      nan u)  true +2.351e-15 (max      45.4 u, 41.891 ulp)     0.09 s
-N =  160  ir_direct          own +nan (+nan N^2 u, max      nan u)  true +6.816e-17 (max       1.0 u, 0.500 ulp)     0.05 s
-N =  320  cholmod_default    own +3.649e-13 (+0.0321 N^2 u, max   3290.1 u)  true -7.389e-13 (max    6660.8 u, 6613.234 ulp)     0.27 s
-N =  320  cholmod_simplicial own -2.352e-13 (-0.0207 N^2 u, max   2136.9 u)  true -1.339e-12 (max   12063.2 u, 11969.234 ulp)     0.33 s
-N =  320  cholmod_supernodal own +3.649e-13 (+0.0321 N^2 u, max   3290.1 u)  true -7.389e-13 (max    6660.8 u, 6613.234 ulp)     0.27 s
+N =  160  ir_direct          own +nan (+nan N^2 u, max      nan u)  true +6.816e-17 (max       1.0 u, 0.500 ulp)     0.06 s
+N =  320  cholmod_default    own +3.649e-13 (+0.0321 N^2 u, max   3290.1 u)  true -7.389e-13 (max    6660.8 u, 6613.234 ulp)     0.26 s
+N =  320  cholmod_simplicial own -2.352e-13 (-0.0207 N^2 u, max   2136.9 u)  true -1.339e-12 (max   12063.2 u, 11969.234 ulp)     0.32 s
+N =  320  cholmod_supernodal own +3.649e-13 (+0.0321 N^2 u, max   3290.1 u)  true -7.389e-13 (max    6660.8 u, 6613.234 ulp)     0.26 s
 N =  320  splu_colamd        own +3.099e-13 (+0.0273 N^2 u, max   2813.5 u)  true -7.939e-13 (max    7151.0 u, 7071.234 ulp)     0.37 s
-N =  320  splu_natural       own -1.434e-12 (-0.1261 N^2 u, max  12940.3 u)  true -2.538e-12 (max   22872.6 u, 22689.234 ulp)     2.11 s
+N =  320  splu_natural       own -1.434e-12 (-0.1261 N^2 u, max  12940.3 u)  true -2.538e-12 (max   22872.6 u, 22689.234 ulp)     2.09 s
 N =  320  banded             own -1.135e-14 (-0.0010 N^2 u, max    445.9 u)  true -1.115e-12 (max   10046.5 u, 9967.234 ulp)     0.42 s
 N =  320  banded_int         own +nan (+nan N^2 u, max      nan u)  true -6.893e-14 (max     653.4 u, 636.798 ulp)     0.41 s
 N =  320  cholmod_int        own +nan (+nan N^2 u, max      nan u)  true +1.610e-12 (max   14501.6 u, 14358.766 ulp)     0.27 s
 N =  320  gth                own +nan (+nan N^2 u, max      nan u)  true +4.304e-15 (max      60.3 u, 54.571 ulp)     1.37 s
 N =  320  ir_direct          own +nan (+nan N^2 u, max      nan u)  true -7.091e-17 (max       1.0 u, 0.500 ulp)     0.28 s
-N =  640  cholmod_default    own +1.470e-12 (+0.0323 N^2 u, max  13246.9 u)  true -2.945e-12 (max   26527.1 u, 26395.541 ulp)     1.30 s
-N =  640  cholmod_simplicial own -9.795e-13 (-0.0215 N^2 u, max   8833.4 u)  true -5.395e-12 (max   48591.6 u, 48353.541 ulp)     1.77 s
-N =  640  cholmod_supernodal own +1.470e-12 (+0.0323 N^2 u, max  13246.9 u)  true -2.945e-12 (max   26527.1 u, 26395.541 ulp)     1.29 s
-N =  640  splu_colamd        own +1.273e-12 (+0.0280 N^2 u, max  11485.1 u)  true -3.143e-12 (max   28306.4 u, 28154.541 ulp)     3.56 s
-N =  640  banded             own -2.441e-13 (-0.0054 N^2 u, max   2246.9 u)  true -4.659e-12 (max   41973.1 u, 41775.541 ulp)     4.69 s
-N =  640  banded_int         own +nan (+nan N^2 u, max      nan u)  true -4.481e-13 (max    4085.3 u, 4043.312 ulp)     4.62 s
-N =  640  cholmod_int        own +nan (+nan N^2 u, max      nan u)  true +6.464e-12 (max   58218.3 u, 57933.459 ulp)     1.30 s
+N =  640  cholmod_default    own +1.470e-12 (+0.0323 N^2 u, max  13246.9 u)  true -2.945e-12 (max   26527.1 u, 26395.541 ulp)     1.29 s
+N =  640  cholmod_simplicial own -9.795e-13 (-0.0215 N^2 u, max   8833.4 u)  true -5.395e-12 (max   48591.6 u, 48353.541 ulp)     1.79 s
+N =  640  cholmod_supernodal own +1.470e-12 (+0.0323 N^2 u, max  13246.9 u)  true -2.945e-12 (max   26527.1 u, 26395.541 ulp)     1.31 s
+N =  640  splu_colamd        own +1.273e-12 (+0.0280 N^2 u, max  11485.1 u)  true -3.143e-12 (max   28306.4 u, 28154.541 ulp)     3.49 s
+N =  640  banded             own -2.441e-13 (-0.0054 N^2 u, max   2246.9 u)  true -4.659e-12 (max   41973.1 u, 41775.541 ulp)     4.72 s
+N =  640  banded_int         own +nan (+nan N^2 u, max      nan u)  true -4.481e-13 (max    4085.3 u, 4043.312 ulp)     4.78 s
+N =  640  cholmod_int        own +nan (+nan N^2 u, max      nan u)  true +6.464e-12 (max   58218.3 u, 57933.459 ulp)     1.31 s
 N =  640  gth                own +nan (+nan N^2 u, max      nan u)  true +1.776e-14 (max     199.6 u, 189.099 ulp)    20.61 s
 N =  640  ir_direct          own +nan (+nan N^2 u, max      nan u)  true +6.732e-17 (max       1.0 u, 0.500 ulp)     1.35 s
-N = 1280  cholmod_default    own +5.743e-12 (+0.0316 N^2 u, max  51725.6 u)  true -1.192e-11 (max  107356.4 u, 107122.309 ulp)     6.25 s
+N = 1280  cholmod_default    own +5.743e-12 (+0.0316 N^2 u, max  51725.6 u)  true -1.192e-11 (max  107356.4 u, 107122.309 ulp)     6.22 s
 N = 1280  ir_direct          own +nan (+nan N^2 u, max      nan u)  true -7.794e-17 (max       1.0 u, 0.500 ulp)     6.47 s
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e07_baselines.csv
-=== e07_baselines: exit 0, 72 s, peak 3359 MB
+=== e07_baselines: manifest records e07_baselines.csv
+=== e07_baselines: exit 0, 72 s, peak 3382 MB
 
-=== e07_fft_check  (11:37:39)
+=== e07_fft_check  (21:31:37)
 N =   50  fft       vs refined  smallest 1.92e-12 (signed +1.92e-12, data term -2.69e-14)  max 1.92e-12  normwise 1.05e-14
 N =   50  cholmod   vs refined  smallest 3.27e-14 (signed -3.27e-14, data term -2.69e-14)  max 3.28e-14  normwise 4.94e-15
 N =   50  splu      vs refined  smallest 2.14e-14 (signed -2.14e-14, data term -2.69e-14)  max 2.14e-14  normwise 3.68e-15
@@ -645,9 +658,10 @@ N =  800  fft       vs refined  smallest 4.76e-07 (signed -4.76e-07, data term -
 N =  800  cholmod   vs refined  smallest 4.76e-12 (signed -4.76e-12, data term -6.90e-12)  max 4.76e-12  normwise 5.69e-13
 N =  800  splu      vs refined  smallest 4.96e-12 (signed -4.96e-12, data term -6.90e-12)  max 4.96e-12  normwise 5.80e-13
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e07_fft_check.csv
-=== e07_fft_check: exit 0, 14 s, peak 2548 MB
+=== e07_fft_check: manifest records e07_fft_check.csv
+=== e07_fft_check: exit 0, 14 s, peak 2519 MB
 
-=== e07_fixes  (11:37:53)
+=== e07_fixes  (21:31:51)
 N =   20  flint_solve 0.1 s
 N =   20  direct           nesdis      nan  its    nan     0.000 s  tiny 3.80e-15  max      36.6 u  vs stored +3.80e-16  omega 2.5 u
 N =   20  ir_direct        nesdis      nan  its      2     0.000 s  tiny 0.00e+00  max       0.0 u  vs stored +4.18e-15  omega 1.1 u
@@ -665,7 +679,7 @@ N =   20  cg_componentwise amg       1e-14  its     10     0.005 s  tiny 3.04e-1
 N =   20  ir_cg_amg        amg       1e-06  its      3     0.006 s  tiny 0.00e+00  max       0.0 u  vs stored +4.18e-15  omega 1.1 u
 N =   40  flint_solve 0.4 s
 N =   40  direct           nesdis      nan  its    nan     0.001 s  tiny 2.11e-14  max     190.2 u  vs stored -3.99e-15  omega 3.8 u
-N =   40  ir_direct        nesdis      nan  its      2     0.001 s  tiny 0.00e+00  max       0.0 u  vs stored +1.71e-14  omega 1.2 u
+N =   40  ir_direct        nesdis      nan  its      2     0.002 s  tiny 0.00e+00  max       0.0 u  vs stored +1.71e-14  omega 1.2 u
 N =   40  gth              natural     nan  its    nan     0.001 s  tiny 1.90e-16  max      11.7 u  vs stored +1.69e-14  omega 3.5 u
 N =   40  cg               none      1e-10  its     72     0.001 s  tiny 3.74e-08  max 336496114.5 u  vs stored +3.74e-08  omega 40180897.8 u
 N =   40  cg_componentwise none      1e-12  its     90     0.002 s  tiny 1.65e-14  max     258.1 u  vs stored +5.71e-16  omega 54.7 u
@@ -691,8 +705,8 @@ N =   60  cg_componentwise mic0      1e-14  its     40     0.003 s  tiny 3.68e-1
 N =   60  ir_cg_mic0       mic0      1e-06  its      3     0.005 s  tiny 0.00e+00  max       0.0 u  vs stored +3.87e-14  omega 1.1 u
 N =   60  cg               amg       1e-10  its      9     0.009 s  tiny 1.28e-09  max 16369721.7 u  vs stored -1.28e-09  omega 3129884.5 u
 N =   60  cg_componentwise amg       1e-12  its     12     0.011 s  tiny 6.62e-13  max    6636.9 u  vs stored +7.01e-13  omega 966.9 u
-N =   60  cg_componentwise amg       1e-14  its     13     0.011 s  tiny 6.13e-14  max     566.7 u  vs stored -2.26e-14  omega 18.6 u
-N =   60  ir_cg_amg        amg       1e-06  its      3     0.014 s  tiny 0.00e+00  max       0.0 u  vs stored +3.87e-14  omega 1.1 u
+N =   60  cg_componentwise amg       1e-14  its     13     0.012 s  tiny 6.13e-14  max     566.7 u  vs stored -2.26e-14  omega 18.6 u
+N =   60  ir_cg_amg        amg       1e-06  its      3     0.015 s  tiny 0.00e+00  max       0.0 u  vs stored +3.87e-14  omega 1.1 u
 N =   80  flint_solve 22.0 s
 N =   80  direct           nesdis      nan  its    nan     0.010 s  tiny 9.42e-14  max     848.1 u  vs stored -2.53e-14  omega 6.9 u
 N =   80  ir_direct        nesdis      nan  its      2     0.010 s  tiny 0.00e+00  max       0.0 u  vs stored +6.89e-14  omega 1.2 u
@@ -703,71 +717,72 @@ N =   80  cg_componentwise none      1e-14  its    190     0.007 s  tiny 6.94e-1
 N =   80  cg               mic0      1e-10  its     31     0.003 s  tiny 7.64e-11  max 11455442.5 u  vs stored -7.63e-11  omega 2166281.0 u
 N =   80  cg_componentwise mic0      1e-12  its     40     0.005 s  tiny 3.63e-13  max   16596.5 u  vs stored -2.94e-13  omega 3486.7 u
 N =   80  cg_componentwise mic0      1e-14  its     45     0.005 s  tiny 8.05e-14  max     815.6 u  vs stored -1.16e-14  omega 44.5 u
-N =   80  ir_cg_mic0       mic0      1e-06  its      3     0.009 s  tiny 0.00e+00  max       0.0 u  vs stored +6.89e-14  omega 1.2 u
+N =   80  ir_cg_mic0       mic0      1e-06  its      3     0.008 s  tiny 0.00e+00  max       0.0 u  vs stored +6.89e-14  omega 1.2 u
 N =   80  cg               amg       1e-10  its      9     0.013 s  tiny 9.58e-09  max 93404042.0 u  vs stored +9.58e-09  omega 16201232.1 u
-N =   80  cg_componentwise amg       1e-12  its     13     0.017 s  tiny 2.05e-12  max   20244.9 u  vs stored -1.99e-12  omega 2243.0 u
-N =   80  cg_componentwise amg       1e-14  its     15     0.017 s  tiny 7.15e-14  max     651.1 u  vs stored -2.66e-15  omega 5.8 u
-N =   80  ir_cg_amg        amg       1e-06  its      3     0.022 s  tiny 0.00e+00  max       0.0 u  vs stored +6.89e-14  omega 1.2 u
+N =   80  cg_componentwise amg       1e-12  its     13     0.016 s  tiny 2.05e-12  max   20244.9 u  vs stored -1.99e-12  omega 2243.0 u
+N =   80  cg_componentwise amg       1e-14  its     15     0.018 s  tiny 7.15e-14  max     651.1 u  vs stored -2.66e-15  omega 5.8 u
+N =   80  ir_cg_amg        amg       1e-06  its      3     0.021 s  tiny 0.00e+00  max       0.0 u  vs stored +6.89e-14  omega 1.2 u
 N =  160  direct           nesdis      nan  its    nan     0.052 s  tiny 1.85e-13  max    1668.8 u  vs stored +9.05e-14  omega 5.6 u
 N =  160  ir_direct        nesdis      nan  its      2     0.054 s  tiny 0.00e+00  max       0.0 u  vs stored +2.76e-13  omega 1.3 u
-N =  160  gth              natural     nan  its    nan     0.092 s  tiny 2.28e-15  max      45.8 u  vs stored +2.78e-13  omega 8.7 u
+N =  160  gth              natural     nan  its    nan     0.093 s  tiny 2.28e-15  max      45.8 u  vs stored +2.78e-13  omega 8.7 u
 N =  160  cg               none      1e-10  its    282     0.028 s  tiny 6.80e-07  max 6126610741.9 u  vs stored +6.80e-07  omega 3351295650.8 u
-N =  160  cg_componentwise none      1e-12  its    350     0.042 s  tiny 5.69e-13  max   10605.6 u  vs stored -2.93e-13  omega 7330.5 u
-N =  160  cg_componentwise none      1e-14  its    380     0.045 s  tiny 2.46e-13  max    2367.8 u  vs stored +2.95e-14  omega 70.9 u
+N =  160  cg_componentwise none      1e-12  its    350     0.045 s  tiny 5.69e-13  max   10605.6 u  vs stored -2.93e-13  omega 7330.5 u
+N =  160  cg_componentwise none      1e-14  its    380     0.046 s  tiny 2.46e-13  max    2367.8 u  vs stored +2.95e-14  omega 70.9 u
 N =  160  cg               mic0      1e-10  its     45     0.017 s  tiny 5.28e-09  max 70661592.0 u  vs stored +5.28e-09  omega 14051139.7 u
-N =  160  cg_componentwise mic0      1e-12  its     60     0.025 s  tiny 1.84e-12  max   37341.3 u  vs stored -1.56e-12  omega 6953.6 u
-N =  160  cg_componentwise mic0      1e-14  its     75     0.030 s  tiny 2.41e-13  max    2186.1 u  vs stored +3.50e-14  omega 10.4 u
+N =  160  cg_componentwise mic0      1e-12  its     60     0.026 s  tiny 1.84e-12  max   37341.3 u  vs stored -1.56e-12  omega 6953.6 u
+N =  160  cg_componentwise mic0      1e-14  its     75     0.031 s  tiny 2.41e-13  max    2186.1 u  vs stored +3.50e-14  omega 10.4 u
 N =  160  ir_cg_mic0       mic0      1e-06  its      3     0.043 s  tiny 0.00e+00  max       0.0 u  vs stored +2.76e-13  omega 1.3 u
-N =  160  cg               amg       1e-10  its     10     0.039 s  tiny 1.33e-07  max 1293403676.7 u  vs stored -1.33e-07  omega 151220738.5 u
+N =  160  cg               amg       1e-10  its     10     0.040 s  tiny 1.33e-07  max 1293403676.7 u  vs stored -1.33e-07  omega 151220738.5 u
 N =  160  cg_componentwise amg       1e-12  its     15     0.052 s  tiny 2.57e-12  max   25175.9 u  vs stored -2.30e-12  omega 2424.2 u
 N =  160  cg_componentwise amg       1e-14  its     17     0.057 s  tiny 2.84e-13  max    2571.2 u  vs stored -7.99e-15  omega 19.5 u
-N =  160  ir_cg_amg        amg       1e-06  its      3     0.068 s  tiny 0.00e+00  max       1.1 u  vs stored +2.76e-13  omega 1.3 u
+N =  160  ir_cg_amg        amg       1e-06  its      3     0.069 s  tiny 0.00e+00  max       1.1 u  vs stored +2.76e-13  omega 1.3 u
 N =  320  direct           nesdis      nan  its    nan     0.268 s  tiny 7.39e-13  max    6661.5 u  vs stored +3.65e-13  omega 10.4 u
 N =  320  ir_direct        nesdis      nan  its      2     0.278 s  tiny 0.00e+00  max       0.0 u  vs stored +1.10e-12  omega 1.4 u
-N =  320  gth              natural     nan  its    nan     1.364 s  tiny 4.38e-15  max      59.5 u  vs stored +1.11e-12  omega 11.4 u
-N =  320  cg               none      1e-10  its    556     0.204 s  tiny 5.79e-06  max 52179702234.5 u  vs stored +5.79e-06  omega 32861249003.5 u
-N =  320  cg_componentwise none      1e-12  its    710     0.329 s  tiny 1.19e-12  max   12405.5 u  vs stored -8.92e-14  omega 3325.2 u
+N =  320  gth              natural     nan  its    nan     1.366 s  tiny 4.38e-15  max      59.5 u  vs stored +1.11e-12  omega 11.4 u
+N =  320  cg               none      1e-10  its    556     0.203 s  tiny 5.79e-06  max 52179702234.5 u  vs stored +5.79e-06  omega 32861249003.5 u
+N =  320  cg_componentwise none      1e-12  its    710     0.326 s  tiny 1.19e-12  max   12405.5 u  vs stored -8.92e-14  omega 3325.2 u
 N =  320  cg_componentwise none      1e-14  its    760     0.351 s  tiny 1.02e-12  max    9388.0 u  vs stored +7.99e-14  omega 65.5 u
 N =  320  cg               mic0      1e-10  its     66     0.098 s  tiny 3.75e-09  max 277994780.4 u  vs stored +3.75e-09  omega 53676902.3 u
-N =  320  cg_componentwise mic0      1e-12  its     95     0.157 s  tiny 1.10e-12  max   32343.1 u  vs stored +2.21e-12  omega 5113.1 u
-N =  320  cg_componentwise mic0      1e-14  its    110     0.181 s  tiny 1.00e-12  max    9063.6 u  vs stored +1.00e-13  omega 55.8 u
-N =  320  ir_cg_mic0       mic0      1e-06  its      3     0.245 s  tiny 0.00e+00  max       0.0 u  vs stored +1.10e-12  omega 1.4 u
-N =  320  cg               amg       1e-10  its     13     0.159 s  tiny 1.91e-07  max 1826629059.2 u  vs stored +1.91e-07  omega 163453096.6 u
-N =  320  cg_componentwise amg       1e-12  its     19     0.223 s  tiny 7.11e-12  max   69345.9 u  vs stored -6.00e-12  omega 5731.2 u
-N =  320  cg_componentwise amg       1e-14  its     22     0.248 s  tiny 9.36e-13  max    8693.4 u  vs stored +1.68e-13  omega 16.4 u
-N =  320  ir_cg_amg        amg       1e-06  its      3     0.289 s  tiny 0.00e+00  max       0.0 u  vs stored +1.10e-12  omega 1.4 u
+N =  320  cg_componentwise mic0      1e-12  its     95     0.160 s  tiny 1.10e-12  max   32343.1 u  vs stored +2.21e-12  omega 5113.1 u
+N =  320  cg_componentwise mic0      1e-14  its    110     0.182 s  tiny 1.00e-12  max    9063.6 u  vs stored +1.00e-13  omega 55.8 u
+N =  320  ir_cg_mic0       mic0      1e-06  its      3     0.243 s  tiny 0.00e+00  max       0.0 u  vs stored +1.10e-12  omega 1.4 u
+N =  320  cg               amg       1e-10  its     13     0.155 s  tiny 1.91e-07  max 1826629059.2 u  vs stored +1.91e-07  omega 163453096.6 u
+N =  320  cg_componentwise amg       1e-12  its     19     0.221 s  tiny 7.11e-12  max   69345.9 u  vs stored -6.00e-12  omega 5731.2 u
+N =  320  cg_componentwise amg       1e-14  its     22     0.247 s  tiny 9.36e-13  max    8693.4 u  vs stored +1.68e-13  omega 16.4 u
+N =  320  ir_cg_amg        amg       1e-06  its      3     0.286 s  tiny 0.00e+00  max       0.0 u  vs stored +1.10e-12  omega 1.4 u
 N =  640  direct           nesdis      nan  its    nan     1.297 s  tiny 2.95e-12  max   26527.7 u  vs stored +1.47e-12  omega 13.4 u
-N =  640  ir_direct        nesdis      nan  its      2     1.346 s  tiny 0.00e+00  max       0.0 u  vs stored +4.42e-12  omega 1.4 u
-N =  640  gth              natural     nan  its    nan    20.566 s  tiny 1.77e-14  max     199.8 u  vs stored +4.43e-12  omega 18.2 u
+N =  640  ir_direct        nesdis      nan  its      2     1.351 s  tiny 0.00e+00  max       0.0 u  vs stored +4.42e-12  omega 1.4 u
+N =  640  gth              natural     nan  its    nan    20.610 s  tiny 1.77e-14  max     199.8 u  vs stored +4.43e-12  omega 18.2 u
 N =  640  cg               none      1e-10  its   1094     1.594 s  tiny 1.42e-05  max 128326891695.0 u  vs stored +1.42e-05  omega 80621587766.7 u
 N =  640  cg_componentwise none      1e-12  its   1450     2.748 s  tiny 3.01e-12  max   44156.3 u  vs stored +1.40e-12  omega 6385.9 u
-N =  640  cg_componentwise none      1e-14  its   1630     3.112 s  tiny 4.12e-12  max   37307.5 u  vs stored +2.97e-13  omega 89.2 u
-N =  640  cg               mic0      1e-10  its     95     0.560 s  tiny 8.18e-08  max 1337936047.1 u  vs stored -8.18e-08  omega 274591608.0 u
-N =  640  cg_componentwise mic0      1e-12  its    150     1.034 s  tiny 4.91e-12  max   46016.3 u  vs stored -4.91e-13  omega 3486.2 u
-N =  640  cg_componentwise mic0      1e-14  its    170     1.164 s  tiny 3.73e-12  max   33892.3 u  vs stored +6.80e-13  omega 43.5 u
-N =  640  ir_cg_mic0       mic0      1e-06  its      4     1.763 s  tiny 0.00e+00  max       0.0 u  vs stored +4.42e-12  omega 1.4 u
-N =  640  cg               amg       1e-10  its     14     0.667 s  tiny 1.58e-06  max 15145470846.5 u  vs stored -1.58e-06  omega 1407109596.1 u
-N =  640  cg_componentwise amg       1e-12  its     24     1.081 s  tiny 1.77e-12  max   35212.4 u  vs stored +2.65e-12  omega 1340.5 u
-N =  640  cg_componentwise amg       1e-14  its     26     1.155 s  tiny 3.81e-12  max   34980.5 u  vs stored +6.02e-13  omega 74.9 u
-N =  640  ir_cg_amg        amg       1e-06  its      4     1.482 s  tiny 0.00e+00  max       1.9 u  vs stored +4.42e-12  omega 1.4 u
-N = 1280  direct           nesdis      nan  its    nan     6.460 s  tiny 1.19e-11  max  107356.8 u  vs stored +5.74e-12  omega 17.2 u
-N = 1280  ir_direct        nesdis      nan  its      2     6.688 s  tiny 0.00e+00  max       0.0 u  vs stored +1.77e-11  omega 1.4 u
-N = 1280  cg               none      1e-10  its   2147    15.105 s  tiny 9.61e-05  max 865369496578.6 u  vs stored +9.61e-05  omega 519433298679.2 u
-N = 1280  cg_componentwise none      1e-12  its   3150    28.659 s  tiny 1.57e-11  max  148564.1 u  vs stored +1.97e-12  omega 3201.2 u
-N = 1280  cg_componentwise none      1e-14  its  30000   268.653 s  tiny 1.64e-11  max  147725.7 u  vs stored +1.29e-12  omega 360.3 u  NOT CONVERGED
+N =  640  cg_componentwise none      1e-14  its   1630     3.087 s  tiny 4.12e-12  max   37307.5 u  vs stored +2.97e-13  omega 89.2 u
+N =  640  cg               mic0      1e-10  its     95     0.555 s  tiny 8.18e-08  max 1337936047.1 u  vs stored -8.18e-08  omega 274591608.0 u
+N =  640  cg_componentwise mic0      1e-12  its    150     1.029 s  tiny 4.91e-12  max   46016.3 u  vs stored -4.91e-13  omega 3486.2 u
+N =  640  cg_componentwise mic0      1e-14  its    170     1.163 s  tiny 3.73e-12  max   33892.3 u  vs stored +6.80e-13  omega 43.5 u
+N =  640  ir_cg_mic0       mic0      1e-06  its      4     1.748 s  tiny 0.00e+00  max       0.0 u  vs stored +4.42e-12  omega 1.4 u
+N =  640  cg               amg       1e-10  its     14     0.664 s  tiny 1.58e-06  max 15145470846.5 u  vs stored -1.58e-06  omega 1407109596.1 u
+N =  640  cg_componentwise amg       1e-12  its     24     1.072 s  tiny 1.77e-12  max   35212.4 u  vs stored +2.65e-12  omega 1340.5 u
+N =  640  cg_componentwise amg       1e-14  its     26     1.141 s  tiny 3.81e-12  max   34980.5 u  vs stored +6.02e-13  omega 74.9 u
+N =  640  ir_cg_amg        amg       1e-06  its      4     1.490 s  tiny 0.00e+00  max       1.9 u  vs stored +4.42e-12  omega 1.4 u
+N = 1280  direct           nesdis      nan  its    nan     6.224 s  tiny 1.19e-11  max  107356.8 u  vs stored +5.74e-12  omega 17.2 u
+N = 1280  ir_direct        nesdis      nan  its      2     6.465 s  tiny 0.00e+00  max       0.0 u  vs stored +1.77e-11  omega 1.4 u
+N = 1280  cg               none      1e-10  its   2147    12.992 s  tiny 9.61e-05  max 865369496578.6 u  vs stored +9.61e-05  omega 519433298679.2 u
+N = 1280  cg_componentwise none      1e-12  its   3150    24.562 s  tiny 1.57e-11  max  148564.1 u  vs stored +1.97e-12  omega 3201.2 u
+N = 1280  cg_componentwise none      1e-14  its  30000   233.121 s  tiny 1.64e-11  max  147725.7 u  vs stored +1.29e-12  omega 360.3 u  NOT CONVERGED
             smallest omega reached: 3.46e-14
-N = 1280  cg               mic0      1e-10  its    137     3.473 s  tiny 4.45e-07  max 6333973868.0 u  vs stored -4.45e-07  omega 796733035.4 u
-N = 1280  cg_componentwise mic0      1e-12  its    225     6.784 s  tiny 1.55e-11  max  177437.9 u  vs stored +2.13e-12  omega 7547.5 u
-N = 1280  cg_componentwise mic0      1e-14  its    260     7.588 s  tiny 1.51e-11  max  136796.0 u  vs stored +2.59e-12  omega 64.1 u
-N = 1280  ir_cg_mic0       mic0      1e-06  its      4    11.169 s  tiny 0.00e+00  max       2.0 u  vs stored +1.77e-11  omega 1.4 u
-N = 1280  cg               amg       1e-10  its     19     3.505 s  tiny 1.42e-06  max 16846590878.2 u  vs stored -1.42e-06  omega 2878445809.3 u
-N = 1280  cg_componentwise amg       1e-12  its     31     5.754 s  tiny 1.81e-11  max  164114.4 u  vs stored -4.03e-13  omega 3255.8 u
-N = 1280  cg_componentwise amg       1e-14  its     34     6.134 s  tiny 1.57e-11  max  141625.5 u  vs stored +1.97e-12  omega 55.0 u
-N = 1280  ir_cg_amg        amg       1e-06  its      4     7.483 s  tiny 0.00e+00  max       2.0 u  vs stored +1.77e-11  omega 1.4 u
+N = 1280  cg               mic0      1e-10  its    137     3.416 s  tiny 4.45e-07  max 6333973868.0 u  vs stored -4.45e-07  omega 796733035.4 u
+N = 1280  cg_componentwise mic0      1e-12  its    225     6.371 s  tiny 1.55e-11  max  177437.9 u  vs stored +2.13e-12  omega 7547.5 u
+N = 1280  cg_componentwise mic0      1e-14  its    260     7.332 s  tiny 1.51e-11  max  136796.0 u  vs stored +2.59e-12  omega 64.1 u
+N = 1280  ir_cg_mic0       mic0      1e-06  its      4    11.043 s  tiny 0.00e+00  max       2.0 u  vs stored +1.77e-11  omega 1.4 u
+N = 1280  cg               amg       1e-10  its     19     3.378 s  tiny 1.42e-06  max 16846590878.2 u  vs stored -1.42e-06  omega 2878445809.3 u
+N = 1280  cg_componentwise amg       1e-12  its     31     5.583 s  tiny 1.81e-11  max  164114.4 u  vs stored -4.03e-13  omega 3255.8 u
+N = 1280  cg_componentwise amg       1e-14  its     34     5.995 s  tiny 1.57e-11  max  141625.5 u  vs stored +1.97e-12  omega 55.0 u
+N = 1280  ir_cg_amg        amg       1e-06  its      4     7.424 s  tiny 0.00e+00  max       2.0 u  vs stored +1.77e-11  omega 1.4 u
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e07_fixes.csv
-=== e07_fixes: exit 0, 2060 s, peak 5432 MB
+=== e07_fixes: manifest records e07_fixes.csv
+=== e07_fixes: exit 0, 1860 s, peak 5618 MB
 
-=== e07_floor  (12:12:13)
+=== e07_floor  (22:02:51)
 N =   80  none   k10   143  min omega 1.126e-15 (10.1 u) at k = 200 (1.40 k10)  final 10.1 u  peak/x_ref: corner 3.1097, inf 1.0002
 N =   80  mic0   k10    31  min omega 6.667e-16 (6.0 u) at k = 50 (1.61 k10)  final 6.0 u  peak/x_ref: corner 1.9041, inf 1.0000
 N =   80  amg    k10     9  min omega 5.836e-16 (5.3 u) at k = 16 (1.78 k10)  final 5.3 u  peak/x_ref: corner 2.2685, inf 1.0002
@@ -784,20 +799,22 @@ N = 1280  none   k10  2147  min omega 3.462e-14 (311.8 u) at k = 3440 (1.60 k10)
 N = 1280  mic0   k10   137  min omega 6.910e-15 (62.2 u) at k = 265 (1.93 k10)  final 63.3 u  peak/x_ref: corner 20.5390, inf 1.0000
 N = 1280  amg    k10    19  min omega 4.448e-15 (40.1 u) at k = 35 (1.84 k10)  final 43.1 u  peak/x_ref: corner 13.7989, inf 1.0593
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e07_floor.csv
-=== e07_floor: exit 0, 302 s, peak 2094 MB
+=== e07_floor: manifest records e07_floor.csv
+=== e07_floor: exit 0, 297 s, peak 2141 MB
 
-=== e07_structured  (12:17:15)
-N =   10  n =     36  random max 1.476  push 3.851  cond_max 37.3  kappa_tiny 11.3530 (1.1353 N)  attained 11.3530  coherent 7.0000  drift 7.5017  symmetric 6.2287
-N =   20  n =    171  random max 1.959  push 4.300  cond_max 153.8  kappa_tiny 23.7993 (1.1900 N)  attained 23.7993  coherent 17.0000  drift 19.4993  symmetric 8.2651
-N =   40  n =    741  random max 2.211  push 4.525  cond_max 619.9  kappa_tiny 48.3031 (1.2076 N)  attained 48.3031  coherent 37.0000  drift 43.7781  symmetric 10.1728
-N =   80  n =   3081  random max 2.942  push 4.637  cond_max 2484.1  kappa_tiny 97.0969 (1.2137 N)  attained 97.0969  coherent 77.0000  drift 92.4594  symmetric 12.0120
-N =  160  n =  12561  random max 2.407  push 4.694  cond_max 9941.0  kappa_tiny 194.5739 (1.2161 N)  attained 194.5740  coherent 157.0001  drift 189.8802  symmetric 13.8144
-N =  320  n =  50721  random max 2.851  push 4.722  cond_max 39768.3  kappa_tiny 389.4719 (1.2171 N)  attained 389.4723  coherent 317.0004  drift 384.7504  symmetric 15.5982
-N =  640  n = 203841  random max 3.071  push 4.736  cond_max 159077.8  kappa_tiny 779.2398 (1.2176 N)  attained 779.2416  coherent 637.0017  drift 774.5057  symmetric 17.3726
+=== e07_structured  (22:07:48)
+N =   10  n =     36  random max 1.476  push 3.851  cond_max 37.3  kappa_tiny 11.3530 (1.1353 N)  attained 11.3530  coherent 7.0000  drift 7.5017  symmetric 6.2287  rms random 0.7761
+N =   20  n =    171  random max 1.959  push 4.300  cond_max 153.8  kappa_tiny 23.7993 (1.1900 N)  attained 23.7993  coherent 17.0000  drift 19.4993  symmetric 8.2651  rms random 0.8348
+N =   40  n =    741  random max 2.211  push 4.525  cond_max 619.9  kappa_tiny 48.3031 (1.2076 N)  attained 48.3031  coherent 37.0000  drift 43.7781  symmetric 10.1728  rms random 0.8964
+N =   80  n =   3081  random max 2.942  push 4.637  cond_max 2484.1  kappa_tiny 97.0969 (1.2137 N)  attained 97.0969  coherent 77.0000  drift 92.4594  symmetric 12.0120  rms random 0.9588
+N =  160  n =  12561  random max 2.407  push 4.694  cond_max 9941.0  kappa_tiny 194.5739 (1.2161 N)  attained 194.5740  coherent 157.0001  drift 189.8802  symmetric 13.8144  rms random 1.0201
+N =  320  n =  50721  random max 2.851  push 4.722  cond_max 39768.3  kappa_tiny 389.4719 (1.2171 N)  attained 389.4723  coherent 317.0004  drift 384.7504  symmetric 15.5982  rms random 1.0793
+N =  640  n = 203841  random max 3.071  push 4.736  cond_max 159077.8  kappa_tiny 779.2398 (1.2176 N)  attained 779.2416  coherent 637.0017  drift 774.5057  symmetric 17.3726  rms random 1.1361
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e07_structured.csv
-=== e07_structured: exit 0, 105 s, peak 1309 MB
+=== e07_structured: manifest records e07_structured.csv
+=== e07_structured: exit 0, 105 s, peak 1308 MB
 
-=== e08_icm  (12:19:01)
+=== e08_icm  (22:09:33)
 N = 200 25-87-88: exact p2nd 0.1584080071 equity 25.33408007
 N = 200 21-89-90: exact p2nd 0.1346400128 equity 24.49640013
 N = 200 198-1-1: exact p2nd 0.0099988601 equity 49.79998860
@@ -806,42 +823,50 @@ N =   30  max |dP2| 0.0358888708 at 4-13-13  rel p3 5.8060831 at 1-1-28  underra
 N =   60  max |dP2| 0.0359655670 at 7-26-27  rel p3 12.3815091 at 1-1-58  underrate -0.27220714 at 12-13-35  identity 5.9e-13  0.01 s
 N =  120  max |dP2| 0.0360434580 at 15-52-53  rel p3 25.5381260 at 1-1-118  underrate -0.27253356 at 25-25-70  identity 2.2e-12  0.03 s
 N =  240  max |dP2| 0.0360462040 at 30-105-105  rel p3 51.8541766 at 1-1-238  underrate -0.27257953 at 50-51-139  identity 9.6e-12  0.18 s
-N =  480  max |dP2| 0.0360502475 at 59-210-211  rel p3 104.4876678 at 1-1-478  underrate -0.27259922 at 101-101-278  identity 3.8e-11  1.41 s
+N =  480  max |dP2| 0.0360502475 at 59-210-211  rel p3 104.4876678 at 1-1-478  underrate -0.27259922 at 101-101-278  identity 3.8e-11  1.42 s
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e08_icm_errors.csv
 N =   10  p1_second 0.2608432762  obs order nan to nan  0.00 s
 N =   20  p1_second 0.2607814373  obs order nan to nan  0.00 s
 N =   40  p1_second 0.2607771173  obs order 3.808 to 3.931  0.00 s
 N =   80  p1_second 0.2607768409  obs order 3.960 to 3.985  0.01 s
-N =  160  p1_second 0.2607768235  obs order 3.991 to 3.996  0.07 s
+N =  160  p1_second 0.2607768235  obs order 3.991 to 3.996  0.06 s
 N =  320  p1_second 0.2607768224  obs order 3.998 to 4.000  0.38 s
-N =  640  p1_second 0.2607768223  obs order 3.979 to 4.030  3.46 s
+N =  640  p1_second 0.2607768223  obs order 3.979 to 4.030  3.43 s
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e08_limit.csv
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e08_states_N120.csv
-=== e08_icm: exit 0, 6 s, peak 787 MB
+=== e08_icm: manifest records e08_icm_errors.csv, e08_limit.csv, e08_states_N120.csv, e08_wikipedia.csv
+=== e08_icm: exit 0, 6 s, peak 809 MB
 
-=== e09_four  (12:19:07)
-free memory at start: 8104 MB; workers are killed above 4862 MB
-{'N': 10, 'n': 84, 'max_nnz_row': 13, 'max_abs_A_minus_AT': 0.0, 'e2_identity_relerr': 9.210739167260557e-16, 'win_maxerr': 4.440892098500626e-16, 'out_first_sum_maxerr': 1.1102230246251565e-15, 'T_max': 6.100015557911809, 'T_max_state': '2-3-2-3', 'T_over_e4N_min': 1.6944487660866125, 'T_over_e4N_max': 2.267850884329286, 'T_e2_over_6e4_min': 0.9071403537317143, 'T_e2_over_6e4_max': 1.0449100724200784, 'bounds_hold': True, 'free_mem_mb_start': 8104}
-{'N': 20, 'n': 969, 'max_nnz_row': 13, 'max_abs_A_minus_AT': 0.0, 'e2_identity_relerr': 1.5764574830730755e-15, 'win_maxerr': 9.992007221626409e-16, 'out_first_sum_maxerr': 1.9984014443252818e-15, 'T_max': 26.532365077645814, 'T_max_state': '5-5-5-5', 'T_over_e4N_min': 0.849035682484666, 'T_over_e4N_max': 1.8914252156383675, 'T_e2_over_6e4_min': 0.8511413470372653, 'T_e2_over_6e4_max': 1.0612946031058326, 'bounds_hold': True, 'free_mem_mb_start': 8104}
-{'N': 30, 'n': 3654, 'max_nnz_row': 13, 'max_abs_A_minus_AT': 0.0, 'e2_identity_relerr': 3.866899242231838e-15, 'win_maxerr': 1.887379141862766e-15, 'out_first_sum_maxerr': 4.884981308350689e-15, 'T_max': 59.274545053337135, 'T_max_state': '7-7-8-8', 'T_over_e4N_min': 0.5670396529337096, 'T_over_e4N_max': 1.7877985888713903, 'T_e2_over_6e4_min': 0.834306008139982, 'T_e2_over_6e4_max': 1.0616242391036679, 'bounds_hold': True, 'free_mem_mb_start': 8104}
-{'N': 40, 'n': 9139, 'max_nnz_row': 13, 'max_abs_A_minus_AT': 0.0, 'e2_identity_relerr': 5.335702250401179e-15, 'win_maxerr': 3.3306690738754696e-15, 'out_first_sum_maxerr': 6.5503158452884236e-15, 'T_max': 106.30988223737286, 'T_max_state': '10-10-10-10', 'T_over_e4N_min': 0.42523952894949146, 'T_over_e4N_max': 1.7397441363672341, 'T_e2_over_6e4_min': 0.8263784647744362, 'T_e2_over_6e4_max': 1.0630988223737285, 'bounds_hold': True, 'free_mem_mb_start': 8104}
-{'N': 60, 'n': 32509, 'max_nnz_row': 13, 'max_abs_A_minus_AT': 0.0, 'e2_identity_relerr': 1.1689439722539957e-14, 'win_maxerr': 5.773159728050814e-15, 'out_first_sum_maxerr': 1.4876988529977098e-14, 'T_max': 239.2719318741133, 'T_max_state': '15-15-15-15', 'T_over_e4N_min': 0.283581548887838, 'T_over_e4N_max': 1.6940661264356607, 'T_e2_over_6e4_min': 0.8187986277772359, 'T_e2_over_6e4_max': 1.0634308083293924, 'bounds_hold': True, 'free_mem_mb_start': 8104}
+=== e09_cone  (22:09:40)
+octant               m = (64, 128, 256, 512)  finest 12.00018231  h2 removed 11.999999995  h4 removed 12.000000000  alpha 3.00000000
+tetrahedron_vertex   m = (64, 128, 256, 512)  finest 38.44746055  h2 removed 38.446962005  h4 removed 38.446962018  alpha 5.72068823
+wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e09_cone.csv
+=== e09_cone: manifest records e09_cone.csv
+=== e09_cone: exit 0, 8 s, peak 873 MB
+
+=== e09_four  (22:09:48)
+free memory at start: 9218 MB; workers are killed above 5531 MB
+{'N': 10, 'n': 84, 'max_nnz_row': 13, 'max_abs_A_minus_AT': 0.0, 'e2_identity_relerr': 9.210739167260557e-16, 'win_maxerr': 4.440892098500626e-16, 'out_first_sum_maxerr': 1.1102230246251565e-15, 'T_max': 6.100015557911809, 'T_max_state': '2-3-2-3', 'T_over_e4N_min': 1.6944487660866125, 'T_over_e4N_max': 2.267850884329286, 'T_e2_over_6e4_min': 0.9071403537317143, 'T_e2_over_6e4_max': 1.0449100724200784, 'bounds_hold': True, 'free_mem_mb_start': 9218}
+{'N': 20, 'n': 969, 'max_nnz_row': 13, 'max_abs_A_minus_AT': 0.0, 'e2_identity_relerr': 1.5764574830730755e-15, 'win_maxerr': 9.992007221626409e-16, 'out_first_sum_maxerr': 1.9984014443252818e-15, 'T_max': 26.532365077645814, 'T_max_state': '5-5-5-5', 'T_over_e4N_min': 0.849035682484666, 'T_over_e4N_max': 1.8914252156383675, 'T_e2_over_6e4_min': 0.8511413470372653, 'T_e2_over_6e4_max': 1.0612946031058326, 'bounds_hold': True, 'free_mem_mb_start': 9218}
+{'N': 30, 'n': 3654, 'max_nnz_row': 13, 'max_abs_A_minus_AT': 0.0, 'e2_identity_relerr': 3.866899242231838e-15, 'win_maxerr': 1.887379141862766e-15, 'out_first_sum_maxerr': 4.884981308350689e-15, 'T_max': 59.274545053337135, 'T_max_state': '7-7-8-8', 'T_over_e4N_min': 0.5670396529337096, 'T_over_e4N_max': 1.7877985888713903, 'T_e2_over_6e4_min': 0.834306008139982, 'T_e2_over_6e4_max': 1.0616242391036679, 'bounds_hold': True, 'free_mem_mb_start': 9218}
+{'N': 40, 'n': 9139, 'max_nnz_row': 13, 'max_abs_A_minus_AT': 0.0, 'e2_identity_relerr': 5.335702250401179e-15, 'win_maxerr': 3.3306690738754696e-15, 'out_first_sum_maxerr': 6.5503158452884236e-15, 'T_max': 106.30988223737286, 'T_max_state': '10-10-10-10', 'T_over_e4N_min': 0.42523952894949146, 'T_over_e4N_max': 1.7397441363672341, 'T_e2_over_6e4_min': 0.8263784647744362, 'T_e2_over_6e4_max': 1.0630988223737285, 'bounds_hold': True, 'free_mem_mb_start': 9218}
+{'N': 60, 'n': 32509, 'max_nnz_row': 13, 'max_abs_A_minus_AT': 0.0, 'e2_identity_relerr': 1.1689439722539957e-14, 'win_maxerr': 5.773159728050814e-15, 'out_first_sum_maxerr': 1.4876988529977098e-14, 'T_max': 239.2719318741133, 'T_max_state': '15-15-15-15', 'T_over_e4N_min': 0.283581548887838, 'T_over_e4N_max': 1.6940661264356607, 'T_e2_over_6e4_min': 0.8187986277772359, 'T_e2_over_6e4_max': 1.0634308083293924, 'bounds_hold': True, 'free_mem_mb_start': 9218}
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e09_identities.csv (1 s)
-splu     N =  20  n       969  setup    0.007 s  solve   0.000 s  rss      53 MB  nnz 1.12e+05  iters nan  err 1.8e-15  ok (median of 5 processes)  (3 s wall)
-splu     N =  40  n     9,139  setup    0.596 s  solve   0.004 s  rss     172 MB  nnz 5.23e+06  iters nan  err 6.4e-15  ok (median of 5 processes)  (5 s wall)
-splu     N =  60  n    32,509  setup    8.579 s  solve   0.028 s  rss     948 MB  nnz 3.65e+07  iters nan  err 1.3e-14  ok (median of 5 processes)  (46 s wall)
-splu     N =  80  n    79,079  setup   73.880 s  solve   0.098 s  rss    3528 MB  nnz 1.54e+08  iters nan  err 2.4e-14  ok (1 run, over 60 s)  (75 s wall)
+splu     N =  20  n       969  setup    0.007 s  solve   0.000 s  rss      54 MB  nnz 1.12e+05  iters nan  err 1.8e-15  ok (median of 5 processes)  (3 s wall)
+splu     N =  40  n     9,139  setup    0.591 s  solve   0.004 s  rss     173 MB  nnz 5.23e+06  iters nan  err 6.4e-15  ok (median of 5 processes)  (5 s wall)
+splu     N =  60  n    32,509  setup    8.557 s  solve   0.028 s  rss     970 MB  nnz 3.65e+07  iters nan  err 1.3e-14  ok (median of 5 processes)  (46 s wall)
+splu     N =  80  n    79,079  setup   73.655 s  solve   0.102 s  rss    3525 MB  nnz 1.54e+08  iters nan  err 2.4e-14  ok (1 run, over 60 s)  (75 s wall)
 splu     N = 100  skipped: projected factor 3.5 GB > 3 GB
-splu_mmd N =  20  n       969  setup    0.006 s  solve   0.000 s  rss      55 MB  nnz 1.14e+05  iters nan  err 8.5e-16  ok (median of 5 processes)  (3 s wall)
-splu_mmd N =  40  n     9,139  setup    0.268 s  solve   0.002 s  rss     132 MB  nnz 3.25e+06  iters nan  err 3.0e-15  ok (median of 5 processes)  (5 s wall)
-splu_mmd N =  60  n    32,509  setup    4.642 s  solve   0.018 s  rss     595 MB  nnz 2.38e+07  iters nan  err 5.7e-15  ok (median of 5 processes)  (26 s wall)
-splu_mmd N =  80  n    79,079  setup   41.243 s  solve   0.069 s  rss    2348 MB  nnz 9.8e+07  iters nan  err 7.8e-15  ok (median of 5 processes)  (210 s wall)
-splu_mmd N = 100  n   156,849  setup      nan s  solve     nan s  rss     nan MB  nnz nan  iters nan  err nan  killed: rss over 4.7 GB (60% of free memory)  (197 s wall)
-cholmod  N =  20  n       969  setup    0.005 s  solve   0.000 s  rss      54 MB  nnz 4.77e+04  iters nan  err 1.5e-15  ok (median of 5 processes)  (3 s wall)
-cholmod  N =  40  n     9,139  setup    0.089 s  solve   0.002 s  rss      86 MB  nnz 1.23e+06  iters nan  err 5.5e-15  ok (median of 5 processes)  (3 s wall)
-cholmod  N =  60  n    32,509  setup    0.550 s  solve   0.010 s  rss     241 MB  nnz 8e+06  iters nan  err 1.2e-14  ok (median of 5 processes)  (5 s wall)
-cholmod  N =  80  n    79,079  setup    2.224 s  solve   0.036 s  rss     608 MB  nnz 2.76e+07  iters nan  err 2.2e-14  ok (median of 5 processes)  (16 s wall)
-cholmod  N = 100  n   156,849  setup    7.699 s  solve   0.111 s  rss    1465 MB  nnz 7.45e+07  iters nan  err 3.0e-14  ok (median of 5 processes)  (44 s wall)
+splu_mmd N =  20  n       969  setup    0.006 s  solve   0.000 s  rss      54 MB  nnz 1.14e+05  iters nan  err 8.5e-16  ok (median of 5 processes)  (3 s wall)
+splu_mmd N =  40  n     9,139  setup    0.268 s  solve   0.002 s  rss     130 MB  nnz 3.25e+06  iters nan  err 3.0e-15  ok (median of 5 processes)  (5 s wall)
+splu_mmd N =  60  n    32,509  setup    4.637 s  solve   0.018 s  rss     595 MB  nnz 2.38e+07  iters nan  err 5.7e-15  ok (median of 5 processes)  (26 s wall)
+splu_mmd N =  80  n    79,079  setup   41.244 s  solve   0.068 s  rss    2330 MB  nnz 9.8e+07  iters nan  err 7.8e-15  ok (median of 5 processes)  (210 s wall)
+splu_mmd N = 100  n   156,849  setup  201.089 s  solve   0.937 s  rss    3937 MB  nnz 2.81e+08  iters nan  err 1.3e-14  ok (1 run, over 60 s)  (203 s wall)
+cholmod  N =  20  n       969  setup    0.005 s  solve   0.000 s  rss      56 MB  nnz 4.77e+04  iters nan  err 1.5e-15  ok (median of 5 processes)  (3 s wall)
+cholmod  N =  40  n     9,139  setup    0.091 s  solve   0.002 s  rss      92 MB  nnz 1.23e+06  iters nan  err 5.5e-15  ok (median of 5 processes)  (3 s wall)
+cholmod  N =  60  n    32,509  setup    0.561 s  solve   0.010 s  rss     238 MB  nnz 8e+06  iters nan  err 1.2e-14  ok (median of 5 processes)  (5 s wall)
+cholmod  N =  80  n    79,079  setup    2.227 s  solve   0.040 s  rss     619 MB  nnz 2.76e+07  iters nan  err 2.2e-14  ok (median of 5 processes)  (15 s wall)
+cholmod  N = 100  n   156,849  setup    7.730 s  solve   0.097 s  rss    1455 MB  nnz 7.45e+07  iters nan  err 3.0e-14  ok (median of 5 processes)  (43 s wall)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
@@ -863,7 +888,7 @@ amg_cg   N =  20  n       969  setup    0.005 s  solve   0.003 s  rss      58 MB
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
-amg_cg   N =  40  n     9,139  setup    0.023 s  solve   0.019 s  rss      71 MB  nnz nan  iters 9.0  err 7.1e-14  ok (median of 5 processes)  (3 s wall)
+amg_cg   N =  40  n     9,139  setup    0.022 s  solve   0.019 s  rss      69 MB  nnz nan  iters 9.0  err 7.1e-14  ok (median of 5 processes)  (3 s wall)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
@@ -874,7 +899,7 @@ amg_cg   N =  40  n     9,139  setup    0.023 s  solve   0.019 s  rss      71 MB
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
-amg_cg   N =  60  n    32,509  setup    0.068 s  solve   0.070 s  rss     123 MB  nnz nan  iters 10.0  err 9.2e-14  ok (median of 5 processes)  (3 s wall)
+amg_cg   N =  60  n    32,509  setup    0.069 s  solve   0.071 s  rss     126 MB  nnz nan  iters 10.0  err 9.2e-14  ok (median of 5 processes)  (5 s wall)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
@@ -885,7 +910,7 @@ amg_cg   N =  60  n    32,509  setup    0.068 s  solve   0.070 s  rss     123 MB
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
-amg_cg   N =  80  n    79,079  setup    0.154 s  solve   0.184 s  rss     213 MB  nnz nan  iters 11.0  err 3.4e-14  ok (median of 5 processes)  (5 s wall)
+amg_cg   N =  80  n    79,079  setup    0.160 s  solve   0.187 s  rss     205 MB  nnz nan  iters 11.0  err 3.4e-14  ok (median of 5 processes)  (5 s wall)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
@@ -896,7 +921,7 @@ amg_cg   N =  80  n    79,079  setup    0.154 s  solve   0.184 s  rss     213 MB
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
-amg_cg   N = 100  n   156,849  setup    0.323 s  solve   0.410 s  rss     311 MB  nnz nan  iters 12.0  err 3.6e-14  ok (median of 5 processes)  (8 s wall)
+amg_cg   N = 100  n   156,849  setup    0.326 s  solve   0.411 s  rss     321 MB  nnz nan  iters 12.0  err 3.6e-14  ok (median of 5 processes)  (8 s wall)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
@@ -907,7 +932,7 @@ amg_cg   N = 100  n   156,849  setup    0.323 s  solve   0.410 s  rss     311 MB
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
-amg_cg   N = 120  n   273,819  setup    0.624 s  solve   0.791 s  rss     472 MB  nnz nan  iters 13.0  err 3.2e-14  ok (median of 5 processes)  (12 s wall)
+amg_cg   N = 120  n   273,819  setup    0.605 s  solve   0.796 s  rss     469 MB  nnz nan  iters 13.0  err 3.2e-14  ok (median of 5 processes)  (12 s wall)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
@@ -918,7 +943,7 @@ amg_cg   N = 120  n   273,819  setup    0.624 s  solve   0.791 s  rss     472 MB
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
-amg_cg   N = 150  n   540,274  setup    1.282 s  solve   1.588 s  rss     962 MB  nnz nan  iters 13.0  err 6.3e-14  ok (median of 5 processes)  (21 s wall)
+amg_cg   N = 150  n   540,274  setup    1.267 s  solve   1.590 s  rss     905 MB  nnz nan  iters 13.0  err 6.3e-14  ok (median of 5 processes)  (20 s wall)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
@@ -929,23 +954,23 @@ amg_cg   N = 150  n   540,274  setup    1.282 s  solve   1.588 s  rss     962 MB
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
 /opt/homebrew/Caskroom/miniforge/base/envs/gr221/lib/python3.13/site-packages/pyamg/aggregation/aggregation.py:207: SparseEfficiencyWarning: Implicit conversion of A to CSR
   warn('Implicit conversion of A to CSR', SparseEfficiencyWarning)
-amg_cg   N = 200  n 1,293,699  setup    3.114 s  solve   3.966 s  rss    1404 MB  nnz nan  iters 14.0  err 8.1e-14  ok (median of 5 processes)  (47 s wall)
-wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e09_solvers.csv (741 s)
+amg_cg   N = 200  n 1,293,699  setup    3.174 s  solve   3.948 s  rss    1392 MB  nnz nan  iters 14.0  err 8.1e-14  ok (median of 5 processes)  (47 s wall)
+wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e09_solvers.csv (747 s)
 four players N =   8  n_lumped 11  P = 5.577821161394e-03  0.00 s  rss 52 MB  cholmod
 four players N =  10  n_lumped 23  P = 1.571739438951e-03  0.00 s  rss 53 MB  cholmod
 four players N =  12  n_lumped 41  P = 5.568973643914e-04  0.00 s  rss 53 MB  cholmod
-four players N =  16  n_lumped 102  P = 1.080249783339e-04  0.00 s  rss 54 MB  cholmod
+four players N =  16  n_lumped 102  P = 1.080249783339e-04  0.00 s  rss 53 MB  cholmod
 four players N =  20  n_lumped 204  P = 3.022376155052e-05  0.00 s  rss 53 MB  cholmod
-four players N =  24  n_lumped 358  P = 1.066742330410e-05  0.00 s  rss 55 MB  cholmod
+four players N =  24  n_lumped 358  P = 1.066742330410e-05  0.00 s  rss 53 MB  cholmod
 four players N =  30  n_lumped 710  P = 2.980150693207e-06  0.01 s  rss 54 MB  cholmod
-four players N =  40  n_lumped 1708  P = 5.753800975152e-07  0.02 s  rss 56 MB  cholmod
+four players N =  40  n_lumped 1708  P = 5.753800975152e-07  0.01 s  rss 56 MB  cholmod
 four players N =  50  n_lumped 3364  P = 1.606108031016e-07  0.03 s  rss 60 MB  cholmod
-four players N =  60  n_lumped 5845  P = 5.661341422530e-08  0.06 s  rss 68 MB  cholmod
-four players N =  80  n_lumped 13949  P = 1.092193169790e-08  0.18 s  rss 105 MB  cholmod
-four players N = 100  n_lumped 27353  P = 3.047622700924e-09  0.41 s  rss 166 MB  cholmod
-four players N = 120  n_lumped 47390  P = 1.074036901898e-09  0.87 s  rss 267 MB  cholmod
-four players N = 160  n_lumped 112698  P = 2.071632598328e-10  3.40 s  rss 827 MB  cholmod
-four players N = 200  n_lumped 220539  P = 5.780085237687e-11  10.14 s  rss 1882 MB  cholmod
+four players N =  60  n_lumped 5845  P = 5.661341422530e-08  0.06 s  rss 69 MB  cholmod
+four players N =  80  n_lumped 13949  P = 1.092193169790e-08  0.18 s  rss 99 MB  cholmod
+four players N = 100  n_lumped 27353  P = 3.047622700924e-09  0.41 s  rss 158 MB  cholmod
+four players N = 120  n_lumped 47390  P = 1.074036901898e-09  0.89 s  rss 294 MB  cholmod
+four players N = 160  n_lumped 112698  P = 2.071632598328e-10  3.37 s  rss 799 MB  cholmod
+four players N = 200  n_lumped 220539  P = 5.780085237687e-11  10.15 s  rss 1861 MB  cholmod
 three players N =  10  P = 9.122614270460e-03  P N^3 = 9.122614
 three players N =  20  P = 1.139974665747e-03  P N^3 = 9.119797
 three players N =  40  P = 1.424937864033e-04  P N^3 = 9.119602
@@ -955,10 +980,11 @@ three players N = 320  P = 2.783077698728e-07  P N^3 = 9.119589
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e09_big_stack.csv
 players 3: last slope 3.00000, extrapolated 3.00000
 players 4: last slope 5.72055, extrapolated 5.72069
-wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e09_alpha.csv (765 s)
-=== e09_four: exit 0, 765 s, peak 5008 MB
+wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e09_alpha.csv (771 s)
+=== e09_four: manifest records e09_alpha.csv, e09_big_stack.csv, e09_identities.csv, e09_solvers.csv
+=== e09_four: exit 0, 772 s, peak 3937 MB
 
-=== e10_extras  (12:31:52)
+=== e10_extras  (22:22:40)
 321 svd               coef err 0.00e+00  max resid 5.638098e-06  fit diff 0.0e+00
 321 qr                coef err 1.57e-10  max resid 5.638098e-06  fit diff 7.3e-15
 321 normal_equations  coef err 5.55e-06  max resid 5.638044e-06  fit diff 5.8e-11
@@ -989,8 +1015,8 @@ wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e10_degree_sweep.csv
 N =   20  lam_min 0.0608913  lam_max 1.469880  cond2_S 24.1394  max rounds 36.0536  0.01 s
 N =   40  lam_min 0.0371848  lam_max 1.481731  cond2_S 39.8478  max rounds 106.4723  0.18 s
 N =   80  lam_min 0.0312122  lam_max 1.484717  cond2_S 47.5685  max rounds 276.2373  0.17 s
-N =  160  lam_min 0.0297162  lam_max 1.485465  cond2_S 49.9884  max rounds 654.6066  0.94 s
-N =  320  lam_min 0.0293420  lam_max 1.485652  cond2_S 50.6323  max rounds 1465.9752  11.36 s
+N =  160  lam_min 0.0297162  lam_max 1.485465  cond2_S 49.9884  max rounds 654.6066  1.98 s
+N =  320  lam_min 0.0293420  lam_max 1.485652  cond2_S 50.6323  max rounds 1465.9752  11.09 s
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e10_bt_spectrum.csv
 N =   40 weakest_wins    gmres30_A   iters   59  err 2.33e-11  lowpi 2.33e-11  res_A 6.6e-11  0.007 s
 N =   40 weakest_wins    cg_S_1e-10  iters   61  err 1.24e-12  lowpi 1.13e-12  res_A 4.2e-12  0.001 s
@@ -999,7 +1025,7 @@ N =   40 weakest_wins    splu_S      iters    0  err 2.50e-16  lowpi 2.50e-16  r
 N =   40 strongest_wins  gmres30_A   iters  122  err 3.90e-10  lowpi 3.81e-10  res_A 8.4e-11  0.015 s
 N =   40 strongest_wins  cg_S_1e-10  iters   62  err 7.32e-07  lowpi 7.32e-07  res_A 7.5e-07  0.001 s
 N =   40 strongest_wins  cg_S_1e-15  iters   87  err 2.63e-11  lowpi 2.63e-11  res_A 5.7e-12  0.001 s
-N =   40 strongest_wins  splu_S      iters    0  err 3.66e-15  lowpi 2.55e-15  res_A 2.6e-15  0.001 s
+N =   40 strongest_wins  splu_S      iters    0  err 3.66e-15  lowpi 2.55e-15  res_A 2.6e-15  0.002 s
 N =   40 rounds          gmres30_A   iters  169  err 1.11e-10  lowpi 1.04e-10  res_A 9.5e-11  0.020 s
 N =   40 rounds          cg_S_1e-10  iters   63  err 2.45e-08  lowpi 2.45e-08  res_A 2.7e-07  0.001 s
 N =   40 rounds          cg_S_1e-15  iters   89  err 6.65e-13  lowpi 6.65e-13  res_A 2.0e-12  0.001 s
@@ -1012,30 +1038,30 @@ N =   80 strongest_wins  gmres30_A   iters  291  err 7.08e-10  lowpi 7.08e-10  r
 N =   80 strongest_wins  cg_S_1e-10  iters   74  err 3.26e-01  lowpi 3.26e-01  res_A 2.1e-02  0.002 s
 N =   80 strongest_wins  cg_S_1e-15  iters  109  err 1.03e-06  lowpi 1.03e-06  res_A 6.0e-07  0.004 s
 N =   80 strongest_wins  splu_S      iters    0  err 4.11e-15  lowpi 4.11e-15  res_A 8.1e-15  0.008 s
-N =   80 rounds          gmres30_A   iters  272  err 6.15e-11  lowpi 5.62e-11  res_A 9.5e-11  0.045 s
+N =   80 rounds          gmres30_A   iters  272  err 6.15e-11  lowpi 5.62e-11  res_A 9.5e-11  0.044 s
 N =   80 rounds          cg_S_1e-10  iters   76  err 1.26e-02  lowpi 1.26e-02  res_A 2.1e-02  0.003 s
 N =   80 rounds          cg_S_1e-15  iters  113  err 1.51e-08  lowpi 1.51e-08  res_A 2.0e-07  0.004 s
 N =   80 rounds          splu_S      iters    0  err 3.91e-15  lowpi 3.91e-15  res_A 1.4e-13  0.008 s
 N =  160 weakest_wins    gmres30_A   iters   59  err 2.51e-11  lowpi 2.51e-11  res_A 7.0e-11  0.022 s
-N =  160 weakest_wins    cg_S_1e-10  iters   73  err 4.18e-13  lowpi 4.18e-13  res_A 1.5e-12  0.008 s
+N =  160 weakest_wins    cg_S_1e-10  iters   73  err 4.18e-13  lowpi 4.18e-13  res_A 1.5e-12  0.007 s
 N =  160 weakest_wins    cg_S_1e-15  iters  114  err 1.58e-15  lowpi 1.58e-15  res_A 3.0e-15  0.012 s
 N =  160 weakest_wins    splu_S      iters    0  err 1.08e-15  lowpi 1.08e-15  res_A 2.2e-15  0.046 s
 N =  160 strongest_wins  gmres30_A   iters  512  err 1.41e-09  lowpi 1.41e-09  res_A 9.6e-11  0.186 s
 N =  160 strongest_wins  cg_S_1e-10  iters   74  err 1.00e+00  lowpi 9.98e-01  res_A 5.5e-02  0.008 s
 N =  160 strongest_wins  cg_S_1e-15  iters  115  err 9.82e-01  lowpi 9.82e-01  res_A 3.6e-02  0.012 s
-N =  160 strongest_wins  splu_S      iters    0  err 6.88e-15  lowpi 6.11e-15  res_A 1.8e-14  0.046 s
+N =  160 strongest_wins  splu_S      iters    0  err 6.88e-15  lowpi 6.11e-15  res_A 1.8e-14  0.045 s
 N =  160 rounds          gmres30_A   iters  402  err 7.65e-11  lowpi 7.65e-11  res_A 9.8e-11  0.144 s
 N =  160 rounds          cg_S_1e-10  iters   80  err 4.49e-01  lowpi 4.49e-01  res_A 4.5e-01  0.009 s
 N =  160 rounds          cg_S_1e-15  iters  120  err 1.98e-01  lowpi 1.98e-01  res_A 2.2e-01  0.013 s
 N =  160 rounds          splu_S      iters    0  err 5.90e-15  lowpi 5.21e-15  res_A 5.1e-13  0.046 s
-N =  320 weakest_wins    gmres30_A   iters   59  err 2.51e-11  lowpi 2.51e-11  res_A 7.0e-11  0.067 s
+N =  320 weakest_wins    gmres30_A   iters   59  err 2.51e-11  lowpi 2.51e-11  res_A 7.0e-11  0.069 s
 N =  320 weakest_wins    cg_S_1e-10  iters   73  err 4.17e-13  lowpi 4.17e-13  res_A 1.5e-12  0.027 s
 N =  320 weakest_wins    cg_S_1e-15  iters  114  err 1.42e-15  lowpi 1.42e-15  res_A 3.1e-15  0.042 s
 N =  320 weakest_wins    splu_S      iters    0  err 1.27e-15  lowpi 1.27e-15  res_A 3.1e-15  0.331 s
-N =  320 strongest_wins  gmres30_A   iters  819  err 2.50e-09  lowpi 2.50e-09  res_A 9.6e-11  0.906 s
+N =  320 strongest_wins  gmres30_A   iters  819  err 2.50e-09  lowpi 2.50e-09  res_A 9.6e-11  0.903 s
 N =  320 strongest_wins  cg_S_1e-10  iters   74  err 1.00e+00  lowpi 1.00e+00  res_A 6.5e-02  0.028 s
-N =  320 strongest_wins  cg_S_1e-15  iters  115  err 1.00e+00  lowpi 1.00e+00  res_A 5.3e-02  0.042 s
-N =  320 strongest_wins  splu_S      iters    0  err 2.13e-14  lowpi 1.94e-14  res_A 3.5e-14  0.329 s
+N =  320 strongest_wins  cg_S_1e-15  iters  115  err 1.00e+00  lowpi 1.00e+00  res_A 5.3e-02  0.043 s
+N =  320 strongest_wins  splu_S      iters    0  err 2.13e-14  lowpi 1.94e-14  res_A 3.5e-14  0.330 s
 N =  320 rounds          gmres30_A   iters  638  err 4.52e-11  lowpi 4.52e-11  res_A 9.7e-11  0.704 s
 N =  320 rounds          cg_S_1e-10  iters   80  err 7.48e-01  lowpi 7.48e-01  res_A 7.3e-01  0.030 s
 N =  320 rounds          cg_S_1e-15  iters  120  err 6.20e-01  lowpi 6.20e-01  res_A 6.1e-01  0.044 s
@@ -1045,40 +1071,30 @@ wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e10_bt_states_N80.cs
 naive pi overflows from N = 1026, naive sqrt(pi) from N = 2050
 N = 1030: naive S has 204 non-finite entries of 3696174; log-domain S 0 non-finite, rel asym 2.7e-14  0.5 s
 wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e10_bt_overflow.csv
-=== e10_extras: exit 0, 34 s, peak 664 MB
+=== e10_extras: manifest records e10_bt_overflow.csv, e10_bt_solvers.csv, e10_bt_spectrum.csv, e10_bt_states_N80.csv, e10_degree_sweep.csv, e10_regression.csv
+=== e10_extras: exit 0, 34 s, peak 671 MB
 
 script               seconds   peak MB  exit
-e01_conditioning         6.3     348.5     0
-e02_direct             703.7    4342.1     0
-e03_convergence          4.0     237.6     0
-e03_krylov             266.3    2935.5     0
-e04_condition           10.3    1608.3     0
-e04_errors             200.8    6374.8     0
-e04_mechanism           43.7     520.0     0
-e04_perturbation         1.1      94.6     0
-e05_iterations          89.1     786.8     0
-e05_omega_sweep         48.0     260.2     0
-e05_sor_spectra        202.0    2585.0     0
-e06_fft                 73.3    1766.3     0
-e07_baselines           71.9    3358.7     0
-e07_fft_check           14.0    2547.9     0
-e07_fixes             2060.2    5432.3     0
-e07_floor              302.5    2094.1     0
-e07_structured         105.2    1309.1     0
-e08_icm                  6.3     786.8     0
-e09_four               765.0    5008.5     0
-e10_extras              33.5     664.1     0
-total                 5007.2
-log: /Users/neeldankar/Downloads/gamblers-ruin-221/results/run_all_log.csv
-run_all: git 2ef9083, repeats 5, quick False, outdir /Users/neeldankar/Downloads/gamblers-ruin-221/results
-
-=== e02_direct_big  (12:50:11)
-N = 2400  cholmod         nesdis        nnz 165,657,920  setup   30.692 s  solve  0.2905 s  fwd/(k u) 0.127  bwd 3.2e-15
-N = 3200  cholmod         nesdis        nnz 310,559,935  setup   63.318 s  solve  1.1297 s  fwd/(k u) 0.127  bwd 2.7e-15
-wrote /Users/neeldankar/Downloads/gamblers-ruin-221/results/e02_direct_big.csv
-=== e02_direct_big: exit 0, 111 s, peak 4808 MB
-
-script               seconds   peak MB  exit
-e02_direct_big         111.3    4808.0     0
-total                  111.3
+e01_conditioning         5.9     388.9     0
+e02_direct             695.2    5655.9     0
+e03_convergence          3.8     226.1     0
+e03_krylov             266.1    2971.3     0
+e04_condition           10.3    1618.7     0
+e04_errors             200.9    6291.8     0
+e04_mechanism           41.6     513.7     0
+e04_perturbation         1.1      95.1     0
+e05_iterations          88.7     796.8     0
+e05_omega_sweep         48.0     253.0     0
+e05_sor_spectra        201.7    2547.2     0
+e06_fft                 72.8    1723.4     0
+e07_baselines           71.9    3382.2     0
+e07_fft_check           14.1    2518.9     0
+e07_fixes             1860.2    5618.3     0
+e07_floor              297.3    2140.9     0
+e07_structured         105.1    1308.5     0
+e08_icm                  6.3     808.6     0
+e09_cone                 8.5     873.4     0
+e09_four               771.5    3937.0     0
+e10_extras              34.2     671.0     0
+total                 4805.2
 log: /Users/neeldankar/Downloads/gamblers-ruin-221/results/run_all_log.csv

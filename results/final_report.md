@@ -1,6 +1,6 @@
 # Chunk 11: final report
 
-Results: `results`; code at git 2ef9083; HEAD ee2db14; generated 2026-11-14T20:45:35.
+Results: `results`; code at git 5a73f57; HEAD 5a73f57; generated 2026-11-14T22:25:21.
 
 ## Summary
 
@@ -12,11 +12,11 @@ Results: `results`; code at git 2ef9083; HEAD ee2db14; generated 2026-11-14T20:4
 | c04 | check_c04.py | 33 | 0 | 0 | 0 | 0 |
 | c05 | check_c05.py | 28 | 0 | 0 | 0 | 0 |
 | c06 | check_c06.py | 10 | 0 | 0 | 0 | 0 |
-| c07 | check_c07.py | 47 | 0 | 0 | 0 | 0 |
+| c07 | check_c07.py | 49 | 0 | 0 | 0 | 0 |
 | c08 | check_c08.py | 18 | 0 | 0 | 0 | 0 |
-| c09 | check_c09.py | 22 | 0 | 0 | 1 | 0 |
+| c09 | check_c09.py | 25 | 0 | 0 | 0 | 0 |
 | c10 | check_c10.py | 30 | 0 | 0 | 0 | 0 |
-| c11 | check_all.py | 5 | 4 | 0 | 0 |  |
+| c11 | check_all.py | 6 | 4 | 0 | 0 |  |
 
 FLAG lines are the chunk specs' red-flag checks (not counted as FAIL).
 
@@ -24,20 +24,20 @@ FLAG lines are the chunk specs' red-flag checks (not counted as FAIL).
 
 | Check | Expected | Observed | Status |
 |---|---|---|---|
-| every experiment exits 0 | yes | 20 of 20 full runs at git 2ef9083 exit 0 | PASS |
+| every experiment exits 0 | yes | 21 of 21 full runs at git 5a73f57 exit 0 | PASS |
 | every check script: no FAIL lines | all PASS or WARN | 0 FAIL lines | PASS |
 | WARN lines | only timing rows and rows the chunk specs mark as machine-dependent | 1 WARN lines, listed below for review | WARN |
-| one git hash across all CSVs | yes | 33 CSVs, hashes ['2ef9083'] | PASS |
-| CSV hashes equal the code hash (last commit that touched gr/ or experiments/) | yes | code at git 2ef9083; CSV hashes ['2ef9083'] | PASS |
-| total run time | 2-4 h (sum of the chunk compute times with 5 repeats) | 1.39 h | WARN |
-| peak memory | under 4 GB without chunk 9's `--big` | 6375 MB (e04_errors); e02_direct_big (not counted): 4808 MB | WARN |
-| results equal to the per-chunk runs | fill counts, iteration counts and errors identical or within the per-chunk tolerances; only times move (the values are judged by the per-chunk check scripts, which run on these CSVs; this row lists what moved, for the Project chat) | 33 columns changed by more than 1e-12; see the changes table (for review in the Project chat) | WARN |
+| one git hash across all CSVs | yes | 34 CSVs, hashes ['5a73f57'] | PASS |
+| CSV hashes equal the code hash (last commit that touched gr/ or experiments/) | yes | code at git 5a73f57; CSV hashes ['5a73f57'] | PASS |
+| total run time | 2-4 h (sum of the chunk compute times with 5 repeats) | 1.33 h | WARN |
+| peak memory | under 4 GB without chunk 9's `--big` | 6292 MB (e04_errors); e02_direct_big (not counted): 6441 MB | WARN |
+| results equal to the per-chunk runs | fill counts, iteration counts and errors identical or within the per-chunk tolerances; only times move (the values are judged by the per-chunk check scripts, which run on these CSVs; this row lists what moved, for the Project chat) | 4 columns changed by more than 1e-12; see the changes table (for review in the Project chat) | WARN |
 | no row missing against the baseline run | yes | no rows or CSVs removed | PASS |
+| CSVs match the run manifest | every CSV listed for the latest successful run of each experiment exists with the recorded sha256; unlisted CSVs are named (WARN) | 34 CSVs listed for 22 experiments; all present with the recorded sha256 | PASS |
 
 ## WARN, FAIL and FLAG lines
 
 - c02 **WARN** setup_time, cholmod amd, N = 1200: 1.90 s
-- c09 **FLAG** direct solves stopped by the memory rules (60% of free memory, 3 GB projected factor): splu N=100: skipped: projected factor 3.5 GB > 3 GB; splu_mmd N=100: killed: rss over 4.7 GB (60% of free memory)
 
 ## Run log
 
@@ -45,27 +45,28 @@ Last row per script from `results/run_all_log.csv`.
 
 | script | start | end | seconds | exit_code | peak_mb | free_mem_mb_start | quick | repeats | git_hash |
 |---|---|---|---|---|---|---|---|---|---|
-| e01_conditioning | 2026-11-14T11:08:58 | 2026-11-14T11:09:04 | 6.3 | 0 | 348.5 | 3881 | False | 5 | 2ef9083 |
-| e02_direct | 2026-11-14T11:09:04 | 2026-11-14T11:20:48 | 703.7 | 0 | 4342.1 | 3811 | False | 5 | 2ef9083 |
-| e03_convergence | 2026-11-14T11:20:48 | 2026-11-14T11:20:52 | 4.0 | 0 | 237.6 | 11399 | False | 5 | 2ef9083 |
-| e03_krylov | 2026-11-14T11:20:52 | 2026-11-14T11:25:18 | 266.3 | 0 | 2935.5 | 11213 | False | 5 | 2ef9083 |
-| e04_condition | 2026-11-14T11:25:18 | 2026-11-14T11:25:28 | 10.3 | 0 | 1608.3 | 10247 | False | 5 | 2ef9083 |
-| e04_errors | 2026-11-14T11:25:28 | 2026-11-14T11:28:49 | 200.8 | 0 | 6374.8 | 10164 | False | 5 | 2ef9083 |
-| e04_mechanism | 2026-11-14T11:28:49 | 2026-11-14T11:29:33 | 43.7 | 0 | 520.0 | 8777 | False | 5 | 2ef9083 |
-| e04_perturbation | 2026-11-14T11:29:33 | 2026-11-14T11:29:34 | 1.1 | 0 | 94.6 | 8753 | False | 5 | 2ef9083 |
-| e05_iterations | 2026-11-14T11:29:34 | 2026-11-14T11:31:03 | 89.1 | 0 | 786.8 | 8717 | False | 5 | 2ef9083 |
-| e05_omega_sweep | 2026-11-14T11:31:03 | 2026-11-14T11:31:51 | 48.0 | 0 | 260.2 | 8671 | False | 5 | 2ef9083 |
-| e05_sor_spectra | 2026-11-14T11:31:51 | 2026-11-14T11:35:13 | 202.0 | 0 | 2585.0 | 8686 | False | 5 | 2ef9083 |
-| e06_fft | 2026-11-14T11:35:13 | 2026-11-14T11:36:27 | 73.3 | 0 | 1766.3 | 8572 | False | 5 | 2ef9083 |
-| e07_baselines | 2026-11-14T11:36:27 | 2026-11-14T11:37:38 | 71.9 | 0 | 3358.7 | 8555 | False | 5 | 2ef9083 |
-| e07_fft_check | 2026-11-14T11:37:39 | 2026-11-14T11:37:53 | 14.0 | 0 | 2547.9 | 8572 | False | 5 | 2ef9083 |
-| e07_fixes | 2026-11-14T11:37:53 | 2026-11-14T12:12:13 | 2060.2 | 0 | 5432.3 | 8555 | False | 5 | 2ef9083 |
-| e07_floor | 2026-11-14T12:12:13 | 2026-11-14T12:17:15 | 302.5 | 0 | 2094.1 | 10183 | False | 5 | 2ef9083 |
-| e07_structured | 2026-11-14T12:17:15 | 2026-11-14T12:19:01 | 105.2 | 0 | 1309.1 | 8908 | False | 5 | 2ef9083 |
-| e08_icm | 2026-11-14T12:19:01 | 2026-11-14T12:19:07 | 6.3 | 0 | 786.8 | 8931 | False | 5 | 2ef9083 |
-| e09_four | 2026-11-14T12:19:07 | 2026-11-14T12:31:52 | 765.0 | 0 | 5008.5 | 8164 | False | 5 | 2ef9083 |
-| e10_extras | 2026-11-14T12:31:52 | 2026-11-14T12:32:26 | 33.5 | 0 | 664.1 | 9003 | False | 5 | 2ef9083 |
-| e02_direct_big | 2026-11-14T12:50:11 | 2026-11-14T12:52:02 | 111.3 | 0 | 4808.0 | 3037 | False | 5 | 2ef9083 |
+| e01_conditioning | 2026-11-14T21:03:08 | 2026-11-14T21:03:14 | 5.9 | 0 | 388.9 | 9113 | False | 5 | 5a73f57 |
+| e02_direct | 2026-11-14T21:03:14 | 2026-11-14T21:14:49 | 695.2 | 0 | 5655.9 | 8438 | False | 5 | 5a73f57 |
+| e03_convergence | 2026-11-14T21:14:49 | 2026-11-14T21:14:53 | 3.8 | 0 | 226.1 | 12182 | False | 5 | 5a73f57 |
+| e03_krylov | 2026-11-14T21:14:53 | 2026-11-14T21:19:19 | 266.1 | 0 | 2971.3 | 11821 | False | 5 | 5a73f57 |
+| e04_condition | 2026-11-14T21:19:19 | 2026-11-14T21:19:30 | 10.3 | 0 | 1618.7 | 10682 | False | 5 | 5a73f57 |
+| e04_errors | 2026-11-14T21:19:30 | 2026-11-14T21:22:51 | 200.9 | 0 | 6291.8 | 10682 | False | 5 | 5a73f57 |
+| e04_mechanism | 2026-11-14T21:22:51 | 2026-11-14T21:23:32 | 41.6 | 0 | 513.7 | 9824 | False | 5 | 5a73f57 |
+| e04_perturbation | 2026-11-14T21:23:32 | 2026-11-14T21:23:33 | 1.1 | 0 | 95.1 | 9818 | False | 5 | 5a73f57 |
+| e05_iterations | 2026-11-14T21:23:33 | 2026-11-14T21:25:02 | 88.7 | 0 | 796.8 | 9777 | False | 5 | 5a73f57 |
+| e05_omega_sweep | 2026-11-14T21:25:02 | 2026-11-14T21:25:50 | 48.0 | 0 | 253.0 | 9758 | False | 5 | 5a73f57 |
+| e05_sor_spectra | 2026-11-14T21:25:50 | 2026-11-14T21:29:12 | 201.7 | 0 | 2547.2 | 9746 | False | 5 | 5a73f57 |
+| e06_fft | 2026-11-14T21:29:12 | 2026-11-14T21:30:25 | 72.8 | 0 | 1723.4 | 9744 | False | 5 | 5a73f57 |
+| e07_baselines | 2026-11-14T21:30:25 | 2026-11-14T21:31:37 | 71.9 | 0 | 3382.2 | 9733 | False | 5 | 5a73f57 |
+| e07_fft_check | 2026-11-14T21:31:37 | 2026-11-14T21:31:51 | 14.1 | 0 | 2518.9 | 9759 | False | 5 | 5a73f57 |
+| e07_fixes | 2026-11-14T21:31:51 | 2026-11-14T22:02:51 | 1860.2 | 0 | 5618.3 | 9726 | False | 5 | 5a73f57 |
+| e07_floor | 2026-11-14T22:02:51 | 2026-11-14T22:07:48 | 297.3 | 0 | 2140.9 | 9318 | False | 5 | 5a73f57 |
+| e07_structured | 2026-11-14T22:07:48 | 2026-11-14T22:09:33 | 105.1 | 0 | 1308.5 | 9239 | False | 5 | 5a73f57 |
+| e08_icm | 2026-11-14T22:09:33 | 2026-11-14T22:09:40 | 6.3 | 0 | 808.6 | 9286 | False | 5 | 5a73f57 |
+| e09_cone | 2026-11-14T22:09:40 | 2026-11-14T22:09:48 | 8.5 | 0 | 873.4 | 9278 | False | 5 | 5a73f57 |
+| e09_four | 2026-11-14T22:09:48 | 2026-11-14T22:22:40 | 771.5 | 0 | 3937.0 | 9260 | False | 5 | 5a73f57 |
+| e10_extras | 2026-11-14T22:22:40 | 2026-11-14T22:23:14 | 34.2 | 0 | 671.0 | 8671 | False | 5 | 5a73f57 |
+| e02_direct_big | 2026-11-14T22:23:14 | 2026-11-14T22:24:52 | 97.4 | 0 | 6441.3 | 8636 | False | 5 | 5a73f57 |
 
 ## Machine
 
@@ -86,52 +87,23 @@ Last row per script from `results/run_all_log.csv`.
 - OPENBLAS_NUM_THREADS: unset
 - VECLIB_MAXIMUM_THREADS: unset
 
-## Changes against the previous run (git 5de66f4)
+## Changes against the previous run (git ee2db14)
 
-Each CSV in `results` against `git show 5de66f4:results/<name>.csv`. Timings, memory, git_hash and timestamp are left out. Rows are matched by N, the text columns that name a row, and the occurrence number within that key. Numbers: largest |new - old| / |old|. Text and booleans: rows that differ. Not judged here.
+Each CSV in `results` against `git show ee2db14:results/<name>.csv`. Timings, memory, git_hash and timestamp are left out. Rows are matched by N, the text columns that name a row, and the occurrence number within that key. Numbers: largest |new - old| / |old|. Text and booleans: rows that differ. Not judged here.
 
 ### Changed by more than 1e-12
 
 | CSV | Column | Rows | Largest change | Where |
 |---|---|---|---|---|
-| e03_convergence.csv | relres | 1726 | 1.10e-03 | N=320, kind=amg, rhs=order321, occurrence=7 |
-| e03_convergence.csv | err_A | 1726 | 4.72e-04 | N=320, kind=amg, rhs=order321, occurrence=10 |
-| e03_convergence.csv | err_inf | 1726 | 8.50e-04 | N=320, kind=amg, rhs=random, occurrence=12 |
-| e03_krylov.csv | iterations | 160 | 6.67e-02 | N=640, kind=amg, rhs=out_first, occurrence=0 |
-| e03_krylov.csv | iterations_over_N | 160 | 6.67e-02 | N=640, kind=amg, rhs=out_first, occurrence=0 |
-| e03_krylov.csv | final_relres | 160 | 1.27e+00 | N=640, kind=amg, rhs=out_first, occurrence=0 |
-| e03_krylov.csv | forward_error | 160 | 2.21e+00 | N=640, kind=amg, rhs=out_first, occurrence=0 |
-| e04_errors.csv | rel_err_tiny | 124 | 4.55e-01 | N=20, method=cg, kind=amg, reference=exact, occurrence=4 |
-| e04_errors.csv | max_rel_err | 124 | 1.46e-01 | N=640, method=cg, kind=amg, reference=direct, occurrence=2 |
-| e04_errors.csv | normwise_rel_err | 124 | 1.61e-01 | N=640, method=cg, kind=amg, reference=direct, occurrence=2 |
-| e04_errors.csv | normwise_backward_error | 124 | 2.00e-01 | N=20, method=cg, kind=amg, reference=exact, occurrence=4 |
-| e04_errors.csv | componentwise_backward_error | 124 | 1.26e-01 | N=640, method=cg, kind=amg, reference=direct, occurrence=2 |
-| e04_errors.csv | ratio_tiny_to_prediction | 124 | 4.55e-01 | N=20, method=cg, kind=amg, reference=exact, occurrence=4 |
-| e04_errors.csv | max_err_over_bound | 124 | 2.30e-01 | N=20, method=cg, kind=amg, reference=exact, occurrence=4 |
-| e04_errors.csv | value_tiny | 124 | 2.84e-05 | N=1280, method=cg, kind=amg, reference=direct, occurrence=0 |
-| e04_errors.csv | signed_err_tiny | 124 | 4.55e-01 | N=20, method=cg, kind=amg, reference=exact, occurrence=4 |
-| e04_errors.csv | solver_err_tiny | 124 | 4.37e-01 | N=20, method=cg, kind=amg, reference=exact, occurrence=4 |
-| e04_errors.csv | max_solver_err | 124 | 1.85e-01 | N=20, method=cg, kind=amg, reference=exact, occurrence=4 |
-| e07_fixes.csv | rel_err_tiny | 111 | 4.55e-01 | N=20, method=cg_componentwise, kind=amg, reference=exact, occurrence=1 |
-| e07_fixes.csv | max_rel_err | 111 | 6.67e-02 | N=20, method=cg_componentwise, kind=amg, reference=exact, occurrence=1 |
-| e07_fixes.csv | max_rel_err_in_u | 111 | 6.67e-02 | N=20, method=cg_componentwise, kind=amg, reference=exact, occurrence=1 |
-| e07_fixes.csv | omega | 111 | 1.41e-01 | N=1280, method=cg_componentwise, kind=amg, reference=refined, occurrence=1 |
-| e07_fixes.csv | err_vs_stored_tiny | 111 | 4.50e+00 | N=80, method=cg_componentwise, kind=amg, reference=exact, occurrence=1 |
-| e07_fixes.csv | max_err_vs_stored | 111 | 3.00e-01 | N=80, method=cg_componentwise, kind=amg, reference=exact, occurrence=1 |
-| e07_fixes.csv | signed_err_tiny | 111 | 4.55e-01 | N=20, method=cg_componentwise, kind=amg, reference=exact, occurrence=1 |
-| e07_floor.csv | min_omega | 15 | 6.76e-01 | N=1280, kind=amg, occurrence=0 |
-| e07_floor.csv | min_omega_in_u | 15 | 6.76e-01 | N=1280, kind=amg, occurrence=0 |
-| e07_floor.csv | k_at_min | 15 | 8.00e-02 | N=320, kind=amg, occurrence=0 |
-| e07_floor.csv | k_at_min_over_k10 | 15 | 8.00e-02 | N=320, kind=amg, occurrence=0 |
-| e07_floor.csv | final_omega_in_u | 15 | 7.34e-01 | N=1280, kind=amg, occurrence=0 |
+| e09_alpha.csv | alpha_extrapolated | 2 | 8.69e-07 | occurrence=0 |
 | e09_solvers.csv | nnz_factor | 23 | inf | N=100, method=splu_mmd, occurrence=0 |
 | e09_solvers.csv | rel_err | 23 | inf | N=100, method=splu_mmd, occurrence=0 |
-| e09_solvers.csv | status | 23 | 21 rows differ (text) | N=20, method=splu, occurrence=0 |
+| e09_solvers.csv | status | 23 | 1 rows differ (text) | N=100, method=splu_mmd, occurrence=0 |
 
 ### Rows, columns and CSVs added or removed
 
-- e07_fixes.csv: new columns ['corrections']
-- e07_floor.csv: new columns ['max_x_corner_ratio', 'max_x_inf_ratio']
+- e07_structured.csv: new columns ['rms_random_tiny']
+- e09_cone.csv: new CSV (not at ee2db14)
 
 ### Every compared column
 
@@ -139,7 +111,7 @@ Each CSV in `results` against `git show 5de66f4:results/<name>.csv`. Timings, me
 |---|---|---|---|---|---|
 | e01_conditioning.csv | n | 10 | 0.00e+00 |  |  |
 | e01_conditioning.csv | lambda_min_formula | 10 | 0.00e+00 |  |  |
-| e01_conditioning.csv | lambda_min_eigsh | 10 | 1.05e-15 | N=320, occurrence=0 |  |
+| e01_conditioning.csv | lambda_min_eigsh | 10 | 2.22e-15 | N=300, occurrence=0 |  |
 | e01_conditioning.csv | lambda_max_formula | 10 | 0.00e+00 |  |  |
 | e01_conditioning.csv | kappa2 | 10 | 0.00e+00 |  |  |
 | e01_conditioning.csv | kappa2_over_N2 | 10 | 0.00e+00 |  |  |
@@ -168,16 +140,16 @@ Each CSV in `results` against `git show 5de66f4:results/<name>.csv`. Timings, me
 | e02_direct_big.csv | backward_error | 2 | 0.00e+00 |  |  |
 | e03_convergence.csv | n | 1726 | 0.00e+00 |  |  |
 | e03_convergence.csv | k | 1726 | 0.00e+00 |  |  |
-| e03_convergence.csv | relres | 1726 | 1.10e-03 | N=320, kind=amg, rhs=order321, occurrence=7 | **changed** |
-| e03_convergence.csv | err_A | 1726 | 4.72e-04 | N=320, kind=amg, rhs=order321, occurrence=10 | **changed** |
-| e03_convergence.csv | err_inf | 1726 | 8.50e-04 | N=320, kind=amg, rhs=random, occurrence=12 | **changed** |
+| e03_convergence.csv | relres | 1726 | 0.00e+00 |  |  |
+| e03_convergence.csv | err_A | 1726 | 0.00e+00 |  |  |
+| e03_convergence.csv | err_inf | 1726 | 0.00e+00 |  |  |
 | e03_convergence.csv | chebyshev | 1726 | 0.00e+00 |  |  |
 | e03_krylov.csv | n | 160 | 0.00e+00 |  |  |
-| e03_krylov.csv | iterations | 160 | 6.67e-02 | N=640, kind=amg, rhs=out_first, occurrence=0 | **changed** |
+| e03_krylov.csv | iterations | 160 | 0.00e+00 |  |  |
 | e03_krylov.csv | bound | 160 | 0.00e+00 |  |  |
-| e03_krylov.csv | iterations_over_N | 160 | 6.67e-02 | N=640, kind=amg, rhs=out_first, occurrence=0 | **changed** |
-| e03_krylov.csv | final_relres | 160 | 1.27e+00 | N=640, kind=amg, rhs=out_first, occurrence=0 | **changed** |
-| e03_krylov.csv | forward_error | 160 | 2.21e+00 | N=640, kind=amg, rhs=out_first, occurrence=0 | **changed** |
+| e03_krylov.csv | iterations_over_N | 160 | 0.00e+00 |  |  |
+| e03_krylov.csv | final_relres | 160 | 0.00e+00 |  |  |
+| e03_krylov.csv | forward_error | 160 | 0.00e+00 |  |  |
 | e03_krylov.csv | kappa2 | 160 | 0.00e+00 |  |  |
 | e04_condition.csv | n | 16 | 0.00e+00 |  |  |
 | e04_condition.csv | argmin_state | 16 | 0 rows differ (text) |  |  |
@@ -197,20 +169,20 @@ Each CSV in `results` against `git show 5de66f4:results/<name>.csv`. Timings, me
 | e04_errors.csv | rtol | 124 | 0.00e+00 |  |  |
 | e04_errors.csv | iterations | 124 | 0.00e+00 |  |  |
 | e04_errors.csv | converged | 124 | 0.00e+00 |  |  |
-| e04_errors.csv | rel_err_tiny | 124 | 4.55e-01 | N=20, method=cg, kind=amg, reference=exact, occurrence=4 | **changed** |
-| e04_errors.csv | max_rel_err | 124 | 1.46e-01 | N=640, method=cg, kind=amg, reference=direct, occurrence=2 | **changed** |
+| e04_errors.csv | rel_err_tiny | 124 | 0.00e+00 |  |  |
+| e04_errors.csv | max_rel_err | 124 | 0.00e+00 |  |  |
 | e04_errors.csv | argmax_rel_err_state | 124 | 0 rows differ (text) |  |  |
-| e04_errors.csv | normwise_rel_err | 124 | 1.61e-01 | N=640, method=cg, kind=amg, reference=direct, occurrence=2 | **changed** |
-| e04_errors.csv | normwise_backward_error | 124 | 2.00e-01 | N=20, method=cg, kind=amg, reference=exact, occurrence=4 | **changed** |
-| e04_errors.csv | componentwise_backward_error | 124 | 1.26e-01 | N=640, method=cg, kind=amg, reference=direct, occurrence=2 | **changed** |
+| e04_errors.csv | normwise_rel_err | 124 | 0.00e+00 |  |  |
+| e04_errors.csv | normwise_backward_error | 124 | 0.00e+00 |  |  |
+| e04_errors.csv | componentwise_backward_error | 124 | 0.00e+00 |  |  |
 | e04_errors.csv | cond_tiny | 124 | 0.00e+00 |  |  |
-| e04_errors.csv | ratio_tiny_to_prediction | 124 | 4.55e-01 | N=20, method=cg, kind=amg, reference=exact, occurrence=4 | **changed** |
-| e04_errors.csv | max_err_over_bound | 124 | 2.30e-01 | N=20, method=cg, kind=amg, reference=exact, occurrence=4 | **changed** |
-| e04_errors.csv | value_tiny | 124 | 2.84e-05 | N=1280, method=cg, kind=amg, reference=direct, occurrence=0 | **changed** |
+| e04_errors.csv | ratio_tiny_to_prediction | 124 | 0.00e+00 |  |  |
+| e04_errors.csv | max_err_over_bound | 124 | 0.00e+00 |  |  |
+| e04_errors.csv | value_tiny | 124 | 0.00e+00 |  |  |
 | e04_errors.csv | data_term_tiny | 124 | 0.00e+00 |  |  |
-| e04_errors.csv | signed_err_tiny | 124 | 4.55e-01 | N=20, method=cg, kind=amg, reference=exact, occurrence=4 | **changed** |
-| e04_errors.csv | solver_err_tiny | 124 | 4.37e-01 | N=20, method=cg, kind=amg, reference=exact, occurrence=4 | **changed** |
-| e04_errors.csv | max_solver_err | 124 | 1.85e-01 | N=20, method=cg, kind=amg, reference=exact, occurrence=4 | **changed** |
+| e04_errors.csv | signed_err_tiny | 124 | 0.00e+00 |  |  |
+| e04_errors.csv | solver_err_tiny | 124 | 0.00e+00 |  |  |
+| e04_errors.csv | max_solver_err | 124 | 0.00e+00 |  |  |
 | e04_errors.csv | at_reference_accuracy | 124 | 0 rows differ (text) |  |  |
 | e04_mechanism_rhs.csv | rtol | 40 | 0.00e+00 |  |  |
 | e04_mechanism_rhs.csv | iterations | 40 | 0.00e+00 |  |  |
@@ -306,23 +278,26 @@ Each CSV in `results` against `git show 5de66f4:results/<name>.csv`. Timings, me
 | e07_fixes.csv | param | 111 | 0.00e+00 |  |  |
 | e07_fixes.csv | iterations_or_steps | 111 | 0.00e+00 |  |  |
 | e07_fixes.csv | converged | 111 | 0.00e+00 |  |  |
-| e07_fixes.csv | rel_err_tiny | 111 | 4.55e-01 | N=20, method=cg_componentwise, kind=amg, reference=exact, occurrence=1 | **changed** |
-| e07_fixes.csv | max_rel_err | 111 | 6.67e-02 | N=20, method=cg_componentwise, kind=amg, reference=exact, occurrence=1 | **changed** |
-| e07_fixes.csv | max_rel_err_in_u | 111 | 6.67e-02 | N=20, method=cg_componentwise, kind=amg, reference=exact, occurrence=1 | **changed** |
-| e07_fixes.csv | omega | 111 | 1.41e-01 | N=1280, method=cg_componentwise, kind=amg, reference=refined, occurrence=1 | **changed** |
+| e07_fixes.csv | rel_err_tiny | 111 | 0.00e+00 |  |  |
+| e07_fixes.csv | max_rel_err | 111 | 0.00e+00 |  |  |
+| e07_fixes.csv | max_rel_err_in_u | 111 | 0.00e+00 |  |  |
+| e07_fixes.csv | omega | 111 | 0.00e+00 |  |  |
 | e07_fixes.csv | cond_tiny | 111 | 0.00e+00 |  |  |
 | e07_fixes.csv | data_term_tiny | 111 | 0.00e+00 |  |  |
-| e07_fixes.csv | err_vs_stored_tiny | 111 | 4.50e+00 | N=80, method=cg_componentwise, kind=amg, reference=exact, occurrence=1 | **changed** |
-| e07_fixes.csv | max_err_vs_stored | 111 | 3.00e-01 | N=80, method=cg_componentwise, kind=amg, reference=exact, occurrence=1 | **changed** |
-| e07_fixes.csv | signed_err_tiny | 111 | 4.55e-01 | N=20, method=cg_componentwise, kind=amg, reference=exact, occurrence=1 | **changed** |
+| e07_fixes.csv | err_vs_stored_tiny | 111 | 0.00e+00 |  |  |
+| e07_fixes.csv | max_err_vs_stored | 111 | 0.00e+00 |  |  |
+| e07_fixes.csv | signed_err_tiny | 111 | 0.00e+00 |  |  |
+| e07_fixes.csv | corrections | 111 | 0 rows differ (text) |  |  |
 | e07_floor.csv | check_every | 15 | 0.00e+00 |  |  |
 | e07_floor.csv | iters_rtol_1e10 | 15 | 0.00e+00 |  |  |
 | e07_floor.csv | maxiter | 15 | 0.00e+00 |  |  |
-| e07_floor.csv | min_omega | 15 | 6.76e-01 | N=1280, kind=amg, occurrence=0 | **changed** |
-| e07_floor.csv | min_omega_in_u | 15 | 6.76e-01 | N=1280, kind=amg, occurrence=0 | **changed** |
-| e07_floor.csv | k_at_min | 15 | 8.00e-02 | N=320, kind=amg, occurrence=0 | **changed** |
-| e07_floor.csv | k_at_min_over_k10 | 15 | 8.00e-02 | N=320, kind=amg, occurrence=0 | **changed** |
-| e07_floor.csv | final_omega_in_u | 15 | 7.34e-01 | N=1280, kind=amg, occurrence=0 | **changed** |
+| e07_floor.csv | min_omega | 15 | 0.00e+00 |  |  |
+| e07_floor.csv | min_omega_in_u | 15 | 0.00e+00 |  |  |
+| e07_floor.csv | k_at_min | 15 | 0.00e+00 |  |  |
+| e07_floor.csv | k_at_min_over_k10 | 15 | 0.00e+00 |  |  |
+| e07_floor.csv | final_omega_in_u | 15 | 0.00e+00 |  |  |
+| e07_floor.csv | max_x_corner_ratio | 15 | 0.00e+00 |  |  |
+| e07_floor.csv | max_x_inf_ratio | 15 | 0.00e+00 |  |  |
 | e07_structured.csv | n | 7 | 0.00e+00 |  |  |
 | e07_structured.csv | structured_random_max | 7 | 0.00e+00 |  |  |
 | e07_structured.csv | structured_push | 7 | 0.00e+00 |  |  |
@@ -374,7 +349,7 @@ Each CSV in `results` against `git show 5de66f4:results/<name>.csv`. Timings, me
 | e08_wikipedia.csv | equity | 12 | 0.00e+00 |  |  |
 | e09_alpha.csv | players | 2 | 0.00e+00 |  |  |
 | e09_alpha.csv | alpha_last_slope | 2 | 0.00e+00 |  |  |
-| e09_alpha.csv | alpha_extrapolated | 2 | 0.00e+00 |  |  |
+| e09_alpha.csv | alpha_extrapolated | 2 | 8.69e-07 | occurrence=0 | **changed** |
 | e09_big_stack.csv | players | 21 | 0.00e+00 |  |  |
 | e09_big_stack.csv | n_full | 21 | 0.00e+00 |  |  |
 | e09_big_stack.csv | n_lumped | 21 | 0.00e+00 |  |  |
@@ -399,7 +374,7 @@ Each CSV in `results` against `git show 5de66f4:results/<name>.csv`. Timings, me
 | e09_solvers.csv | flops | 23 | 0.00e+00 |  |  |
 | e09_solvers.csv | iters | 23 | 0.00e+00 |  |  |
 | e09_solvers.csv | rel_err | 23 | inf | N=100, method=splu_mmd, occurrence=0 | **changed** |
-| e09_solvers.csv | status | 23 | 21 rows differ (text) | N=20, method=splu, occurrence=0 | **changed** |
+| e09_solvers.csv | status | 23 | 1 rows differ (text) | N=100, method=splu_mmd, occurrence=0 | **changed** |
 | e10_bt_overflow.csv | value | 8 | 0.00e+00 |  |  |
 | e10_bt_solvers.csv | iters | 48 | 0.00e+00 |  |  |
 | e10_bt_solvers.csv | rel_residual_A | 48 | 0.00e+00 |  |  |
@@ -408,9 +383,9 @@ Each CSV in `results` against `git show 5de66f4:results/<name>.csv`. Timings, me
 | e10_bt_spectrum.csv | n | 5 | 0.00e+00 |  |  |
 | e10_bt_spectrum.csv | max_abs_A_minus_AT | 5 | 0.00e+00 |  |  |
 | e10_bt_spectrum.csv | rel_asym_S | 5 | 0.00e+00 |  |  |
-| e10_bt_spectrum.csv | lam_min_S | 5 | 1.42e-15 | N=320, occurrence=0 |  |
-| e10_bt_spectrum.csv | lam_max_S | 5 | 1.96e-14 | N=160, occurrence=0 |  |
-| e10_bt_spectrum.csv | cond2_S | 5 | 1.93e-14 | N=160, occurrence=0 |  |
+| e10_bt_spectrum.csv | lam_min_S | 5 | 1.49e-15 | N=40, occurrence=0 |  |
+| e10_bt_spectrum.csv | lam_max_S | 5 | 1.36e-14 | N=320, occurrence=0 |  |
+| e10_bt_spectrum.csv | cond2_S | 5 | 1.31e-14 | N=320, occurrence=0 |  |
 | e10_bt_spectrum.csv | gershgorin_lower | 5 | 0.00e+00 |  |  |
 | e10_bt_spectrum.csv | log10_pi_range | 5 | 0.00e+00 |  |  |
 | e10_bt_spectrum.csv | max_expected_rounds | 5 | 0.00e+00 |  |  |

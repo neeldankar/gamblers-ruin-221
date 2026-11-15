@@ -1,6 +1,6 @@
 # Chunk 4 report: accuracy of the tiny probabilities
 
-Sources: `results/e04_condition.csv` (git 2ef9083, 2026-11-14T11:25:28), `results/e04_errors.csv` (git 2ef9083, 2026-11-14T11:28:49), `results/e04_perturbation.csv` (git 2ef9083, 2026-11-14T11:29:34), `results/e04_mechanism_rhs.csv` (git 2ef9083, 2026-11-14T11:29:33); macOS-15.6.1-arm64-arm-64bit-Mach-O, Python 3.13.18, numpy 2.5.4, scipy 1.18.1, OMP_NUM_THREADS=1.
+Sources: `results/e04_condition.csv` (git 5a73f57, 2026-11-14T21:19:30), `results/e04_errors.csv` (git 5a73f57, 2026-11-14T21:22:50), `results/e04_perturbation.csv` (git 5a73f57, 2026-11-14T21:23:33), `results/e04_mechanism_rhs.csv` (git 5a73f57, 2026-11-14T21:23:32); macOS-15.6.1-arm64-arm-64bit-Mach-O, Python 3.13.18, numpy 2.5.4, scipy 1.18.1, OMP_NUM_THREADS=1.
 
 | Check | Expected | Observed | Status |
 |---|---|---|---|
