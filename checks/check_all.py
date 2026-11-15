@@ -4,7 +4,10 @@
 The report has: a summary table (PASS/WARN/FAIL/FLAG counts per chunk), the chunk 11 "Expected results" rows of
 plan/c11_final_run.md, every WARN, FAIL and FLAG line, the run log (DIR/run_all_log.csv), the machine metadata,
 and a table of changes against the CSVs committed at --baseline. That table is not judged here: the Project chat
-reviews it.
+reviews it. Only rows (or whole CSVs) missing against the baseline are a FAIL.
+
+The CSVs carry the code hash: the last commit that touched gr/ or experiments/ (plus "-dirty" under the rule of
+gr.runlog.git_hash). HEAD can be a later commit (the results commit), so the hash rows compare with the code hash.
 
 Changes table rules:
   * Rows are matched by N (if the CSV has it), the text columns that name a row (method, kind, rhs, ...; not
@@ -15,6 +18,7 @@ Changes table rules:
     number of matched rows that differ. Changes above 1e-12 (or any differing text) are marked.
 """
 import argparse
+import importlib.metadata
 import io
 import os
 import pathlib
@@ -29,16 +33,42 @@ from pandas.api.types import is_numeric_dtype
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from gr.runlog import git_hash, metadata  # noqa: E402
+from gr.runlog import metadata  # noqa: E402
 
 META = ["git_hash", "timestamp", "platform", "machine", "python", "numpy", "scipy", "omp_num_threads"]
 LOG_NAME = "run_all_log.csv"
 BIG_NAME = "e02_direct_big"  # optional e02 --big output, rerun separately with run_all.py --e02-big
+PACKAGES = ["scikit-sparse", "pyamg", "numba", "python-flint", "pandas", "matplotlib"]
+THREAD_VARS = ["OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"]
 LINE = re.compile(r"^(PASS|WARN|FAIL|FLAG)\s+(.*)$")
 RESULT_TEXT = {"status", "solver", "corrections", "at_reference_accuracy"}  # text columns that are results
 TOLERANCE = 1e-12
 HOURS_MIN, HOURS_MAX = 2.0, 4.0
 PEAK_LIMIT_MB = 4096
+
+
+# ---------------------------------------------------------------- git hashes
+def git(*args):
+    return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
+
+
+def code_hash():
+    """Short hash of the last commit that touched gr/ or experiments/, with "-dirty" if either has uncommitted
+    (or untracked) changes: the same rule as gr.runlog.git_hash, which stamps the CSVs."""
+    try:
+        h = git("log", "-1", "--format=%h", "--", "gr", "experiments")
+        if git("status", "--porcelain", "--", "gr", "experiments"):
+            h += "-dirty"
+        return h
+    except (OSError, subprocess.CalledProcessError):
+        return "unknown"
+
+
+def head_hash():
+    try:
+        return git("rev-parse", "--short", "HEAD")
+    except (OSError, subprocess.CalledProcessError):
+        return "unknown"
 
 
 # ---------------------------------------------------------------- the per-chunk check scripts
@@ -71,8 +101,9 @@ def csv_hashes(results):
             for p in sorted(results.glob("*.csv")) if p.name != LOG_NAME}
 
 
-def chunk11_rows(checks, log, hashes, commit, changes_flagged):
-    """(check, expected, observed, status) for each row of the chunk 11 Expected results table."""
+def chunk11_rows(checks, log, hashes, commit, changes_flagged, missing_rows):
+    """(check, expected, observed, status) for each row of the chunk 11 Expected results table.
+    commit is the code hash (see code_hash)."""
     rows = []
     experiments = [p.stem for p in sorted((ROOT / "experiments").glob("e[0-9][0-9]_*.py"))]
 
@@ -109,6 +140,9 @@ def chunk11_rows(checks, log, hashes, commit, changes_flagged):
     rows.append(("one git hash across all CSVs", "yes",
                  f"{len(checked)} CSVs, hashes {all_hashes}" + (f"; not at {commit}: {', '.join(others)}" if others
                                                                 else "") + big_note,
+                 "PASS" if len(all_hashes) == 1 and "dirty" not in all_hashes[0] else "FAIL"))
+    rows.append(("CSV hashes equal the code hash (last commit that touched gr/ or experiments/)", "yes",
+                 f"code at git {commit}; CSV hashes {all_hashes}",
                  "PASS" if all_hashes == [commit] and "dirty" not in commit else "FAIL"))
 
     main = log[log["script"].isin(experiments)] if len(log) else log
@@ -126,9 +160,14 @@ def chunk11_rows(checks, log, hashes, commit, changes_flagged):
     rows.append(("peak memory", "under 4 GB without chunk 9's `--big`", observed, "PASS" if ok else "WARN"))
 
     rows.append(("results equal to the per-chunk runs", "fill counts, iteration counts and errors identical or "
-                 "within the per-chunk tolerances; only times move",
+                 "within the per-chunk tolerances; only times move (the values are judged by the per-chunk check "
+                 "scripts, which run on these CSVs; this row lists what moved, for the Project chat)",
                  f"{changes_flagged} columns changed by more than {TOLERANCE:g}; see the changes table "
                  "(for review in the Project chat)", "WARN" if changes_flagged else "PASS"))
+
+    rows.append(("no row missing against the baseline run", "yes",
+                 "; ".join(missing_rows) if missing_rows else "no rows or CSVs removed",
+                 "FAIL" if missing_rows else "PASS"))
     return rows
 
 
@@ -169,9 +208,19 @@ def baseline_csv(baseline, name):
     return pd.read_csv(io.StringIO(p.stdout)) if p.returncode == 0 else None
 
 
+def baseline_csv_names(baseline):
+    """Names of the CSVs committed under results/ at the baseline (the run log excluded)."""
+    p = subprocess.run(["git", "ls-tree", "--name-only", f"{baseline}:results"], cwd=ROOT, capture_output=True,
+                       text=True)
+    return {n for n in p.stdout.split() if n.endswith(".csv") and n != LOG_NAME} if p.returncode == 0 else set()
+
+
 def compare(results, baseline):
-    """(table rows, notes): table rows are (csv, column, rows compared, change, where, flagged)."""
+    """(table rows, notes, missing): table rows are (csv, column, rows compared, change, where, flagged); missing
+    lists the baseline CSVs that are gone and the CSVs that lost rows."""
     table, notes = [], []
+    missing = [f"{name}: whole CSV missing" for name in sorted(baseline_csv_names(baseline))
+               if not (results / name).exists()]
     for path in sorted(results.glob("*.csv")):
         if path.name == LOG_NAME:
             continue
@@ -188,6 +237,8 @@ def compare(results, baseline):
         if len(o) - len(common) or len(n) - len(common):
             notes.append(f"{path.name}: {len(n) - len(common)} rows added, {len(o) - len(common)} rows removed "
                          f"({len(common)} matched)")
+        if len(o) - len(common):
+            missing.append(f"{path.name}: {len(o) - len(common)} rows removed")
         added = [c for c in new.columns if c not in old.columns]
         removed = [c for c in old.columns if c not in new.columns]
         if added:
@@ -210,7 +261,7 @@ def compare(results, baseline):
                 first = where(common[int(np.argmax(differ))], keys) if differ.any() else ""
                 table.append((path.name, col, len(common), f"{int(differ.sum())} rows differ (text)", first,
                               bool(differ.any())))
-    return table, notes
+    return table, notes, missing
 
 
 # ---------------------------------------------------------------- report
@@ -225,14 +276,14 @@ def main():
     parser.add_argument("--baseline", default="5de66f4")
     args = parser.parse_args()
     results = pathlib.Path(args.results)
-    commit = git_hash()
+    commit, head = code_hash(), head_hash()
 
     checks = run_check_scripts(results)
     log = latest_log_rows(results)
     hashes = csv_hashes(results)
-    table, notes = compare(results, args.baseline)
+    table, notes, missing = compare(results, args.baseline)
     flagged = [r for r in table if r[5]]
-    c11 = chunk11_rows(checks, log, hashes, commit, len(flagged))
+    c11 = chunk11_rows(checks, log, hashes, commit, len(flagged), missing)
 
     meta = metadata()
     try:
@@ -240,9 +291,16 @@ def main():
         meta["total_ram_gb"] = f"{ram:.0f}"
     except ValueError:
         pass
+    for name in PACKAGES:
+        try:
+            meta[name] = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError:
+            meta[name] = "not installed"
+    for var in THREAD_VARS:
+        meta[var] = os.environ.get(var, "unset")
 
     lines = ["# Chunk 11: final report", "",
-             f"Results: `{results}`; code at git {commit}; generated {meta['timestamp']}.", "",
+             f"Results: `{results}`; code at git {commit}; HEAD {head}; generated {meta['timestamp']}.", "",
              "## Summary", ""]
     summary = []
     for chunk, name, code, found, _ in checks:

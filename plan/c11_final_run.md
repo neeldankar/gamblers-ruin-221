@@ -55,7 +55,9 @@ hash, and that every figure script runs from those CSVs alone. Also run the whol
 | one git hash across all CSVs | yes | FAIL |
 | total run time | 2-4 h (sum of the chunk compute times with 5 repeats) | WARN |
 | peak memory | under 4 GB without chunk 9's `--big` | WARN |
-| results equal to the per-chunk runs | fill counts, iteration counts and errors identical or within the per-chunk tolerances; only times move | FAIL |
+| results equal to the per-chunk runs | fill counts, iteration counts and errors identical or within the per-chunk tolerances; only times move (the values are judged by the per-chunk check scripts, which run on these CSVs; this row lists what moved, for the Project chat) | WARN |
+| no row missing against the baseline run | yes | FAIL |
+| CSV hashes equal the code hash (last commit that touched gr/ or experiments/) | yes | FAIL |
 
 ## Red flags (bring these to the Project chat)
 

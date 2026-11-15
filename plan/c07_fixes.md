@@ -24,14 +24,16 @@ This chunk builds and measures three fixes:
 1. **Componentwise stopping.** Stop CG when the Oettli-Prager backward error of the true residual is below a
    tolerance. MIC(0)- and AMG-preconditioned CG reach omega <= 1e-14 (90 u) at every N up to 1280. Plain CG
    does up to N = 640, but its smallest reachable omega grows with N (e07_floor: about 10 u at N = 80, 190-310 u
-   at N = 1280, machine dependent), so at N = 1280 it stalls above the tolerance. In every run that converges,
-   the tiny entry ends up 2 to 5 times closer to the stored solution than the default CHOLMOD solve's (Mac:
-   2.9e-14 against 9.1e-14 at N = 160, 3.0e-13 against 1.5e-12 at N = 640, plain CG; one AMG run is 20 times
-   closer), for 1.25 to 1.9 times the iterations of the usual rtol 1e-10 rule. That is the size of the own error
+   at N = 1280, machine dependent), so at N = 1280 it stalls above the tolerance. For N >= 160, where default
+   CHOLMOD is supernodal, every converged run ends 2.2 to 5.0 times closer to the stored solution than the default
+   CHOLMOD solve (Mac: 2.9e-14 against 9.1e-14 at N = 160, 3.0e-13 against 1.5e-12 at N = 640, plain CG), and the
+   AMG run at N = 160 11 times closer, for 1.25 to 1.9 times the iterations of the usual rtol 1e-10 rule. For
+   N <= 80 both errors are a few ulps of the reference and their ratio is noise (0.18 to 44 over the 12 runs; 5 of
+   them end farther than the direct solve). That is the size of the own error
    of the most accurate direct solves (band Cholesky, simplicial CHOLMOD), not better: CHOLMOD's default from
    N = 160 is supernodal and carries an own error of +0.03 to +0.05 N^2 u (chunk 7b). Against the true
    probability both are limited by the data term.
-2. **Iterative refinement with an exact residual.** 6N A and 6N b are integers that stand for the ideal system,
+2. **Iterative refinement with the compensated residual of the ideal system.** 6N A and 6N b are integers that stand for the ideal system,
    so b - A x computed from them with error-free transformations is the residual of the true problem, not of
    the stored one. Refinement therefore removes the data error as well as the solver error: two steps after a
    direct solve (or 3 to 4 with a sloppy rtol 1e-6 CG inner solve) give every entry correctly rounded in every
@@ -44,7 +46,7 @@ This chunk builds and measures three fixes:
    scales the off-diagonals, the row sums and b by the same factor (up to a rounding of size u in a few row
    sums), and that common factor cancels in the solution. Most of GTH's 25- to 133-fold gain over CHOLMOD is
    that missing data term plus supernodal CHOLMOD's own error. Against a band Cholesky of the integer matrix 6A,
-   which has no data term either, GTH is better by 1.4 to 5 for N <= 160 and by a factor that grows with N above
+   which has no data term either, GTH is better by 2.0 to 4.8 for N <= 160 and by a factor that grows with N above
    (about 11 at N = 320 and 20 at N = 640 on the Mac: e07_baselines).
 
 Why 3 works: the componentwise condition number from chunk 4 (0.39 N^2) measures sensitivity to perturbations
@@ -53,9 +55,11 @@ Perturb instead each off-diagonal entry, each row sum and each b_i relatively by
 worst case moves entry i by eps kappa_i, kappa_i = (A^-1 v)_i / x_i with v_i = b_i + s_i x_i + sum_j |a_ij| |x_i - x_j|
 (chunk 7b). At the tiny entry kappa = 1.22 N. It is not bounded in N (a coherent drift toward the event attains
 it; the reviewer's direction A + eps (HA - AH) alone gives N - 3), but it is a factor 0.32 N below the
-componentwise number. Random perturbations move x by only 1.5 to 3.1 eps and symmetric ones by about log N
-(17.4 at N = 640). GTH's measured error, 0.19 to 0.42 N u, is 0.16 to 0.34 kappa u: a subtraction-free
-algorithm is stable in this parametrization.
+componentwise number. Random perturbations move the tiny entry by an rms of 0.78 to 1.14 eps (N = 10 to 640, still
+growing slowly; the largest of 20 draws over all states was 1.5 to 3.1 eps) and symmetric ones by about log N
+(17.4 at N = 640). GTH's measured error is at most 0.42 N u at every entry, far below cond_i u, which is what this
+parametrization suggests; but entry by entry it reaches 7 kappa_i u (N = 320), so we do not claim a stability
+theorem in the structured sense.
 
 ## What to build (the tests import exactly these names)
 

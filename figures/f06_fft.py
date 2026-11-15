@@ -47,7 +47,7 @@ def main():
     ax1.plot(n, guide, color=INK, linewidth=1, linestyle=(0, (3, 2)), label="guide: n log n")
     style(ax1)
     ax1.set_xlabel("n (live states)", color=INK)
-    ax1.set_ylabel("seconds (median of 3, b = 1)", color=INK)
+    ax1.set_ylabel("seconds\n(median of the timing repeats (5 in the final run), b = 1)", color=INK)
     ax1.set_title("Solve time", color=INK, fontsize=10, loc="left")
     ax1.legend(frameon=False, fontsize=8, labelcolor=INK, loc="upper left")
 

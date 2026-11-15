@@ -138,7 +138,8 @@ def solver_checks(sv):
     s = slope(ch.loc[big, "n"], ch.loc[big, "nnz_factor"]) if big else float("nan")
     vals_ok = all(abs(ch.loc[N, "nnz_factor"] / CHOLMOD_NNZ[N] - 1) <= 0.10 for N in big)
     out.append(("cholmod nnz_factor against n (N = 60 to 100)",
-                "slope between 1.25 and 1.6 (theory n^(4/3)); 8.0e6, 2.76e7, 7.45e7 at N = 60, 80, 100; 10%",
+                "slope between 1.25 and 1.6 (3D nested-dissection orders 4/3 and 2 (Lipton-Rose-Tarjan); local slopes 1.39 to 1.47 and 2.0 to 2.2); "
+                "8.0e6, 2.76e7, 7.45e7 at N = 60, 80, 100; 10%",
                 f"slope {s:.3f}; " + ", ".join(f"N={N}: {ch.loc[N, 'nnz_factor']:.3g} "
                                                f"({ch.loc[N, 'nnz_factor'] / CHOLMOD_NNZ[N] - 1:+.1%})" for N in big)
                 + missing(set(big), CHOLMOD_NNZ),
@@ -147,7 +148,8 @@ def solver_checks(sv):
     s = slope(ch.loc[fl, "n"], ch.loc[fl, "flops"]) if fl else float("nan")
     vals_ok = all(abs(ch.loc[N, "flops"] / CHOLMOD_FLOPS[N] - 1) <= 0.01 for N in fl)
     out.append(("cholmod flops against n (N = 60 to 100)",
-                "slope 2.09 (theory n^2); 5.2907e9, 3.1766e10, 1.4145e11 at N = 60, 80, 100 (Linux, independent "
+                "slope 2.09 (3D nested-dissection orders 4/3 and 2 (Lipton-Rose-Tarjan); local slopes 1.39 to 1.47 and 2.0 to 2.2); "
+                "5.2907e9, 3.1766e10, 1.4145e11 at N = 60, 80, 100 (Linux, independent "
                 "builder; nnz identical to the Mac's); slope in [1.9, 2.3]; each value within 1%",
                 f"slope {s:.3f}; " + ", ".join(f"N={N}: {ch.loc[N, 'flops']:.5g} "
                                                f"({ch.loc[N, 'flops'] / CHOLMOD_FLOPS[N] - 1:+.2%})" for N in fl)

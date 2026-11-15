@@ -77,7 +77,7 @@ def main():
     ax.set_yscale("log")
     ax.set_xlabel("polynomial degree (cond(X) below)", color=INK)
     ax.set_ylabel("max |residual| of the SVD fit", color=INK)
-    ax.set_title("213 has a boundary layer no polynomial follows", color=INK, fontsize=10, loc="left")
+    ax.set_title("213: a corner singularity that degrees 2 to 8 do not resolve", color=INK, fontsize=10, loc="left")
     ax.legend(frameon=False, fontsize=8, labelcolor=INK, loc="lower left")
     style(ax)
 

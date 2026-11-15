@@ -11,8 +11,9 @@ Solve A x = b exactly (up to rounding) in O(n log n) time with FFTs, by the meth
 the fastest solver in the project for the equal-skill three-player game and a reference point for
 chunk 11's benchmark. It is also a test case for the main question: FFT errors are normwise (at most
 about eps x kappa2 relative to max |x|), so the smallest probabilities are likely to lose relative
-accuracy as N grows. At N = 800 the FFT and splu already disagree by about 1e-6 relative at the
-smallest P(123). The experiment measures this; chunk 7 decides what to do about it.
+accuracy as N grows. At N = 800 the FFT is off by 4.8e-7 relative at the smallest P(123) (final run; the
+figure depends on the FFT library's rounding: 1e-10 to 1e-8 at N = 100 to 320 across three implementations), while
+the direct solvers stay at 1e-13 to 5e-12. The experiment measures this; chunk 7 decides what to do about it.
 
 The method works because the stencil is translation invariant and the triangle tiles the plane by
 reflections. It does not apply to unequal skill (chunk 10), and it does not carry over to four players

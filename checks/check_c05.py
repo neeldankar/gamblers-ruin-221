@@ -245,7 +245,7 @@ def spectra_checks(sp):
         obs = ", ".join(f"N={N}: {fmt.format(d.loc[N, col])}" for N in d.index)
         out.append((name, expected, obs + missing_text(lost), status(ok, kind, have)))
 
-    every("e05_sor_spectra: law_relerr", "0, every N; 1e-10 (measured at most 2.3e-14)", "law_relerr",
+    every("e05_sor_spectra: law_relerr", "0, every N; 1e-10 (final run: at most 1.5e-14)", "law_relerr",
           lambda v: v <= 1e-10, "{:.2g}")
     h6 = 6 in d.index
     v6 = d.loc[6, "rho_sor_dense"] if h6 else np.nan

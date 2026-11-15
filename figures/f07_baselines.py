@@ -2,7 +2,7 @@
 
 Two panels from results/e07_baselines.csv (N <= 640), log-log against N:
   (a) |own_err_tiny| (against the stored solution) for the methods that solve the stored system, with the
-      |data_term_tiny| line and guides u N and u N^2;
+      |data_term_tiny| line and guides u N and u N^2; filled markers where own_err_tiny > 0, hollow where < 0;
   (b) max_true_err_in_u (against the true probability, every entry) for cholmod_default, banded, banded_int,
       cholmod_int and gth, with guides N and N^2.
 Each method keeps one color in both panels. cholmod_int is drawn in ink (no categorical slot left), with its
@@ -54,15 +54,28 @@ def style_axes(ax, Ns, ylabel, title):
     ax.legend(frameon=False, fontsize=8, labelcolor=INK, loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=3)
 
 
-def plot_method(ax, d, column, method, absolute=False):
+def plot_method(ax, d, column, method):
     label, color, marker, dash = STYLE[method]
     m = d[d["method"] == method].sort_values("N")
-    y = m[column].abs() if absolute else m[column]
+    y = m[column]
     if method == "cholmod_default":  # hollow and larger: it coincides with simplicial (N <= 80) or supernodal
         ax.plot(m["N"], y, color=color, marker=marker, markersize=10, markerfacecolor="none", markeredgewidth=2,
                 linewidth=2, linestyle=dash, zorder=2.5, label=label)
         return
     ax.plot(m["N"], y, color=color, marker=marker, markersize=6, linewidth=2, linestyle=dash, zorder=3, label=label)
+
+
+def plot_signed(ax, d, column, method):
+    """|column| as a line; markers filled where column > 0 and hollow where < 0."""
+    label, color, marker, dash = STYLE[method]
+    m = d[d["method"] == method].sort_values("N")
+    big = method == "cholmod_default"  # larger and below the others: it coincides with simplicial or supernodal
+    size, z = (10, 2.5) if big else (6, 3)
+    ax.plot(m["N"], m[column].abs(), color=color, linewidth=2, linestyle=dash, zorder=z, label=label)
+    for positive in (True, False):
+        s = m[m[column] > 0] if positive else m[m[column] < 0]
+        ax.plot(s["N"], s[column].abs(), color=color, marker=marker, markersize=size, linestyle="none",
+                markerfacecolor=color if positive else "white", markeredgewidth=2 if big else 1.2, zorder=z)
 
 
 def guide(ax, Ns, values, label, dash):
@@ -81,7 +94,10 @@ def main():
 
     fig, (ax_a, ax_b) = plt.subplots(1, 2, figsize=(13, 6.4), dpi=150)
     for method in PANEL_A:
-        plot_method(ax_a, df, "own_err_tiny", method, absolute=True)
+        plot_signed(ax_a, df, "own_err_tiny", method)
+    ax_a.plot([], [], color=MUTED, marker="o", markersize=6, linestyle="none", label="filled marker: own error > 0")
+    ax_a.plot([], [], color=MUTED, marker="o", markersize=6, markerfacecolor="white", linestyle="none",
+              label="hollow marker: own error < 0")
     dt = df[df["method"] == "cholmod_default"].sort_values("N")
     ax_a.plot(dt["N"], dt["data_term_tiny"].abs(), color=INK, linewidth=1.5, linestyle=(0, (6, 2)), zorder=2,
               label="|data term| (u/4) cond_tiny")

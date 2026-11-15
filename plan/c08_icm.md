@@ -24,7 +24,12 @@ confirm with numbers:
    rate N^-4, as Diaconis and Ethier conjecture: arXiv:2011.07610v2, Conjecture 4.2(b); their Table 9 uses the same
    2:3:5 stacks) to a limit that differs from the ICM.
 4. **Relative** error explodes where probabilities are tiny: from (N-2, 1, 1) the exact P(leader busts
-   first) is about 9.12/N^3, the ICM says 2/(N(N-1)), so the ICM is off by a factor of about N/4.56. (Diaconis and Ethier, section 2.7, Remark 2, already note the two are of different orders, 1/N^3 against 1/N^2.)
+   first) is about 9.12/N^3, the ICM says 2/(N(N-1)), so the ICM is too large by the factor 2 N^2/(9.12 (N - 1)), about N/4.56 (max_rel_err_p3 is that factor minus 1: 5.806 at N = 30). (Diaconis and Ethier, section 2.7, Remark 2, already note the two are of different orders, 1/N^3 against 1/N^2.)
+
+Prior work for the maximum: the Wikipedia page "Independent Chip Model" (section "Comparison to gambler's
+ruin") already states that 25/87/88 at N = 200 gives the largest probability difference (0.0360) and the
+largest equity difference ($0.36). Ours: the scan over N (0.0359 to 0.0361 at N = 30 to 480; not monotone in
+N: 0.0343 at N = 13 in the reviewers' scans), the sign pattern at every state, and the equity identity.
 
 ## What to build (the tests import exactly these names)
 

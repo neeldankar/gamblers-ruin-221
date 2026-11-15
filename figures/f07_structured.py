@@ -26,7 +26,7 @@ SERIES = [  # (column, label, color, marker): categorical slots 1-5 (slots 1-3 a
 ]
 GUIDES = [(0.39, 2, "0.39 N^2", (0, (5, 2))), (1.22, 1, "1.22 N", (0, (1, 2)))]  # (coefficient, power, label, dash)
 TITLE = ("Sensitivity of the tiny probability: N^2 for A's entries, N for off-diagonals and row sums,\n"
-         "log N if symmetric, O(1) for random perturbations")
+         "about log N if symmetric; random draws: largest of 20")
 
 
 def main():

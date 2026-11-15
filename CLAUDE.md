@@ -62,6 +62,6 @@ solves. SciPy has no sparse or incomplete Cholesky; spilu is not a valid CG prec
 - conda env create -f environment.yml && conda activate gr221
 - pytest -q                        run all tests (chunks not built yet are skipped)
 - pytest tests/c00_core tests/c03_krylov   run the tests for one chunk plus the core
-- python experiments/<name>.py [--quick]   run one experiment
+- PYTHONPATH=. python experiments/<name>.py [--quick] [--outdir DIR]   run one experiment
 - python checks/check_cNN.py       compare a chunk's CSVs with its expected results
 - caffeinate -i python ...         keep the Mac awake for long runs

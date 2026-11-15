@@ -117,8 +117,9 @@ missing). Right-hand sides: `out_first_3`, `order_321`, `land_mid` = rhs_landing
 not an empirical fit. kappa_inf = 2N^2/9 needs 3 | N and N >= 6."
 
 `plan/c02_direct.md`:
-- story point 2: replace "cut fill to about n^{1.1} (n log n in theory)" by "cut fill to n log n (George 1973);
-  the fitted exponent 1.1 is a local slope".
+- story point 2: replace "cut fill to about n^{1.1} (n log n in theory)" by "cut fill to n log n (O(n log n) fill on
+  a regular 2D mesh: a theorem for nested dissection, George 1973; AMD, COLAMD and MMD fill is measured, and the
+  fitted exponent 1.1 is a local slope)".
 - story point 3: replace "about 0.1 to 0.25 kappa_inf u here" by "0.07 to 0.33 kappa_inf u here. Of this,
   (3/16 - 27/(16 N^2)) kappa_inf u is not solver error: it is the rounding of 1/6 in the stored matrix,
   identical for every solver, because A^{-1} t = t (1 + e2)/4 (chunk 4b)".

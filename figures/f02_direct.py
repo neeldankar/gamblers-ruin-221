@@ -83,7 +83,7 @@ def main():
     guide(axes[1], m, lambda k: k**2, *anchor(df, "cholmod", "natural", "flops"), r"$n^2$")
     guide(axes[1], m, lambda k: k**1.5, *anchor(df, "cholmod", "metis", "flops"), r"$n^{3/2}$")
 
-    panel(axes[2], df, "setup_time", "(c) setup time (median of 3)", "seconds")
+    panel(axes[2], df, "setup_time", "(c) setup time\n(median of the timing repeats (5 in the final run))", "seconds")
 
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=5, frameon=False, fontsize=9, labelcolor=INK)

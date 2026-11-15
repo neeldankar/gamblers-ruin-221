@@ -1,5 +1,8 @@
 # Chunk 7b: fixes from the external review of chunks 4b and 7
 
+Numbers in this file are from review 2 (Linux and earlier Mac runs). The final-run values and the corrected
+wording (rms in place of 'O(1)'; no N^2 u 'law') are in notes/proofs.md sections 7 and 8.
+
 - **Depends on:** chunks 4b and 7 (all built)
 - **Learn first:** "Math to record" at the end of this file (three short sections; this is what you defend on Nov 20)
 - **Time:** build 45-75 min · compute about 5-8 min (one rerun of e07_structured, one new experiment) ·

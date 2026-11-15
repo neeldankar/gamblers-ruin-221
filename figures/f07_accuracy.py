@@ -1,13 +1,16 @@
 """Figure for chunk 7: relative error of the tiny entry (1, 1, N-2) against N, b = out_first_3.
 
-(a) against the true probability (rel_err_tiny): direct (CHOLMOD), gth, ir_direct, cg_componentwise at tol 1e-14
-    and cg at rtol 1e-10 (both kind none), with the data-term line (u/4) cond_tiny and guide lines u N and u N^2.
-    ir_direct's error is exactly 0 at every N (correctly rounded at N <= 80; at N >= 160 it is the reference), so
-    it is drawn hollow at a floor. cg_componentwise rows that hit maxiter (omega never <= 1e-14) are drawn hollow.
+(a) against the true probability (rel_err_tiny): direct (CHOLMOD), gth, cg_componentwise at tol 1e-14 and cg at
+    rtol 1e-10 (both kind none), with the data-term line (u/4) cond_tiny and guide lines u N and u N^2.
+    Refinement (ir_direct) comes from results/e07_baselines.csv: max_true_err_in_u times u, the largest relative
+    error over all entries against exact integer residuals (0.84 to 1.00 u), so a bound at the tiny state. The
+    ir_direct rows of e07_fixes are not used: for N >= 160 their reference is the refined vector itself.
+    An exact zero would be drawn hollow at a floor. cg_componentwise rows that hit maxiter (omega never <= 1e-14)
+    are drawn hollow.
 (b) against the stored solution (|err_vs_stored_tiny|): direct, cg_componentwise tol 1e-14 and cg rtol 1e-10 (kind
     none), plus cg_componentwise tol 1e-14 with AMG (it converges at every N).
     ir_* and gth are left out: they target the true probability.
-Reads results/e07_fixes.csv only.
+Reads results/e07_fixes.csv and results/e07_baselines.csv.
     python figures/f07_accuracy.py [--results DIR] [--outdir DIR]
 """
 import argparse
@@ -76,12 +79,15 @@ def main():
     parser.add_argument("--outdir", default="figures")
     args = parser.parse_args()
     df = pd.read_csv(pathlib.Path(args.results) / "e07_fixes.csv")
+    bl = pd.read_csv(pathlib.Path(args.results) / "e07_baselines.csv")
     Ns = np.array(sorted(df["N"].unique()), dtype=float)
 
     fig, (ax_a, ax_b) = plt.subplots(1, 2, figsize=(12, 6.5), dpi=150, sharey=True)
 
     # (a) against the true probability
     for method, param, label, color, marker in SERIES:
+        if method == "ir_direct":  # drawn from e07_baselines below
+            continue
         d = pick(df, method, param)
         if not len(d):
             continue
@@ -96,6 +102,11 @@ def main():
                   label=label + (": error 0, drawn at 1e-17" if zero.all() else ""))
         if method == "cg_componentwise":
             mark_not_converged(ax_a, d, d["rel_err_tiny"], color, marker)
+    _, _, _, color, marker = next(s for s in SERIES if s[0] == "ir_direct")
+    ir = bl[bl["method"] == "ir_direct"].sort_values("N")
+    if len(ir):
+        ax_a.plot(ir["N"], ir["max_true_err_in_u"] * U, color=color, marker=marker, markersize=6, linewidth=2,
+                  zorder=4, label="refinement: within half an ulp (exact integer residuals)")
     dterm = pick(df, "direct", None)
     ax_a.plot(dterm["N"], U / 4 * dterm["cond_tiny"], color=MUTED, linewidth=1.5, linestyle=(0, (5, 2)), zorder=2,
               label="data term (u/4) cond_tiny")

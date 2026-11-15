@@ -1,7 +1,10 @@
 """Figure for chunk 9: four-player solvers against n, log-log.
 
-(a) setup_s + solve_s, (b) peak_rss_mb (each run in its own process), one line per method, dashed n^1 and n^2
-guides. Runs stopped by the memory rules are left out. Reads results/e09_solvers.csv only.
+(a) setup_s + solve_s, one line per method, dashed n^1 and n^2 guides. (b) nnz_factor, the nonzeros of the
+factor (direct methods only; amg_cg has none), with a dashed n^(4/3) guide (the 3D nested-dissection order)
+through CHOLMOD's largest run. Memory is not plotted: peak RSS levels off under memory pressure, so it is not a
+reliable measure here. Runs stopped by the memory rules are left out, and panel (b)'s title names the runs the
+memory guard killed (status "killed: ..."). Reads results/e09_solvers.csv only.
     python figures/f09_solvers.py [--results DIR] [--outdir DIR]
 """
 import argparse
@@ -22,6 +25,7 @@ STYLE = {  # method -> (color, marker, linestyle, label)
     "cholmod": ("#eda100", "o", "-", "CHOLMOD, METIS"),
     "amg_cg": ("#2a78d6", "D", "-", "CG + smoothed-aggregation AMG"),
 }
+SHORT = {"splu": "SuperLU-COLAMD", "splu_mmd": "SuperLU-MMD", "cholmod": "CHOLMOD", "amg_cg": "AMG-CG"}
 
 
 def guide(ax, n, power, anchor_n, anchor_y, label):
@@ -59,8 +63,8 @@ def main():
     parser.add_argument("--outdir", default="figures")
     args = parser.parse_args()
 
-    df = pd.read_csv(pathlib.Path(args.results) / "e09_solvers.csv")
-    df = df[df["status"].str.startswith("ok")].copy()
+    raw = pd.read_csv(pathlib.Path(args.results) / "e09_solvers.csv")
+    df = raw[raw["status"].str.startswith("ok")].copy()
     df["total_s"] = df["setup_s"] + df["solve_s"]
     n = np.geomspace(df["n"].min(), df["n"].max(), 50)
 
@@ -71,11 +75,15 @@ def main():
         guide(axes[0], n, 1, first.loc["amg_cg", "n"], first.loc["amg_cg", "total_s"], r"$n$")
     if "cholmod" in first.index:
         guide(axes[0], n, 2, first.loc["cholmod", "n"], first.loc["cholmod", "total_s"], r"$n^2$")
-    panel(axes[1], df, "peak_rss_mb", "(b) peak resident memory of the run's process", "MB")
-    last = df.sort_values("n").groupby("method").last()  # memory: anchor at the largest run, past the
-    if "amg_cg" in last.index:                            # fixed cost of a Python process with its libraries
-        top = n[n >= n[-1] / 30]  # the upper decade and a half only, so the guide does not stretch the axis
-        guide(axes[1], top, 1, last.loc["amg_cg", "n"], last.loc["amg_cg", "peak_rss_mb"], r"$n$")
+    killed = raw[raw["status"].str.startswith("killed")].sort_values(["method", "N"])
+    stopped = ", ".join(f"{SHORT.get(m, m)} at N = {N}" for m, N in zip(killed["method"], killed["N"]))
+    title_b = "(b) nonzeros of the factor" + (f"\n{stopped}: stopped by the memory guard" if stopped else "")
+    panel(axes[1], df, "nnz_factor", title_b, "nonzeros of the factor")
+    ch = df[df["method"] == "cholmod"].sort_values("n")
+    if len(ch):  # anchor at CHOLMOD's largest run, over the range of the direct runs
+        direct = df[df["nnz_factor"].notna()]
+        nd = np.geomspace(direct["n"].min(), direct["n"].max(), 50)
+        guide(axes[1], nd, 4 / 3, ch["n"].iloc[-1], ch["nnz_factor"].iloc[-1], r"$n^{4/3}$")
 
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=4, frameon=False, fontsize=9, labelcolor=INK)

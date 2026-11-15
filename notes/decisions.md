@@ -968,3 +968,57 @@ checks/check_all.py, with the four additions approved in the Project chat and tw
   - Tested on a copy of results/: 0 changes against itself, and a planted 1e-9 change and a deleted row were
     both reported. pandas 3 str columns keep NaN through astype(str), so NaN is filled with "" before text
     comparisons.
+
+## Checkpoint 3 review (Nov 14)
+
+Two outside reviews of the final run (results ee2db14, code 2ef9083), plus an independent re-check in the Project
+chat, found no wrong number in the CSVs. Every fix this round is to wording, citations, checks, figures and
+robustness. The approved spec is plan/c11b_review3_fixes.md (a verbatim copy of the fix prompt). Part A changes no
+file under gr/ or experiments/ (`git diff --stat ee2db14 -- gr experiments` is empty).
+
+Corrections to earlier entries:
+1. The scaffold entry (Nov 9, lines 26-28) listed three "findings": "CG's tiny-entry error is about cond_tiny *
+   rtol", "refinement with an accurate residual is correctly rounded", and "the structured condition number is
+   O(1)". All three are superseded. Chunk 4b showed that a residual test bounds the absolute error, not
+   cond_tiny * rtol. Correct rounding is a measurement (chunk 7b), not a finding of the scaffold. The structured
+   number grows like 1.22 N, and random perturbations give an rms that still creeps up (0.78 to 1.14 eps) rather
+   than O(1) (this entry; notes/proofs.md section 7).
+2. "Not found in their paper, so ours: the largest second-place error" (chunk 8) is wrong. The Wikipedia page
+   "Independent Chip Model" (section "Comparison to gambler's ruin") already gives 25/87/88 at N = 200 as the
+   largest difference. Ours is the scan over N, the sign pattern and the equity identity.
+3. Exponent credit: Diaconis and Ethier's Table 11 already has the four-player values (divided by 6) and the
+   estimate 5.72. Ours is the cone-eigenvalue refinement to 5.720688, N up to 200, and the 1/N^2 rate.
+4. The chunk 10 regression is Diaconis and Ethier's section 3 (Table 6), reproduced, not a fit of our own design.
+5. The expansion of b = 1 in the sine eigenvectors behind CG's finite termination is Bruss, Louchard and Turner
+   (2003). The CG statement is our corollary of it.
+6. The constant C = Gamma(1/3)^9/(8 pi^4) is now a theorem (Denisov and Wachtel 2024, Corollary 4), not just
+   Lee's unpublished derivation. The N^-4 rate and its coefficient K stay measured or conjectured.
+7. The memory guard cannot prevent swapping: under memory pressure peak RSS levels off. SuperLU-MMD at N = 100
+   "finished" at 2922 MB on Nov 11 and passed 4.7 GB on Nov 14. Memory is therefore reported as factor nonzeros
+   (f09 panel (b)), and the Nov 11 time of 203 s for that run is not quoted.
+8. "nnz grows like n^1.42, as the theory says" (chunk 9) becomes "near the 3D order 4/3": the measured local
+   slopes are 1.39 to 1.47 and do not converge on this range. The orders are Lipton, Rose and Tarjan's (3D);
+   George 1973 is the 2D result, and it applies to nested dissection only.
+9. The SOR 3/4 law is a theorem (notes/proofs.md section 10), no longer a computational finding. Wording: "not
+   found in the literature", never "new".
+
+Part A choices made in this session:
+- check_all.py takes the code hash from `git log -1 --format=%h -- gr experiments` (plus "-dirty" by the
+  gr.runlog.git_hash rule), because at a results commit HEAD is no longer the hash the CSVs carry. The old code
+  gave 2 FAIL at ee2db14. The c11 spec table now has both "one git hash across all CSVs" and "CSV hashes equal the
+  code hash", so check_all emits both rows: the first needs a single hash that is not dirty, the second needs it
+  to equal the code hash. "No row missing against the baseline run" also counts a baseline CSV that is gone
+  entirely (`git ls-tree <baseline>:results`).
+- The check scripts' Expected strings were synced to the edited spec rows (user's choice): check_c05 law_relerr,
+  check_c09 nnz/flops wording, and check_all's "results equal" text. No logic changed. The opposite mismatch is
+  left as it is: check_c07 rows 1 and 12 now differ from plan/c07_fixes.md's table rows, which the fix spec did
+  not change. That goes to the Project chat.
+- f09 panel (b): amg_cg has no factor, so the n guide anchored on its peak RSS is replaced by an n^(4/3) guide
+  through CHOLMOD's largest run. The "stopped by the memory guard" note is built from the CSV's `killed:` rows.
+- f07_accuracy: refinement is drawn from e07_baselines' max_true_err_in_u. That is the largest error over all
+  entries, so it is a bound at the tiny state.
+- f05: Young's dashed prediction is the same count for every b, so it already serves as the guide for the two new
+  thin SOR lines. Long labels in f02 (c) and f06 are wrapped onto two lines; the text is the spec's.
+- tests/c05_stationary/test_c05_theorem.py (43 tests) moved in unchanged. `pytest -q`: 513 passed, 42 skipped.
+- `python checks/check_all.py` (baseline 5de66f4, unchanged default): 0 FAIL. The c11 rows are 5 PASS and 4 WARN
+  (WARN lines, total time, peak memory, results equal). Code at git 2ef9083; HEAD ee2db14.

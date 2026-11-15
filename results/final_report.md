@@ -1,6 +1,6 @@
 # Chunk 11: final report
 
-Results: `results`; code at git 2ef9083; generated 2026-11-14T12:53:18.
+Results: `results`; code at git 2ef9083; HEAD ee2db14; generated 2026-11-14T20:45:35.
 
 ## Summary
 
@@ -16,7 +16,7 @@ Results: `results`; code at git 2ef9083; generated 2026-11-14T12:53:18.
 | c08 | check_c08.py | 18 | 0 | 0 | 0 | 0 |
 | c09 | check_c09.py | 22 | 0 | 0 | 1 | 0 |
 | c10 | check_c10.py | 30 | 0 | 0 | 0 | 0 |
-| c11 | check_all.py | 3 | 4 | 0 | 0 |  |
+| c11 | check_all.py | 5 | 4 | 0 | 0 |  |
 
 FLAG lines are the chunk specs' red-flag checks (not counted as FAIL).
 
@@ -28,9 +28,11 @@ FLAG lines are the chunk specs' red-flag checks (not counted as FAIL).
 | every check script: no FAIL lines | all PASS or WARN | 0 FAIL lines | PASS |
 | WARN lines | only timing rows and rows the chunk specs mark as machine-dependent | 1 WARN lines, listed below for review | WARN |
 | one git hash across all CSVs | yes | 33 CSVs, hashes ['2ef9083'] | PASS |
+| CSV hashes equal the code hash (last commit that touched gr/ or experiments/) | yes | code at git 2ef9083; CSV hashes ['2ef9083'] | PASS |
 | total run time | 2-4 h (sum of the chunk compute times with 5 repeats) | 1.39 h | WARN |
 | peak memory | under 4 GB without chunk 9's `--big` | 6375 MB (e04_errors); e02_direct_big (not counted): 4808 MB | WARN |
-| results equal to the per-chunk runs | fill counts, iteration counts and errors identical or within the per-chunk tolerances; only times move | 33 columns changed by more than 1e-12; see the changes table (for review in the Project chat) | WARN |
+| results equal to the per-chunk runs | fill counts, iteration counts and errors identical or within the per-chunk tolerances; only times move (the values are judged by the per-chunk check scripts, which run on these CSVs; this row lists what moved, for the Project chat) | 33 columns changed by more than 1e-12; see the changes table (for review in the Project chat) | WARN |
+| no row missing against the baseline run | yes | no rows or CSVs removed | PASS |
 
 ## WARN, FAIL and FLAG lines
 
@@ -74,6 +76,15 @@ Last row per script from `results/run_all_log.csv`.
 - scipy: 1.18.1
 - omp_num_threads: unset
 - total_ram_gb: 16
+- scikit-sparse: 0.5.0
+- pyamg: 5.3.0
+- numba: 0.68.1
+- python-flint: 0.9.0
+- pandas: 3.1.1
+- matplotlib: 3.11.2
+- OMP_NUM_THREADS: unset
+- OPENBLAS_NUM_THREADS: unset
+- VECLIB_MAXIMUM_THREADS: unset
 
 ## Changes against the previous run (git 5de66f4)
 

@@ -14,18 +14,22 @@
 Two small projects that reuse the machinery on problems with different linear algebra.
 
 **Part A: least squares.** Diaconis and Ethier summarize exact-versus-ICM results with a polynomial
-regression of the ratio P/P_ICM in the stack fractions. We redo such a fit as a least-squares lab:
+regression of the ratio P/P_ICM in the stack fractions. We reproduce their regression
+(their section 3 and Table 6: N = 300, the same 7500 states, targets, sextic and monomial order; the
+coefficients agree to the printed digits) and use it as a least-squares lab:
 R_sigma = P_sigma / P_ICM_sigma for sigma in {321, 312, 213} over all 7500 states 1 <= A <= B <= C at
 N = 300, modeled by a sextic in x = A/N, y = B/N (28 monomials). Facts to confirm:
 
 1. cond(X) = 1.684e7, so X^T X has condition 2.84e14. The normal equations give coefficients that differ
-   from the SVD's by 1e-7 to 4e-6 (relative), QR by 1e-13 to 2e-11, yet all three fitted curves agree to
-   1e-8: the coefficient error lies along directions X barely sees. Coefficients are ill-determined; the
-   fit is not.
-2. The sextic fits 321 and 312 to about 1e-6 relative (max residual 5.6e-6 and 6.7e-6), and each two
+   from the SVD's by 6e-8 to 6e-6 (relative), QR by 2e-13 to 2e-10 (machine dependent; against an
+   extended-precision solve the SVD is no more accurate than QR), yet all three fitted curves agree to 1e-9:
+   the coefficient error lies along directions X barely sees. Coefficients are ill-determined; the fit is not.
+2. The sextic fits the ratios R_321 and R_312 with largest residual 5.6e-6 and 6.7e-6 (as a relative error of
+   the probability the largest misfit is 2.1e-4 and 2.3e-4, at (1, 1, 298) where R = 0.015), and each two
    extra degrees gain one to two digits while cond(X) grows about 300-fold. It cannot fit 213 (max
    residual 0.038, still 0.027 at degree 8): R_213 = 1 exactly when A = B but drops to 0.956 at
-   (1, 2, 297), a boundary layer at A = 1, 2 that no low-degree polynomial follows.
+   (1, 2, 297), and to 0.665 along A = 1: a singularity at the corner A = B -> 0 (Diaconis and Ethier note it)
+   that degrees 2 to 8 do not resolve.
 
 **Part B: unequal skill (Bradley-Terry).** Each round an unordered pair {a, b} is chosen with
 probability 1/3 and a beats b with probability s_a / (s_a + s_b); skills s = (1, 1.5, 2). When a player
@@ -40,8 +44,9 @@ busts, the two survivors play biased two-player ruin. Facts to confirm:
 3. **The trap.** CG on S converges in about 75 steps at every N, but its answer mapped back by D^{-1/2}
    is wrong where pi is small (error 0.33 at N = 80 and about 1 at N = 160 for P(strongest wins)): CG
    controls the residual in a norm that does not see those states. GMRES on A takes 59 to about
-   820 steps but is accurate (below 3e-9). A direct solve of S mapped back is accurate too (1e-15): Gaussian
-   elimination is unaffected by a diagonal similarity scaling, Krylov stopping tests are not.
+   820 steps but is accurate (below 3e-9). A direct solve of S mapped back is accurate too (2e-14): in exact
+   arithmetic Gaussian elimination with a fixed pivot order commutes with a diagonal similarity scaling (bitwise in
+   floating point only for powers of 2), while a Krylov stopping test does not.
 
 ## What to build (the tests import exactly these names)
 

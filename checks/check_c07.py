@@ -98,7 +98,8 @@ def run_checks(fx, st, fft, fl, bl):
     # 1. ir_* vs exact
     d = fx[fx["method"].isin(ir_methods(fx)) & (fx["reference"] == "exact")]
     out.append(("ir_direct, ir_cg_mic0, ir_cg_amg vs exact (N <= 80): max_rel_err",
-                "0 (correctly rounded); at most 2 u",
+                "0 against exact rationals; tolerance 2 u (a regression band, not a proof of correct rounding: that is "
+                "e07_baselines' half-ulp row)",
                 (f"{len(d)} rows, max_rel_err {d['max_rel_err_in_u'].max():.2g} u; "
                  + ", ".join(f"N={r.N} {r.method}: {r.max_rel_err_in_u:.2g} u" for r in d.itertuples()))
                 if len(d) else "no rows",
@@ -204,8 +205,8 @@ def run_checks(fx, st, fft, fl, bl):
     dirs = rows(fx, "direct").set_index("N")["err_vs_stored_tiny"].abs()
     cmp = [(r.kind, r.N, abs(r.err_vs_stored_tiny), dirs.get(r.N, np.nan)) for r in d160c.itertuples()]
     out.append(("cg_componentwise tol 1e-14: err_vs_stored_tiny, N >= 160, converged runs only",
-                "0.05-0.46 of the direct solver's (Mac): none 2.9e-14, 8.0e-14, 3.0e-13; mic0 3.5e-14, 1.0e-13, "
-                "6.8e-13, 2.6e-12; amg 4.6e-15, 1.5e-13, 6.2e-13, 1.9e-12 (N = 160, 320, 640, 1280); below the direct "
+                "0.09-0.46 of the direct solver's (Mac): none 2.9e-14, 8.0e-14, 3.0e-13; mic0 3.5e-14, 1.0e-13, "
+                "6.8e-13, 2.6e-12; amg 8.0e-15, 1.5e-13, 6.2e-13, 1.9e-12 (N = 160, 320, 640, 1280); below the direct "
                 "solver's err_vs_stored_tiny at the same N",
                 ("; ".join(f"N={N} {k}: {e:.2g} vs direct {de:.2g} ({e / de:.2f})" for k, N, e, de in cmp)
                  + excluded_text(d160)) if cmp else "no rows",

@@ -15,7 +15,7 @@ Jacobi iteration matrix is Q = I - A, with spectral radius rho_J = 1 - lambda_mi
 Young's theory then predicts rho_GS = rho_J^2, the best omega* = 2/(1 + sqrt(1 - rho_J^2)), and
 rho(SOR(omega*)) = omega* - 1. But Young's theory assumes a consistently ordered matrix, and the
 7-point triangular stencil in lexicographic order is not consistently ordered (its graph has
-triangles). What happens instead, measured to rounding with dense eigenvalues at 13 sizes from N = 6
+triangles, so it is not bipartite: A has no Property A and no consistent ordering exists). What happens instead, measured to rounding with dense eigenvalues at 13 sizes from N = 6
 to N = 100:
 
 - rho_GS is slightly above rho_J^2 (N^4 times the gap rises from 10 at N = 6 to 19.2 at N = 100).
@@ -23,14 +23,21 @@ to N = 100:
 - **rho(SOR(omega*)) = (omega* - 1)^(3/4)**, not omega* - 1. At N = 6 it is a closed form:
   omega* - 1 = phi^-4 and rho = phi^-3 = sqrt(5) - 2, with phi the golden ratio.
 
-So SOR at omega* converges with 3/4 of the exponent Young's theory promises and needs 4/3 as many
-sweeps asymptotically (1.44 times as many at rtol = 1e-10, see below): still O(N) sweeps, against
-O(N^2) for Jacobi and Gauss-Seidel. This chunk establishes the law numerically in two
-independent ways (dense eigenvalues, and residual histories of the real sweeps up to N = 640). There
-is no proof here, and we did not find the law stated anywhere; treat it as a computational finding
-until the Project chat has looked at the literature. A possible starting point is the SOR analysis of
-another stencil that is not consistently ordered, the 9-point Laplacian (Adams, LeVeque and Young,
-SIAM J. Numer. Anal. 25, 1988, doi 10.1137/0725066); its relevance here was not checked.
+So the spectral radius at omega* is (omega* - 1)^(3/4): asymptotically SOR needs 4/3 as many sweeps as Young's
+theory promises, still O(N) against O(N^2) for Jacobi and Gauss-Seidel. This is a theorem (notes/proofs.md
+section 10; proved in the Project chat on Nov 14 and checked by two outside reviewers): the eigenvalues of the
+SOR matrix are the cubes of the roots of a cubic that replaces Young's quadratic, the Perron mode gives the
+spectral radius for every 0 < omega < 2, and omega* is the unique minimizer. It holds for every ordering in
+which each lattice triangle has two steps to earlier states (the six lexicographic orders, backward sweeps,
+the 3-colourings) and fails for a snake or a random order. We did not find it in the literature (the
+reviewers searched Varga's p-cyclic theory, generalized consistent orderings, LeVeque and Trefethen 1988, and
+Adams, LeVeque and Young 1988 on the 9-point stencil): say "not found", never "new". The theorem is about the
+spectral radius, not about sweep counts at a fixed tolerance. At rtol = 1e-10 the counts are 1.43 to 1.44
+times Young's prediction for b = 1 (a transient constant of about 5.6 on top of the 4/3), 1.28 to 1.35 times
+for a random b, and 1.30 down to 0.96 times for b = P(player 1 out first), N = 10 to 640, because that run
+ends before the slowest mode dominates. For b = 1 the run at N = 640 stops only about 4 times above the
+smallest residual the sweep can reach (about 2.5e-11, growing 5.5 times per doubling of N), so the counts must
+not be extrapolated beyond N = 640.
 
 A side result worth a slide: from x0 = 0 the k-th Jacobi iterate is sum over m < k of Q^m b, the game
 played forward k rounds. For b = 1 it is E[min(T, k)], T = rounds to the first bust; for
@@ -149,7 +156,7 @@ minimizer of rho.
 | rows with omega = 1.00 | iterations equal the gauss_seidel counts in e05_iterations (same N and b) | 1 sweep | FAIL |
 | fine grid: best iterations_ones | at offset 0 to +0.025, with 10% to 20% fewer sweeps than at omega* (measured +0.0175 and 14% at N = 20, +0.0125 and 16% at N = 40, +0.0075 and 17% at N = 80) | | WARN |
 | fine grid: best iterations_random | offset within 0.01 of 0, under 5% fewer sweeps (measured +0.005 and 2%, 0 and 0%, -0.005 and 3%) | | WARN |
-| e05_sor_spectra: law_relerr | 0, every N | 1e-10 (measured at most 2.3e-14) | FAIL |
+| e05_sor_spectra: law_relerr | 0, every N | 1e-10 (final run: at most 1.5e-14) | FAIL |
 | rho_sor_dense at N = 6 | sqrt(5) - 2 = 0.2360679775 | 1e-12 | FAIL |
 | rho_sor_dense at N = 12, 20, 30, 40, 100 | 0.517356404, 0.678068809, 0.772896324, 0.824609363, 0.925906019 | 1e-9 relative | FAIL |
 | sor_over_young | above 1 for every N (1.618 at N = 6 down to 1.026 at N = 100) | | FAIL |
@@ -157,6 +164,10 @@ minimizer of rho.
 | gs_gap | positive for every N | | FAIL |
 | gs_gap_times_N4 | 10 to 20 and increasing in N (measured 10.13 at N = 6 up to 19.20 at N = 100) | | FAIL |
 | seconds_dense at N = 100 | under 5 min (2.4 min on the 2-core cloud machine) | | WARN |
+
+The best finite-run omega (row 'fine grid: best iterations_ones') is a description of b = 1 at N = 20, 40, 80,
+not a tuning rule: at N = 160 and 320 the best offsets are +0.0050 and +0.0025, for P(out first) the gain falls
+from 9% to 0%, and for a random b the best offset is negative from N = 80.
 
 Why b = ones is the clean test of the 3/4 law: it lines up with the slowest mode, so the run reaches
 the asymptotic rate long before rtol. For `random` the slowest mode starts with weight about 1/sqrt(n),

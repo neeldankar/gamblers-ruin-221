@@ -20,25 +20,32 @@ up to 13 nonzeros per row, and the questions are:
 1. **Closed forms survive only partly.** P(i wins) = x_i/N still holds. The product identity becomes
    E[change in x1x2x3x4 per round] = -e2/6 with e2 = sum_{i<j} xi xj, so A (6 x1x2x3x4) = e2 exactly (a
    free accuracy test at any N). But E[rounds to the first bust] T = A^{-1} 1 has no product formula:
-   T/(x1x2x3x4) varies by a factor of 2 to 6. Since A^{-1} >= 0 and 3N - 6 <= e2 <= 3N^2/8, we still get
+   T/(x1x2x3x4) varies by a factor that grows like N/10 (1.3 at N = 10, 6.0 at N = 60); the bounded normalization is
+   T e2/(6 e4), which stays in [0.82, 1.06]. Since A^{-1} >= 0 and 3N - 6 <= e2 <= 3N^2/8, we still get
    16 e4/N^2 <= T <= 2 e4/(N - 2), with e4 = x1x2x3x4.
-2. **Direct solvers hit a memory wall in 3D.** Nested-dissection fill grows like n^(4/3) and work like n^2,
-   so at the same size, n = 157k, the CHOLMOD (METIS) factor has 11 times the fill of the three-player one
+2. **Direct solvers hit a memory wall in 3D.** For nested dissection of a 3D mesh the fill is of order n^(4/3)
+   and the work of order n^2 (Lipton, Rose and Tarjan 1979; George 1973 is the 2D result). The measured local
+   slopes are 1.39 to 1.47 and 2.0 to 2.2 (N = 20 to 100): near those orders, not converging to them on this
+   range; so at the same size, n = 157k, the CHOLMOD (METIS) factor has 11 times the fill of the three-player one
    (74.5e6 at N = 100 against 6.6e6 at N = 561) and takes 127 times the flops (1.41e11 against 1.11e9).
    AMG-preconditioned CG stays near linear.
 3. **Symmetry reduction.** For quantities symmetric in players 1-3 (like P(player 4 busts first)),
    lumping states by sorting (x1, x2, x3) gives an exact chain about 6 times smaller. It is not
    symmetric, but diag(orbit sizes) A_L is, so W^(1/2) A_L W^(-1/2) is SPD (W = orbit sizes, at most 6, so
    the scaling is harmless) and CHOLMOD or CG apply.
-4. **A tiny probability with a new exponent.** From (1, 1, 1, N-3), P(the chip leader busts first)
-   decays like N^-5.72 (three players, from (1, 1, N-2): exactly N^-3 with P N^3 -> 9.1196). The
+4. **A tiny probability with an irrational exponent.** From (1, 1, 1, N-3), P(the chip leader busts first)
+   decays like N^-5.72 (Diaconis and Ethier 2022, section 4.2 and Table 11, tabulate this probability divided by 6
+   for N = 10 to 100 and estimate the exponent 5.72 from it; our values are 6 times theirs to 8 digits) (three
+   players, from (1, 1, N-2): exactly N^-3 with P N^3 -> 9.1196). The
    exponent is the harmonic exponent of the tetrahedron's vertex cone: alpha = sqrt(1/4 + lambda) - 1/2, with
    lambda the first Dirichlet eigenvalue of its spherical triangle (angles arccos(1/3)). O'Connor and
    Saloff-Coste (arXiv:2209.05264, 2022, Theorem 1.1) prove that P is of order N^-alpha and estimate
    lambda ~ 38.447; they print alpha ~ 5.68, which does not follow from their own lambda and formula (5.7207).
    Project chat, independent P1 finite elements with Richardson extrapolation (the octant gives 12 to 1e-8):
    lambda = 38.446962, alpha = 5.720688. The chain's local slopes approach it like alpha - 4.4 / N^2
-   (three players: like N^-4).
+   (three players: like N^-4). Ours: the refinement to 5.720688 through the cone eigenvalue
+   (experiments/e09_cone.py from part B on; two reviewers' independent spectral computations give 38.4469620), N up to 200, and the 1/N^2
+   rate with its coefficient.
 
 ## What to build (the tests import exactly these names)
 
@@ -115,8 +122,8 @@ decay exponent, the T bounds, and one AMG-CG solve (skipped if pyamg is missing)
 | e09_solvers rel_err | below 1e-10 for every method and N | | FAIL |
 | amg_cg iters | 9 to 14 for N = 40 ... 150, growing slowly | | WARN |
 | amg_cg setup_s + solve_s against n | slope of log time vs log n between 0.8 and 1.4 | | WARN |
-| cholmod nnz_factor against n (N = 60 to 100) | slope between 1.25 and 1.6 (theory n^(4/3)); 8.0e6, 2.76e7, 7.45e7 at N = 60, 80, 100 | 10% | WARN |
-| cholmod flops against n (N = 60 to 100) | slope 2.09 (theory n^2); 5.2907e9, 3.1766e10, 1.4145e11 at N = 60, 80, 100 (Linux, independent builder; nnz identical to the Mac's) | slope in [1.9, 2.3]; each value within 1% | FAIL |
+| cholmod nnz_factor against n (N = 60 to 100) | slope between 1.25 and 1.6 (3D nested-dissection orders 4/3 and 2 (Lipton-Rose-Tarjan); local slopes 1.39 to 1.47 and 2.0 to 2.2); 8.0e6, 2.76e7, 7.45e7 at N = 60, 80, 100 | 10% | WARN |
+| cholmod flops against n (N = 60 to 100) | slope 2.09 (3D nested-dissection orders 4/3 and 2 (Lipton-Rose-Tarjan); local slopes 1.39 to 1.47 and 2.0 to 2.2); 5.2907e9, 3.1766e10, 1.4145e11 at N = 60, 80, 100 (Linux, independent builder; nnz identical to the Mac's) | slope in [1.9, 2.3]; each value within 1% | FAIL |
 | cholmod setup_s against n (N = 60 to 100) | Mac 1.66 (flop rate 9.4 to 18.2 GFLOP/s), Linux 2.1 (3.0 GFLOP/s) | slope in [1.4, 2.6] | WARN |
 | splu (COLAMD) peak memory vs cholmod at N = 60 | splu several times larger (about 1 GB vs 0.2 GB here) | | WARN |
 | e09_big_stack P (four players) at N = 8, 10, 12, 16, 20, 24, 30, 40, 50 | 5.577821161394e-03 (= 11017/1975144), 1.571739438951e-03, 5.568973643914e-04, 1.080249783339e-04, 3.022376155052e-05, 1.066742330410e-05, 2.980150693207e-06, 5.753800975152e-07, 1.606108031016e-07 | 1e-9 relative | FAIL |

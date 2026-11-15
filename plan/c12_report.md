@@ -23,13 +23,17 @@ proved, cited, or labelled as measured.
   2. The matrix: M-matrix, exact spectrum by reflections, kappa_2 and kappa_inf (chunk 1).
   3. Direct solvers: envelope fill formula, orderings, n^{3/2} flops for nested dissection, backward
      stability (chunk 2).
-  4. Iterative solvers: CG against its bound, finite termination for b = 1, preconditioners, the SOR 3/4 law,
+  4. Iterative solvers: CG against its bound, finite termination for b = 1, preconditioners, the SOR 3/4 law (a theorem: proofs section 10),
      the FFT solver (chunks 3, 5, 6).
   5. **Main result: accuracy of tiny probabilities** (chunks 4 and 7): cond_i = 2 E[T | event], normwise
-     stopping fails as cond_tiny * rtol, the three fixes, and the structured condition number explaining GTH.
+     stopping fails (a residual test bounds absolute, not relative, error), the three fixes, and the structured condition number explaining GTH.
   6. Applications: ICM error (chunk 8), four players (chunk 9), optional extras (chunk 10).
-  7. What is new here, what is known (cite), what is conjecture (the 3/4 law).
+  7. What is ours, what was already published (cite), what is measured, and what is conjecture (the N^-4 rate;
+     the closed form of its coefficient).
   Appendix: reproducibility (commit hash, machine, how to rerun), the test suite and what it checks.
+- README.md rewritten: purpose and headline results; setup; `PYTHONPATH=.` for experiments; how to run tests, one
+  experiment, the pipeline, checks and figures; hardware and time; the map chunk -> spec -> experiment -> CSV ->
+  check -> figure; the code and results commits; known limits (memory figures, machine-dependent constants).
 - `checks/check_report.py`: every macro used in `report.tex` is defined in `numbers.tex`, every `\includegraphics`
   file exists, and `make_numbers.py` reproduces `numbers.tex` byte for byte.
 

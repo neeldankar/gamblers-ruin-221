@@ -63,7 +63,7 @@ def main():
                  label=f"guide: max abs error / x ({r['abs_err_max']:.1e} / x)", zorder=3)
         ax1.plot([r["x_smallest"]], [r["rel_err_smallest"]], color=INK, marker="*", markersize=12, linestyle="none",
                  label=f"corner {r['smallest_state']}: rel err {r['rel_err_smallest']:.1e}", zorder=4)
-    style_axes(ax1, f"(a) N = {N}, out_first_3, plain CG, rtol {STATES_RTOL:g}: every entry",
+    style_axes(ax1, f"(a) N = {N}, out_first_3, plain CG, rtol {STATES_RTOL:g}: {len(s)} sampled states",
                "x = P(player 3 out first) at the state", "relative error of the entry")
     ax1.legend(frameon=False, fontsize=8, labelcolor=INK, loc="upper right")
 
