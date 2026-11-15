@@ -73,7 +73,8 @@ def _dense(A):
 def _banded(A):
     """Lower band storage with p = bandwidth: ab[i, j] = A[j + i, j] for i = 0..p (row 0 is the diagonal,
     row i the i-th subdiagonal). The last i slots of row i lie below the matrix and are never used: those
-    p(p+1)/2 corner slots are not counted in nnz. The Cholesky factor fills the whole band."""
+    p(p+1)/2 corner slots are not counted in nnz. nnz counts the band storage; the factor's nonzeros are the
+    envelope (394 of 550 slots at N = 12)."""
     n, p = A.shape[0], bandwidth(A)
     A = sp.csr_matrix(A)
     ab = np.zeros((p + 1, n))

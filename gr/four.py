@@ -55,7 +55,7 @@ class _Keyed:
         return tuple(int(v) for v in self.X[i])
 
     def _check(self, x):
-        if len(x) != 4 or sum(x) != self.N or min(x) < 1:
+        if len(x) != 4 or sum(x) != self.N or min(x) < 1 or any(int(v) != v for v in x):
             raise ValueError(f"{x} is not a live state for N = {self.N}")
 
 

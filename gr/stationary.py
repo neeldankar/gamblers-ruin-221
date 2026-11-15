@@ -67,11 +67,12 @@ def _iterate(A, b, rtol, maxiter, x0, omega):
     work = np.empty_like(x)
     maxiter = MAXITER if maxiter is None else maxiter
     bnorm = np.linalg.norm(b)
+    scale = bnorm if bnorm > 0 else 1.0  # b = 0: the residual is not scaled (no 0/0)
 
     res = []
     k = 0
     while True:
-        res.append(_residual_norm(indptr, indices, data, b, x) / bnorm)
+        res.append(_residual_norm(indptr, indices, data, b, x) / scale)
         if res[-1] <= rtol or k == maxiter:
             break
         if omega is None:

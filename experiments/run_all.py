@@ -7,13 +7,19 @@ Options: --only e03,e04  --skip e09  --force  --repeats 5  --outdir DIR
 
 Each experiment runs as `peak_wrapper.py OUT.json python eNN_*.py [--quick] --outdir DIR` with GR_REPEATS set,
 so its peak memory is its own. One row per experiment is appended to DIR/run_all_log.csv as soon as it ends.
-Resume rule: without --force, an experiment is skipped only if the log already has a row for it with exit code 0,
-quick False and the current git hash, so a full run interrupted at 3 a.m. picks up where it stopped. The run stops
-at the first experiment that fails.
+When an experiment exits 0, DIR/run_all_manifest.json records under its log name {"git_hash", "quick", "csv":
+{file name: sha256}} for every CSV in DIR (except the log) modified since that experiment started, so the outputs
+are verified, not assumed.
+Resume rule: without --force (and never with --quick), an experiment is skipped only if (1) the LAST log row for it
+has exit code 0, quick False and the current git hash, (2) the manifest has it at that hash, and (3) every CSV
+the manifest lists for it exists with the recorded sha256. Otherwise it runs again. So a full run interrupted at
+3 a.m. picks up where it stopped, and a CSV deleted or edited since is regenerated. The run stops at the first
+experiment that fails.
 """
 import argparse
 import csv
 import datetime
+import hashlib
 import json
 import os
 import pathlib
@@ -31,6 +37,7 @@ EXPERIMENTS = ROOT / "experiments"
 WRAPPER = EXPERIMENTS / "peak_wrapper.py"
 QUICK_OUTDIR = "/tmp/c11quick"
 LOG_NAME = "run_all_log.csv"
+MANIFEST_NAME = "run_all_manifest.json"
 LOG_COLUMNS = ["script", "start", "end", "seconds", "exit_code", "peak_mb", "free_mem_mb_start", "quick",
                "repeats", "git_hash"]
 
@@ -61,9 +68,42 @@ def read_log(path):
         return list(csv.DictReader(fh))
 
 
-def already_done(log, name, commit):
-    return any(r["script"] == name and r["exit_code"] == "0" and r["quick"] == "False" and r["git_hash"] == commit
-               for r in log)
+def sha256(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def read_manifest(path):
+    """{log name: {"git_hash", "quick", "csv": {file name: sha256}}}, or {} if there is no manifest yet."""
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text())
+
+
+def record_manifest(outdir, name, git, quick, since):
+    """Record the CSVs in outdir (except the log) modified at or after `since` (time.time() at the start of the
+    experiment) as the outputs of experiment `name`, replacing its previous entry."""
+    path = outdir / MANIFEST_NAME
+    manifest = read_manifest(path)
+    csvs = {p.name: sha256(p) for p in sorted(outdir.glob("*.csv"))
+            if p.name != LOG_NAME and p.stat().st_mtime >= since}
+    manifest[name] = {"git_hash": git, "quick": quick, "csv": csvs}
+    path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+    return csvs
+
+
+def already_done(log, manifest, name, commit, outdir):
+    """True only if the last log row for `name` is a successful full run at `commit`, the manifest has `name` at
+    that hash, and every CSV it lists still exists with the recorded sha256."""
+    rows = [r for r in log if r["script"] == name]
+    if not rows:
+        return False
+    last = rows[-1]
+    if not (last["exit_code"] == "0" and last["quick"] == "False" and last["git_hash"] == commit):
+        return False
+    entry = manifest.get(name)
+    if not entry or entry["git_hash"] != commit or not entry["csv"]:
+        return False
+    return all((outdir / f).exists() and sha256(outdir / f) == h for f, h in entry["csv"].items())
 
 
 def append_log(path, row):
@@ -137,13 +177,19 @@ def main():
 
     rows = []
     for name, command in planned_runs(args):
-        if not args.force and not args.quick and already_done(read_log(log_path), name, commit):
-            print(f"--- {name}: already done at git {commit}, skipping (use --force to rerun)", flush=True)
+        manifest = read_manifest(outdir / MANIFEST_NAME)
+        if not args.force and not args.quick and already_done(read_log(log_path), manifest, name, commit, outdir):
+            print(f"--- {name}: already done at git {commit} and its CSVs match the manifest, skipping "
+                  "(use --force to rerun)", flush=True)
             continue
         print(f"\n=== {name}  ({datetime.datetime.now():%H:%M:%S})", flush=True)
+        since = time.time()
         row = run_one(name, command, outdir, env, args.quick)
         append_log(log_path, row)
         rows.append(row)
+        if row["exit_code"] == 0:
+            csvs = record_manifest(outdir, name, row["git_hash"], args.quick, since)
+            print(f"=== {name}: manifest records {', '.join(csvs) or 'no CSV'}", flush=True)
         print(f"=== {name}: exit {row['exit_code']}, {row['seconds']:.0f} s, peak {row['peak_mb']:.0f} MB", flush=True)
         if row["exit_code"] != 0:
             print_table(rows)

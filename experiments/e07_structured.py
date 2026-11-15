@@ -20,6 +20,11 @@ kappa = gr.accuracy.structured_condition on the base system and tiny = (1, 1, N-
   (h) symmetric_cond_tiny: with g = A^-1 e_tiny and each unordered pair {i, j} once,
       (sum_i g_i (b_i + s_i x_i) + sum_{i<j} |a_ij| |g_i - g_j| |x_i - x_j|) / x_tiny.
   (i) cond_tiny: chunk 4's entry_condition at tiny (next to cond_max).
+Checkpoint 3 addition (after everything above, so no earlier value or draw changes):
+  (j) rms_random_tiny: the standard deviation, per unit eps, of the tiny entry's relative change when every
+      off-diagonal entry, row sum and b_i is multiplied by 1 + eps * uniform(-1, 1) (independent draws, variance
+      1/3 each). To first order dx_tiny = g . (db - dA x), so its variance is eps^2 / 3 times
+      sum (g b)^2 + sum (g s x)^2 + sum over off-diagonal entries (g_i a_ij (x_i - x_j))^2.
     python experiments/e07_structured.py [--quick] [--outdir DIR]
 """
 import os
@@ -101,20 +106,23 @@ def run_size(N):
     e = np.zeros(S.n)
     e[tiny] = 1.0
     g = base.solve(e)
+    sens2 = np.sum((g * b) ** 2) + np.sum((g * sums * x) ** 2) + np.sum((g[r] * v * (x[r] - x[c])) ** 2)
+    rms_random_tiny = np.sqrt(sens2 / 3) / x[tiny]
     up = r < c  # each unordered pair {i, j} once (the matrix is symmetric)
     pair = np.sum(-v[up] * np.abs(g[r[up]] - g[c[up]]) * np.abs(x[r[up]] - x[c[up]]))
     symmetric = (np.sum(g * (b + sums * x)) + pair) / x[tiny]
 
     print(f"N = {N:4d}  n = {S.n:6d}  random max {random_max:.3f}  push {push:.3f}  cond_max {cond_max:.1f}  "
           f"kappa_tiny {kappa[tiny]:.4f} ({kappa[tiny] / N:.4f} N)  attained {attained[tiny]:.4f}  "
-          f"coherent {coherent[tiny]:.4f}  drift {drift[tiny]:.4f}  symmetric {symmetric:.4f}", flush=True)
+          f"coherent {coherent[tiny]:.4f}  drift {drift[tiny]:.4f}  symmetric {symmetric:.4f}  "
+          f"rms random {rms_random_tiny:.4f}", flush=True)
     return {"N": N, "n": S.n, "structured_random_max": random_max, "structured_push": push, "cond_max": cond_max,
             "two_n_minus_1": 2 * S.n - 1, "eps": EPS, "draws": DRAWS,
             "structured_cond_tiny": kappa[tiny], "structured_cond_max": kappa[k_arg],
             "structured_argmax_state": str(S.state(k_arg)), "structured_cond_over_N": kappa[k_arg] / N,
             "attained_tiny": attained[tiny], "attained_max_dev": np.max(np.abs(attained / kappa - 1)),
             "coherent_tiny": coherent[tiny], "drift_tiny": drift[tiny], "symmetric_cond_tiny": symmetric,
-            "cond_tiny": cond[tiny]}
+            "cond_tiny": cond[tiny], "rms_random_tiny": rms_random_tiny}
 
 
 def main():

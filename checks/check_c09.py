@@ -1,5 +1,6 @@
-"""Chunk 9 check: compare results/e09_identities.csv, e09_solvers.csv, e09_big_stack.csv and e09_alpha.csv with the
-"Expected results" table of plan/c09_four_players.md. Prints one PASS/WARN/FAIL line per table row (plus automatic
+"""Chunk 9 check: compare results/e09_identities.csv, e09_solvers.csv, e09_big_stack.csv, e09_alpha.csv and
+e09_cone.csv with the "Expected results" table of plan/c09_four_players.md and the e09_cone rows of
+plan/c11b_review3_fixes.md (B6). Prints one PASS/WARN/FAIL line per table row (plus automatic
 red-flag checks) and writes results/c09_report.md.
     python checks/check_c09.py [--results DIR]
 
@@ -12,6 +13,9 @@ Conventions (logged in notes/decisions.md, chunk 9):
     sizes, cholmod over N = 60, 80, 100 (the same sizes as the nnz row). cholmod flops = sum colcount^2.
   * "splu several times larger": peak_rss_mb(splu) >= 3 x peak_rss_mb(cholmod) at N = 60.
   * "ratio tends to 1/6": the three exact fractions, and |n_lumped / n_full - 1/6| decreasing in N.
+  * alpha_extrapolated (four players) is compared with the alpha of e09_cone.csv's tetrahedron_vertex row (the
+    cone eigenvalue computed in the repo, checkpoint 3), not with a typed constant. Without e09_cone.csv that
+    alpha is NaN, so the row and the three e09_cone rows FAIL.
 """
 import argparse
 import math
@@ -30,7 +34,6 @@ DIRECT_N, AMG_N = [20, 40, 60, 80, 100], [20, 40, 60, 80, 100, 120, 150, 200]
 METHOD_N = {"splu": DIRECT_N, "splu_mmd": DIRECT_N, "cholmod": DIRECT_N, "amg_cg": AMG_N}
 CHOLMOD_NNZ = {60: 8.0e6, 80: 2.76e7, 100: 7.45e7}
 CHOLMOD_FLOPS = {60: 5.2907e9, 80: 3.1766e10, 100: 1.4145e11}  # sum colcount^2, Linux, independent builder
-ALPHA = 5.720688  # cone eigenvalue lambda = 38.446962 (Project chat FEM)
 P_SMALL = dict(zip([8, 10, 12, 16, 20, 24, 30, 40, 50],
                    [5.577821161394e-03, 1.571739438951e-03, 5.568973643914e-04, 1.080249783339e-04,
                     3.022376155052e-05, 1.066742330410e-05, 2.980150693207e-06, 5.753800975152e-07,
@@ -174,7 +177,22 @@ def solver_checks(sv):
     return out
 
 
-def big_stack_checks(bs, al):
+def cone_checks(cone):
+    """The three e09_cone rows of B6 (plan/c11b_review3_fixes.md)."""
+    out = []
+    rows = [("e09_cone lambda, octant", "octant", "lambda", 12.0, 1e-6, "12.000000; 1e-6 abs"),
+            ("e09_cone lambda, tetrahedron_vertex", "tetrahedron_vertex", "lambda", 38.446962, 2e-6,
+             "38.446962 (Project chat 38.446962018; reviewers 38.4469620); 2e-6 abs"),
+            ("e09_cone alpha, tetrahedron_vertex", "tetrahedron_vertex", "alpha", 5.720688, 1e-6, "5.720688; 1e-6 abs")]
+    for check, domain, col, ref, tol, expected in rows:
+        have = cone is not None and domain in cone.index
+        v = cone.loc[domain, col] if have else float("nan")
+        out.append((check, expected, f"{v:.9f} ({v - ref:+.1e}; m_finest {cone.loc[domain, 'm_finest']})" if have
+                    else "no e09_cone.csv row", status(have and abs(v - ref) <= tol, "FAIL", have)))
+    return out
+
+
+def big_stack_checks(bs, al, alpha_cone):
     out = []
     four = bs[bs["players"] == 4].set_index("N").sort_index()
     three = bs[bs["players"] == 3].set_index("N").sort_index()
@@ -220,11 +238,12 @@ def big_stack_checks(bs, al):
     a4 = al[al["players"] == 4]
     if len(a4):
         a = a4["alpha_extrapolated"].iloc[0]
-        obs = f"{a:.6f} ({a - ALPHA:+.1e}; last slope {a4['alpha_last_slope'].iloc[0]:.5f})"
+        obs = (f"{a:.6f} ({a - alpha_cone:+.1e} against e09_cone alpha {alpha_cone:.7f}; last slope "
+               f"{a4['alpha_last_slope'].iloc[0]:.5f})")
     out.append(("alpha_extrapolated (four players)",
                 "5.720688 (cone eigenvalue lambda = 38.446962, Project chat FEM); the 1/N^2 fit of the Nov 11 "
                 "slopes gives 5.720687; 1e-4", obs if len(a4) else "no row",
-                status(len(a4) and abs(a - ALPHA) <= 1e-4, "FAIL", bool(len(a4)) and 200 in four.index)))
+                status(len(a4) and abs(a - alpha_cone) <= 1e-4, "FAIL", bool(len(a4)) and 200 in four.index)))
 
     parts, ok = [], True
     for N, (nl, nf) in LUMP.items():
@@ -301,10 +320,16 @@ def main():
     sv = pd.read_csv(results / "e09_solvers.csv")
     bs = pd.read_csv(results / "e09_big_stack.csv")
     al = pd.read_csv(results / "e09_alpha.csv")
-    checks = identity_checks(idt) + solver_checks(sv) + big_stack_checks(bs, al)
+    cone_path = results / "e09_cone.csv"
+    cone = pd.read_csv(cone_path).set_index("domain", drop=False) if cone_path.exists() else None
+    alpha_cone = (float(cone.loc["tetrahedron_vertex", "alpha"]) if cone is not None and "tetrahedron_vertex" in
+                  cone.index else float("nan"))
+    checks = identity_checks(idt) + solver_checks(sv) + big_stack_checks(bs, al, alpha_cone) + cone_checks(cone)
     flags = red_flags(idt, sv, bs)
 
     sources = [("e09_identities", idt), ("e09_solvers", sv), ("e09_big_stack", bs), ("e09_alpha", al)]
+    if cone is not None:
+        sources.append(("e09_cone", cone))
     src = ", ".join(f"`{results / (name + '.csv')}` (git {df.iloc[0]['git_hash']}, {df.iloc[0]['timestamp']})"
                     for name, df in sources)
     m = idt.iloc[0]
@@ -332,6 +357,9 @@ def main():
     lines += ["", "## Data (e09_big_stack: P(chip leader busts first) from (1, 1, 1, N-3) and (1, 1, N-2))", ""]
     lines += table(bs, "players", "solver")
     lines += ["", "## Data (e09_alpha)", ""] + table(al, "players", "alpha_extrapolated")
+    if cone is not None:
+        lines += ["", "## Data (e09_cone: first Dirichlet eigenvalue of the cone's spherical triangle)", ""]
+        lines += table(cone, "domain", "lambda_exact")
     lines += ["", "Figures: `figures/f09_solvers.png`, `figures/f09_big_stack.png`.", ""]
 
     for c, _, o, s in checks:

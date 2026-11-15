@@ -188,7 +188,9 @@ def ic_preconditioner(L):
 # ---------------------------------------------------------------- the preconditioner factory
 
 def make_preconditioner(A, kind):
-    """Build preconditioner `kind` (one of PRECONDITIONERS) for A. Returns (M, setup_time in seconds)."""
+    """Build preconditioner `kind` (one of PRECONDITIONERS) for A. Returns (M, setup_time in seconds).
+    kind "amg" reseeds NumPy's global generator (np.random.seed(221)) so that pyamg's setup repeats; any later
+    code that draws from np.random without its own seed sees that seeded stream."""
     if kind not in PRECONDITIONERS:
         raise ValueError(f"unknown preconditioner {kind!r}; choose from {PRECONDITIONERS}")
     t0 = time.perf_counter()

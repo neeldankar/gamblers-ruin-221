@@ -1022,3 +1022,37 @@ Part A choices made in this session:
 - tests/c05_stationary/test_c05_theorem.py (43 tests) moved in unchanged. `pytest -q`: 513 passed, 42 skipped.
 - `python checks/check_all.py` (baseline 5de66f4, unchanged default): 0 FAIL. The c11 rows are 5 PASS and 4 WARN
   (WARN lines, total time, peak memory, results equal). Code at git 2ef9083; HEAD ee2db14.
+
+## Checkpoint 3 fixes, part B: code (Nov 14)
+
+Spec: plan/c11b_review3_fixes.md, part B. The full rerun is Neel's (never `run_all.py` without `--quick` here).
+
+- B1 experiments/e09_cone.py: lam1 and alpha are byte-identical to review3_inputs/c09-cone-fem.py (checked by
+  extracting both function texts). --quick (m = 16, 32, 64): octant 11.99999995, tetrahedron vertex
+  38.44696165, alpha 5.72068820. The full meshes (m = 64 ... 512), run alone into a scratch folder to preview B6:
+  octant 12.000000000 (-1.3e-13), tetrahedron vertex 38.446962018, alpha 5.720688227. All three B6 rows pass,
+  and e09_alpha players 4 (5.7206868) is 1.4e-6 from it. check_c09 reads alpha from that CSV (no typed constant;
+  NaN, so FAIL, if the file is missing) and has the three e09_cone rows.
+- B2 rms_random_tiny is computed after everything else and goes last in the row. A quick run gives 0.7761, 0.8348
+  at N = 10, 20, and every existing column at those N is bit-identical to results/e07_structured.csv.
+- B3 alpha_rows fits in 1/N_mid^4 for three players and 1/N_mid^2 for four. Recomputed from the committed
+  big_stack slopes: players 3 gives 3.0000000171 (the Project chat's value), and players 4 is bit-identical
+  (5.72068677760647; x**1.0 is exact).
+- B4 run_all writes run_all_manifest.json after every successful experiment (the CSVs whose mtime is at or after
+  the experiment's start), and already_done needs the last log row, the manifest hash and every CSV's sha256.
+  Exercised on a synthetic log and manifest: match, other hash, last row failed or quick, CSV edited, deleted or
+  restored, and no manifest all behave as intended. check_all has "CSVs match the run manifest" (SKIP without a
+  manifest). results/run_all_log.csv is deleted (git rm; it stays in history) so the rerun's log starts clean.
+- B5 as specified, and the eight tests in tests/c11b_review3 pass (seven failed before the fix).
+- cg_componentwise's extra final omega and e07_floor (Neel's decision this session). e07_floor calls it with
+  maxiter = 4 k10, which is not a multiple of check_every in 9 of 15 rows. So e07_floor now keeps only the
+  check-point omegas, `info["omegas"][: iterations // c + 1]`, exactly the old array, and its k_at_min = j c stays
+  right. The B6 changes row now says e07_floor.csv must be bit-identical. Measured: the extra entry would not
+  have moved anything on this Mac. With the experiment's thread settings, the omega of the returned x equals the
+  last check point's bit for bit at N = 320 (none, mic0), 640 (none) and 1280 (none, mic0), and the quick run
+  (N = 80, 160) is bit-identical with and without the trim. CG has stagnated by then. So the trim is a safeguard
+  that makes bit-identity and k_at_min hold whatever the rounding, not a fix of a measured change. Other callers:
+  e07_fixes always stops on a check point (all 48 cg_componentwise rows; the unconverged N = 1280 run stops at
+  30000, a multiple of 10, 5 and 1), and the two tests in tests/c07_fixes converge on a check point.
+- `pytest -q`: 521 passed, 43 skipped. B6 says 42 skipped, but the opt-in pipeline test is parametrized over the
+  experiments, so e09_cone adds one skipped case (20 to 21). All 43 skips are that pipeline test.

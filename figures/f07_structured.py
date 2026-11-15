@@ -2,8 +2,11 @@
 
 Lines: cond_max (chunk 4: perturb A's entries, diagonal free) with a 0.39 N^2 guide; structured_cond_max (the
 structured condition number: off-diagonals, row sums and b, worst case) with a 1.22 N guide; symmetric_cond_tiny
-(the same, symmetric perturbations only); structured_push and structured_random_max (measured ratios for one push
-and the max over 20 random draws). Reads results/e07_structured.csv only.
+(the same, symmetric perturbations only); structured_push (measured ratio for one push); rms_random_tiny (the
+"random" curve: standard deviation of the tiny entry's relative change per unit eps under independent random
+perturbations of every parameter), with structured_random_max (the largest ratio over 20 random draws and all
+states) as hollow markers. A series whose column is missing from the CSV is skipped.
+Reads results/e07_structured.csv only.
     python figures/f07_structured.py [--results DIR] [--outdir DIR]
 """
 import argparse
@@ -22,11 +25,12 @@ SERIES = [  # (column, label, color, marker): categorical slots 1-5 (slots 1-3 a
     ("structured_cond_max", "structured condition number (worst case)", "#eda100", "^"),
     ("symmetric_cond_tiny", "structured, symmetric perturbations only", "#e87ba4", "v"),
     ("structured_push", "structured push (row sums down, b up)", "#eb6834", "s"),
-    ("structured_random_max", "structured, random (max over 20 draws)", "#2a78d6", "o"),
+    ("rms_random_tiny", "structured, random (rms at the tiny entry)", "#2a78d6", "o"),
 ]
+RANDOM_MAX = ("structured_random_max", "largest of 20 draws (all states)", "#2a78d6", "o")  # hollow markers only
 GUIDES = [(0.39, 2, "0.39 N^2", (0, (5, 2))), (1.22, 1, "1.22 N", (0, (1, 2)))]  # (coefficient, power, label, dash)
 TITLE = ("Sensitivity of the tiny probability: N^2 for A's entries, N for off-diagonals and row sums,\n"
-         "about log N if symmetric; random draws: largest of 20")
+         "about log N if symmetric, rms near 1 for random perturbations")
 
 
 def main():
@@ -38,7 +42,11 @@ def main():
 
     fig, ax = plt.subplots(figsize=(10, 5.2), dpi=150)
     for col, label, color, marker in SERIES:
-        ax.plot(df["N"], df[col], color=color, marker=marker, markersize=6, linewidth=2, zorder=3, label=label)
+        if col in df.columns:
+            ax.plot(df["N"], df[col], color=color, marker=marker, markersize=6, linewidth=2, zorder=3, label=label)
+    col, label, color, marker = RANDOM_MAX
+    ax.plot(df["N"], df[col], color=color, marker=marker, markersize=7, markerfacecolor="white", linestyle="none",
+            zorder=3, label=label)
     for coef, power, label, dash in GUIDES:
         ax.plot(df["N"], coef * df["N"] ** power, color=MUTED, linewidth=1.2, linestyle=dash, zorder=2,
                 label=f"guide {label}")

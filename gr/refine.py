@@ -10,6 +10,7 @@ Error-free transformations (Dekker 1971, Knuth; used in Ogita, Rump and Oishi's 
   TwoSum(a, b) = (s, e) with s = fl(a + b) and s + e = a + b exactly.
   TwoProduct(a, b) = (p, e) with p = fl(a b) and p + e = a b exactly. Dekker splits each factor into a high and
   a low half of at most 26 significant bits, so every partial product fits in 53 bits and is exact.
+  Both identities assume no overflow or underflow: every input, product and sum stays in the normal range.
 """
 import numpy as np
 import scipy.sparse as sp
@@ -133,7 +134,8 @@ def iterative_refinement(A, b, solve, scale, x0=None, max_steps=10):
 
     solve(r) applies an approximate A^{-1} (a direct factor, or a sloppy inner CG). x starts as solve(b), or x0.
     Stops when the correction max_i |d_i| / |x_i| is at most 4u, or after max_steps steps.
-    The 4u test is a stopping rule, not a proof of correct rounding.
+    The 4u test is a stopping rule, not a proof of correct rounding. It divides by |x_i|, so it assumes that x
+    has no zero entry.
     Returns x and {"steps": steps taken, "corrections": one per step, "converged": bool}.
     """
     Ai, B = integer_system(A, b, scale)  # built once, used in every step
@@ -243,8 +245,11 @@ def cg_componentwise(A, b, tol, M=None, check_every=10, maxiter=None):
     """The CG recurrence of gr.krylov.cg (x0 = 0), stopped when the componentwise backward error of the TRUE
     residual, omega(x_k) = componentwise_backward_error(A, x_k, b), is at most tol.
 
-    omega is evaluated at k = 0 and every check_every iterations (one extra product with A and one with |A|).
-    maxiter defaults to 10 n. Returns x and {"iterations", "omegas" (k = 0, check_every, ...), "converged"}.
+    omega is evaluated at k = 0 and every check_every iterations (one extra product with A and one with |A|),
+    and once more for the returned x if the run stops between check points (at maxiter, or when the recurrence
+    residual is exactly 0), so `converged` and the last omega always describe the returned x.
+    maxiter defaults to 10 n. Returns x and {"iterations", "omegas" (k = 0, check_every, ..., and the final k if it
+    is not a multiple of check_every), "converged"}.
     """
     b = np.asarray(b, dtype=float)
     n = b.shape[0]
@@ -271,4 +276,6 @@ def cg_componentwise(A, b, tol, M=None, check_every=10, maxiter=None):
         k += 1
         if k % check_every == 0:
             omegas.append(componentwise_backward_error(A, x, b))
+    if k % check_every != 0:  # stopped between check points: evaluate the returned x
+        omegas.append(componentwise_backward_error(A, x, b))
     return x, {"iterations": k, "omegas": np.array(omegas), "converged": bool(omegas[-1] <= tol)}

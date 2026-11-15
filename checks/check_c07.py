@@ -22,6 +22,8 @@ Conventions (logged in notes/decisions.md, chunk 7 and its follow-up):
     ir_direct ulp row needs N = 1280. "Within a factor 3" is 1/3 <= value / reference <= 3.
   * Information only, no check row (pre-chunk-11 fixes): e07_fixes `corrections` (ir_* rows) and e07_floor
     `max_x_corner_ratio`, `max_x_inf_ratio`. A CSV written before these columns existed prints "not measured".
+  * Checkpoint 3 rows (plan/c11b_review3_fixes.md, B6): e07_structured rms_random_tiny at the seven N (1e-3
+    relative) and increasing in N, both FAIL. A CSV without the column fails them as "not measured".
 """
 import argparse
 import pathlib
@@ -39,6 +41,7 @@ IT_RATIO_REF = {"none": "1.25-1.49", "mic0": "1.36-1.90", "amg": "1.38-1.86"}
 PUSH_REF = {10: 3.8512, 20: 4.3001, 40: 4.5250, 80: 4.6375, 160: 4.6937, 320: 4.7219, 640: 4.7359}
 STRUCT_N = [10, 20, 40, 80, 160, 320, 640]
 KAPPA_REF = dict(zip(STRUCT_N, [11.35295, 23.79933, 48.30309, 97.09688, 194.5739, 389.4719, 779.2398]))
+RMS_REF = dict(zip(STRUCT_N, [0.7761, 0.8348, 0.8964, 0.9588, 1.0201, 1.0793, 1.1361]))  # checkpoint 3, B6
 DRIFT_REF = dict(zip(STRUCT_N, [7.50173, 19.49928, 43.77809, 92.45941, 189.8802, 384.7504, 774.5056]))
 SYMMETRIC_REF = dict(zip(STRUCT_N, [6.228720, 8.265100, 10.17282, 12.01203, 13.81435, 15.59815, 17.37261]))
 BL_N = [20, 40, 80, 160, 320, 640]
@@ -327,6 +330,17 @@ def run_checks(fx, st, fft, fl, bl):
                 "draws, not monotone); below 10",
                 ", ".join(f"N={r.N}: {r.structured_random_max:.2f}" for r in st.itertuples()) if have else "no rows",
                 status(have and bool((st["structured_random_max"] < 10).all()), "FAIL", have)))
+    rms = have and "rms_random_tiny" in st.columns
+    out.append(("e07_structured rms_random_tiny, N = 10 ... 640",
+                "0.7761, 0.8348, 0.8964, 0.9588, 1.0201, 1.0793, 1.1361; 1e-3 relative",
+                ", ".join(f"N={r.N}: {r.rms_random_tiny:.4f}" for r in st.itertuples()) if rms
+                else "not measured (no rms_random_tiny column)",
+                status(rms and ref_ok(st, "rms_random_tiny", RMS_REF, 1e-3), "FAIL", rms)))
+    out.append(("rms_random_tiny", "increasing in N",
+                "increasing: " + ("yes" if rms and bool((np.diff(st["rms_random_tiny"].to_numpy()) > 0).all()) else "NO")
+                if rms else "not measured (no rms_random_tiny column)",
+                status(rms and len(st) > 1 and bool((np.diff(st["rms_random_tiny"].to_numpy()) > 0).all()), "FAIL",
+                       rms)))
     out.append(("structured_push", "3.8512, 4.3001, 4.5250, 4.6375, 4.6937, 4.7219, 4.7359; 1e-3 relative",
                 ", ".join(f"N={r.N}: {r.structured_push:.4f}" for r in st.itertuples()) if have else "no rows",
                 status(ref_ok(st, "structured_push", PUSH_REF, 1e-3), "WARN", have)))

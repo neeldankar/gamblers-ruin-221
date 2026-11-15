@@ -50,7 +50,7 @@ def run_size(N, kinds):
         M, _ = krylov.make_preconditioner(A, kind)
         k10 = krylov.cg(A, b, rtol=1e-10, maxiter=MAXITER_RTOL, M=M)[1]["iterations"]
         _, info = refine.cg_componentwise(A, b, 0.0, M=M, check_every=c, maxiter=4 * k10)
-        om = info["omegas"]
+        om = info["omegas"][: info["iterations"] // c + 1]  # check points only (k = 0, c, 2c, ...)
 
         peak = {"corner": 0.0, "inf": 0.0}  # the largest |x_k[tiny]| and max |x_k| over the iterates
 

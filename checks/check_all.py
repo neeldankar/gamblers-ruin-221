@@ -8,6 +8,8 @@ reviews it. Only rows (or whole CSVs) missing against the baseline are a FAIL.
 
 The CSVs carry the code hash: the last commit that touched gr/ or experiments/ (plus "-dirty" under the rule of
 gr.runlog.git_hash). HEAD can be a later commit (the results commit), so the hash rows compare with the code hash.
+The row "CSVs match the run manifest" checks DIR/run_all_manifest.json (written by experiments/run_all.py); it is
+SKIP when there is no manifest (results from before checkpoint 3).
 
 Changes table rules:
   * Rows are matched by N (if the CSV has it), the text columns that name a row (method, kind, rhs, ...; not
@@ -18,8 +20,10 @@ Changes table rules:
     number of matched rows that differ. Changes above 1e-12 (or any differing text) are marked.
 """
 import argparse
+import hashlib
 import importlib.metadata
 import io
+import json
 import os
 import pathlib
 import re
@@ -37,6 +41,7 @@ from gr.runlog import metadata  # noqa: E402
 
 META = ["git_hash", "timestamp", "platform", "machine", "python", "numpy", "scipy", "omp_num_threads"]
 LOG_NAME = "run_all_log.csv"
+MANIFEST_NAME = "run_all_manifest.json"  # written by experiments/run_all.py (checkpoint 3)
 BIG_NAME = "e02_direct_big"  # optional e02 --big output, rerun separately with run_all.py --e02-big
 PACKAGES = ["scikit-sparse", "pyamg", "numba", "python-flint", "pandas", "matplotlib"]
 THREAD_VARS = ["OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"]
@@ -171,6 +176,33 @@ def chunk11_rows(checks, log, hashes, commit, changes_flagged, missing_rows):
     return rows
 
 
+def manifest_row(results):
+    """Every CSV that results/run_all_manifest.json lists for the latest successful run of each experiment exists
+    with the recorded sha256 (FAIL otherwise); CSVs in results/ that no entry lists are named (WARN)."""
+    check = "CSVs match the run manifest"
+    expected = ("every CSV listed for the latest successful run of each experiment exists with the recorded "
+                "sha256; unlisted CSVs are named (WARN)")
+    path = results / MANIFEST_NAME
+    if not path.exists():
+        return (check, expected, f"no {MANIFEST_NAME} (results from before the manifest, such as ee2db14); "
+                "row skipped", "SKIP")
+    manifest = json.loads(path.read_text())
+    bad, listed = [], set()
+    for script, entry in manifest.items():
+        for name, digest in entry["csv"].items():
+            listed.add(name)
+            p = results / name
+            if not p.exists():
+                bad.append(f"{script}: {name} missing")
+            elif hashlib.sha256(p.read_bytes()).hexdigest() != digest:
+                bad.append(f"{script}: {name} differs from the manifest")
+    unlisted = [p.name for p in sorted(results.glob("*.csv")) if p.name != LOG_NAME and p.name not in listed]
+    observed = (f"{len(listed)} CSVs listed for {len(manifest)} experiments"
+                + (f"; {'; '.join(bad)}" if bad else "; all present with the recorded sha256")
+                + (f"; not in the manifest: {', '.join(unlisted)}" if unlisted else ""))
+    return check, expected, observed, "FAIL" if bad else ("WARN" if unlisted else "PASS")
+
+
 # ---------------------------------------------------------------- changes against the baseline commit
 def is_timing_or_memory(col):
     return bool(re.search(r"time|second|speedup|rss|mem|_mb|MB", col)) or col.endswith("_s")
@@ -283,7 +315,7 @@ def main():
     hashes = csv_hashes(results)
     table, notes, missing = compare(results, args.baseline)
     flagged = [r for r in table if r[5]]
-    c11 = chunk11_rows(checks, log, hashes, commit, len(flagged), missing)
+    c11 = chunk11_rows(checks, log, hashes, commit, len(flagged), missing) + [manifest_row(results)]
 
     meta = metadata()
     try:

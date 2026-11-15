@@ -207,15 +207,17 @@ def big_stack_rows(quick, kill_mb):
 
 
 def alpha_rows(big):
-    """alpha_extrapolated: least-squares line slope = a + c / N_mid^2 through the last four local slopes,
-    N_mid = sqrt(previous N * N); a is the slope at N = infinity. The x-variable is 1/N_mid^2, not 1/N_mid,
-    because the four-player slopes approach alpha like 1/N^2 (about alpha - 4.4 / N^2)."""
+    """alpha_extrapolated: least-squares line slope = a + c / N_mid^power through the last four local slopes,
+    N_mid = sqrt(previous N * N); a is the slope at N = infinity. power is the rate at which the slopes approach
+    their limit: 4 for three players (the slopes approach 3 like 1/N^4) and 2 for four players (they approach
+    alpha like 1/N^2, about alpha - 4.4 / N^2)."""
     rows = []
     for players in (3, 4):
         group = [r for r in big if r["players"] == players]
         Ns = np.array([r["N"] for r in group], dtype=float)
         slopes = np.array([r["local_slope"] for r in group])
-        x = 1 / (Ns[1:] * Ns[:-1])[-4:]  # 1 / N_mid^2
+        power = 4 if players == 3 else 2
+        x = 1 / ((Ns[1:] * Ns[:-1]) ** (power / 2))[-4:]  # 1 / N_mid^power
         a = np.polyfit(x, slopes[1:][-4:], 1)[1]
         rows.append({"players": players, "alpha_last_slope": float(slopes[-1]), "alpha_extrapolated": float(a)})
         print(f"players {players}: last slope {slopes[-1]:.5f}, extrapolated {a:.5f}", flush=True)

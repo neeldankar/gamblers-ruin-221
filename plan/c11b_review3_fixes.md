@@ -318,7 +318,7 @@ docstring. Nothing else in e09 changes.
 | e09_alpha, players 4, alpha_extrapolated | 5.7206868, unchanged; within 1e-4 of e09_cone alpha | | FAIL |
 | e07_structured rms_random_tiny, N = 10 ... 640 | 0.7761, 0.8348, 0.8964, 0.9588, 1.0201, 1.0793, 1.1361 | 1e-3 relative | FAIL |
 | rms_random_tiny | increasing in N | | FAIL |
-| changes against ee2db14 (`check_all.py --baseline ee2db14`) | only: e09_alpha players 3 alpha_extrapolated; the e09_solvers rows whose status depends on the memory guard; the new column and the new CSV | anything else that moves: stop and bring it to the Project chat | FAIL |
+| changes against ee2db14 (`check_all.py --baseline ee2db14`) | only: e09_alpha players 3 alpha_extrapolated; the e09_solvers rows whose status depends on the memory guard; the new column and the new CSV. e07_floor.csv must be bit-identical (added Nov 14 with Neel's approval: e07_floor keeps only the check-point omegas of cg_componentwise) | anything else that moves: stop and bring it to the Project chat | FAIL |
 | pytest -q | 521 passed, 42 skipped (513 + 8) | | FAIL |
 | pipeline test (GR_PIPELINE=1) | passes with e09_cone included | | FAIL |
 
